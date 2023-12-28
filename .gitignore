@@ -1,0 +1,8 @@
+# outputfiles
+*.out
+*.pdf
+*.bbl
+*.aux
+*.blg
+*.log
+*.spl
