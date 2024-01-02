@@ -44,6 +44,7 @@
 
 %% The amssymb package provides various useful mathematical symbols
 \usepackage{amssymb}
+\usepackage{amsmath}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
 
@@ -51,6 +52,14 @@
 %% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
 %% for the whole article with \linenumbers.
 %% \usepackage{lineno}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    }
 
 \journal{Journal's Name}
 
@@ -70,7 +79,7 @@
     %% and the form \ead[url] for the home page:
     \title{A Nested Implicit Runge-Kutta Method
         Based on Time Interpolation
-        for High Order Finite Volume Method}
+        for High-order Finite Volume Method}
     % \tnotetext[label1]{}
     % \ead{email address}
     % \ead[url]{home page}
@@ -144,11 +153,256 @@
 %% main text
 \section{Introduction}
 \label{sec:intro}
-\cite{RN36}
+
+In computational fluid dynamics (CFD),
+high-order numerical methods have the capability of
+resolving complex flows effectively and efficiently,
+which have been attracting great attention recently.
+Popular high-order CFD methods, including discontinuous
+Galerkin (DG) methods
+\cite{reed1973triangularDG,
+    BASSI1997251DG,
+    BASSI1997267DG,
+    cockburn1989DGII,
+    cockburn2001rungeDG},
+spectral volume
+\cite{WANG2002210_SV}
+and spectral difference
+\cite{LIU2006780_SD} methods,
+PnPm procedures
+\cite{DUMBSER20088209_PNPM},
+FR/CPR methods
+\cite{huynh2007flux_FR,
+    huynh2009reconstruction_FR,
+    vincent2011new_FR,
+    wang2009unifying_CPR},
+and finite volume (FV) methods
+\cite{wang2016compact_VR,
+    wang2016compact1_VR,
+    wang2017compact_VR,
+    pan2018high_VR,
+    zhang2019compact_VR,
+    barth1990higher_FV,
+    delanaye1999quadratic_FV,
+    ollivier1997quasi_ENO,
+    friedrich1998weighted_WENO,
+    hu1999weighted_WENO,
+    dumbser2007quadrature_WENO},
+generally provides spacial discretization methods
+which produce semi-discretized forms of the original
+partial differential equations (PDEs).
+The semi-discretized PDEs are
+sets of first order ordinary
+differential equations (ODEs),
+which are usually further solved with
+ODE integrators such as the
+popular strong stability preserving
+Runge-Kutta (SSPRK) methods
+\cite{gottlieb2001strong_SSPRK}.
+
+Although explicit ODE integrators
+are simple and efficient in a wide range of
+CFD problems,
+the Courant-Friedrichs-Lewy (CFL) constraint
+that limits physical time step in explicit
+methods could make them inefficient in
+notably inhomogeneous or anisotropic
+transient flows,
+such as wall-bounded turbulence.
+Such inefficiency could be overcome by
+applying implicit ODE methods with
+sufficient stability.
+Due to Dahlquist's second barrier
+\cite{dahlquist1963special},
+only second and first order multi-step ODE methods
+could achieve $A$-stability, and
+trapezoid rule not being $L$-stable,
+only the $L$-stable
+second-order backward differentiation formula (BDF2)
+is extensively adopted in transient CFD problems.
+Different from multi-step methods,
+the single-step implicit Runge-Kutta (IRK) methods
+with multiple internal stages
+can achieve higher order of accuracy while
+preserving stability \cite{butcher2016ODEBook}.
+Among the IRK methods, fully coupled IRK methods
+could achieve optimal order given number of stages,
+but they require the solution of a nonlinear
+system with its dimension multiple times larger
+than the ODE, which could be especially
+troublesome for its implementation in
+CFD schemes.
+Pazner and Persson
+\cite{pazner2017stage}
+made effort in efficiently solving
+fully IRK methods with DG, and
+Jameson \cite{jameson2017evaluation}
+discussed how to adopt dual time stepping
+into fully IRK.
+As a result of the difficulties in the solution
+of fully IRK methods,
+singly diagonally implicit Runge-Kutta (SDIRK)
+methods are more commonly used in CFD, for example in
+\cite{wang2017compact_VR}. As a special case of
+SDIRK, ESDIRK methods are SDIRK with an explicit first stage,
+which are constructed to be
+stiffly accurate and $L$-stable
+\cite{kennedy2003additiveARK,kvaerno2004singly}.
+High-order ESDIRK schemes and
+BDF2 have been tested in
+\cite{
+    bijl2002implicitBDFvESDIRK,
+    wang2007implicitDGTests}
+to solve flow problems,
+whose results illustrate
+better accuracy and higher efficiency
+of high-order ESDIRK methods
+compared to second order BDF2.
+
+Apart from fully IRK and SDIRK methods,
+another class of implicit RK methods,
+mono implicit RK methods (MIRK)
+\cite{cash1975classMIRKOrig}
+have explicit internal stages and
+puts all the implicitness into the final
+stage, allowing the implicit system to
+remain have the same number of dimensions
+as the original ODE.
+Cash and Signhal derived examples of
+$A$-stable and $L$-stable high-order
+MIRK methods in
+\cite{cash1977clasMIRK1,cash1982monoMIRK2}.
+Kulikov and Shindin presented a similar type
+of method called nested implicit RK (NIRK)
+\cite{kulikov2006familyNIRKOrig}.
+Discussion was made on symmetry, stiff accuracy and
+other advantageous properties of a series of Gauss type
+NIRK methods.
+\cite{kulikov2009adaptive}.
+The major drawback of NIRK or MIRK schemes is that
+the Jacobian matrices of the nonlinear algebraic problems
+for each NIRK or MIRK step are
+polynomials of the Jacobian of ODE's right hand side.
+Cash and Singhal proposed to find MIRK methods whose
+Jacobian could be factorized or approximate the Jacobian
+with a factorization,
+so that the Newton iteration
+step could be solved by solving a series of successive linear
+problems \cite{cash1982monoMIRK2}.
+Kulikov and Shindin found certain factorization
+approximation could sabotage the stability of
+the method in
+\cite{kulikov2009adaptive},
+and analyzed how to choose the approximation of
+Jacobian in
+\cite{kulikov2007asymptotic}.
+MIRK and NIRK methods are more attractive than SDIRK methods
+for they require fewer inner stage solving.
+Typical fourth order
+stiffly accurate ESDIRK requires 5 implicit internal stages to be
+solved,
+while MIRK and NIRK could
+solve only one implicit stage.
 
 
-\section{Hermite Interpolation Nested Runge Kutta Method}
-\label{sec:HINRK}
+MIRK and NIRK methods have implicit stages than SDIRK methods,
+which gives them potential to gain better efficiency in
+large scale problems.
+However, current literature has seldom explored
+the application of MIRK or NIRK methods in
+PDE solving.
+Therefore, this paper aims to
+derive an NIRK type ODE method suitable for high-order
+CFD implementation,
+and apply the method to flow problems.
+
+Paper's structure:...%TODO
+
+
+\section{Hermite Interpolation Nested Implicit Runge Kutta Method}
+\label{sec:HINIRK}
+
+The acquiring of an NIRK method with
+certain order of accuracy is usually based on
+a certain integration method and
+corresponding taylor expansion analysis,
+as described in \cite{kulikov2006familyNIRKOrig}.
+The present paper proposes a type of NIRK
+derived with Hermite interpolation
+(thus called HINIRK),
+which simplifies the analysis on
+stage accuracy and provides an approach to
+modify the scheme.
+
+\newcommand{\uu}{\mathbf{u}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\inc}{\mathrm\Delta}
+
+Considering a general first order ODE:
+\begin{equation}
+    \frac{d\uu}{dt} = \R(t, \uu)
+\end{equation}
+with $\uu^n$ as the known numerical solution at $t=t^n$ and
+$t^{n+1} = t^{n} + \inc t$,
+the HINIRK method has the form:
+\begin{subequations}
+    \label{eq:HM3}
+    \begin{align}
+        \uu^{n+1} & = \uu^{n} +
+        \inc t
+        \left(
+        b_1\R(t^{n,1}, \uu^n) +
+        b_2\R(t^{n,2}, \uu^*) +
+        b_3\R(t^{n,3}, \uu^{n+1})
+        \right)   \label{eq:HM3-1} \\
+        \uu^{*}   & =
+        a_1\uu^{n} +
+        a_2\uu^{n+1} +
+        \inc t
+        \left(
+        d_1\R(t^{n,1}, \uu^n)
+        d_2\R(t^{n,3}, \uu^{n+1})
+        \right) \label{eq:HM3-2}
+    \end{align}
+\end{subequations}
+where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1$.
+
+The only stage value besides endpoint is $\uu^*$.
+The internal stage $\uu^*$ can be explicitly
+calculated with \eqref{eq:HM3-2}, which is derived
+directly from the cubic Hermite interpolation of $\uu$
+on interval $[t^n,t^{n+1}]$ evaluated at
+$t^{n,2}$, which requires:
+\begin{equation}
+    \begin{aligned}
+        a_2 & = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3 \\
+        d_1 & = {c_2} - 2 {c_2}^2 + {c_2}^3    \\
+        d_2 & = - {c_2}^2 + {c_2}^3            \\
+    \end{aligned}
+\end{equation}
+The first equation \eqref{eq:HM3-1} is 
+a numeric integration on 
+$t^{n,1},t^{n,2},t^{n,3}$, which demands:
+\begin{equation}
+    \begin{aligned}
+        b_1 & = \frac{1}{2} - \frac{1}{6{c_2}}\\
+        b_2 & = \frac{1}{6{c_2}(1-{c_2})} \\
+        b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})}  \\
+    \end{aligned}
+\end{equation}
+The Hermite interpolation gives \eqref{eq:HM3-2} 
+local truncation error $O(\inc t^4)$, 
+and the numeric integration gives \eqref{eq:HM3-1}
+local truncation error $O(\inc t^3)$, therefore the 
+classic order of accuracy of HMLB \eqref{eq:HM3} is 
+three. If $c_2=1/2$, then the numeric integration \eqref{eq:HM3-2}
+becomes a Gauss-Lobatto quadrature rule, which yields 
+a local truncation error of $O(\inc t^4)$, making 
+the scheme forth order accurate.
+
+
+
+
 \subsection{Linear Stability}
 
 \subsection{Alternating Solving Strategy}

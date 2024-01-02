@@ -6,3 +6,6 @@
 *.blg
 *.log
 *.spl
+*.fls
+*.fdb_*
+*.gz
