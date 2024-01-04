@@ -9,3 +9,5 @@
 *.fls
 *.fdb_*
 *.gz
+*.lyx~
+*.lyx

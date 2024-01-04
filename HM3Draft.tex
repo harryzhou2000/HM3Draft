@@ -77,7 +77,7 @@
     %% use the cortext command for theassociated footnote;
     %% use the ead command for the email address,
     %% and the form \ead[url] for the home page:
-    \title{A Nested Implicit Runge-Kutta Method
+    \title{An Efficient Implicit Runge-Kutta Method
         Based on Time Interpolation
         for High-order Finite Volume Method}
     % \tnotetext[label1]{}
@@ -308,7 +308,8 @@ while MIRK and NIRK could
 solve only one implicit stage.
 
 
-MIRK and NIRK methods have implicit stages than SDIRK methods,
+MIRK and NIRK methods have less
+implicit stages than SDIRK methods,
 which gives them potential to gain better efficiency in
 large scale problems.
 However, current literature has seldom explored
@@ -318,12 +319,14 @@ Therefore, this paper aims to
 derive an NIRK type ODE method suitable for high-order
 CFD implementation,
 and apply the method to flow problems.
+(matrix free...)
+\#\#\#\#
 
 Paper's structure:...%TODO
 
 
-\section{Hermite Interpolation Nested Implicit Runge Kutta Method}
-\label{sec:HINIRK}
+\section{Hermite Interpolation Implicit Runge Kutta Method}
+\label{sec:HIRK}
 
 The acquiring of an NIRK method with
 certain order of accuracy is usually based on
@@ -332,7 +335,7 @@ corresponding taylor expansion analysis,
 as described in \cite{kulikov2006familyNIRKOrig}.
 The present paper proposes a type of NIRK
 derived with Hermite interpolation
-(thus called HINIRK),
+(thus called HIRK),
 which simplifies the analysis on
 stage accuracy and provides an approach to
 modify the scheme.
@@ -340,32 +343,34 @@ modify the scheme.
 \newcommand{\uu}{\mathbf{u}}
 \newcommand{\R}{\mathbf{R}}
 \newcommand{\inc}{\mathrm\Delta}
+\newcommand{\Tau}{\mathrm{T}}
 
-Considering a general first order ODE:
+Considering a general first order ODE about
+$t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
 \begin{equation}
     \frac{d\uu}{dt} = \R(t, \uu)
 \end{equation}
 with $\uu^n$ as the known numerical solution at $t=t^n$ and
 $t^{n+1} = t^{n} + \inc t$,
-the HINIRK method has the form:
+the HIRK method has the form:
 \begin{subequations}
     \label{eq:HM3}
     \begin{align}
         \uu^{n+1} & = \uu^{n} +
         \inc t
-        \left(
-        b_1\R(t^{n,1}, \uu^n) +
-        b_2\R(t^{n,2}, \uu^*) +
-        b_3\R(t^{n,3}, \uu^{n+1})
-        \right)   \label{eq:HM3-1} \\
+        \left[
+            b_1\R(t^{n,1}, \uu^n) +
+            b_2\R(t^{n,2}, \uu^*) +
+            b_3\R(t^{n,3}, \uu^{n+1})
+        \right]   \label{eq:HM3-1} \\
         \uu^{*}   & =
         a_1\uu^{n} +
         a_2\uu^{n+1} +
         \inc t
-        \left(
-        d_1\R(t^{n,1}, \uu^n) +
-        d_2\R(t^{n,3}, \uu^{n+1})
-        \right) \label{eq:HM3-2}
+        \left[
+            d_1\R(t^{n,1}, \uu^n) +
+            d_2\R(t^{n,3}, \uu^{n+1})
+            \right] \label{eq:HM3-2}
     \end{align}
 \end{subequations}
 where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1, c_2\in(0,1)$.
@@ -400,20 +405,20 @@ The Hermite interpolation gives \eqref{eq:HM3-2}
 local truncation error $O(\inc t^4)$,
 and the numeric integration gives \eqref{eq:HM3-1}
 local truncation error $O(\inc t^3)$, therefore the
-classic order of accuracy of HMLB \eqref{eq:HM3} is
+classic order of accuracy of HIRK \eqref{eq:HM3} is
 3. If $c_2=1/2$, then the numeric integration \eqref{eq:HM3-2}
 becomes a Gauss-Lobatto quadrature rule, which yields
 a local truncation error of $O(\inc t^4)$, making
 the scheme 4th order accurate.
 Also, from the interpolation, no matter
-the choice of $c_2$, HINIRK has a stage order of
+the choice of $c_2$, HIRK has a stage order of
 3, making it stiffly accurate.
-As there is a family of HINIRK methods decided by
+As there is a family of HIRK methods decided by
 a single parameter $c_2$,
-here we denote them as HINIRK($c_2$).
+here we denote them as HIRK($c_2$).
 
 
-Reformulating \eqref{sec:HINIRK} into
+Reformulating \eqref{eq:HM3} into
 a standard Runge-Kutta form yields a Butcher
 tableau:
 \begin{table}[htbp]
@@ -431,29 +436,29 @@ tableau:
 From table \ref{tab:HM3Butcher} with the coefficients
 decided with \eqref{eq:interp} and \eqref{eq:integ},
 one can find that the 4th order accurate
-HINIRK($1/2$) is indeed the Lobatto IIIA method
+HIRK($1/2$) is indeed the Lobatto IIIA method
 of order 4 \cite{wanner1996solving}.
-The classic order and stage order of HINIRK could
+The classic order and stage order of HIRK could
 also be evaluated from table \ref{tab:HM3Butcher} via
 the simplifying assumptions.
 Despite the formulation above only
-provides an order degraded modification 
-of Lobatto IIIA type IRK method, 
-this modification will prove useful 
+provides an order degraded modification
+of Lobatto IIIA type IRK method,
+this modification will prove useful
 in latter discussion.
 
-If the quadrature rule in HINIRK is 
-replaced with Gauss-Legendre rule, 
-the method immediately becomes a special case of the 
-Gauss type NIRK method of order 4 
-described in \cite{kulikov2006familyNIRKOrig}. 
-For large scale CFD application, 
-using 2 point Gauss-Legendre rule 
-would mean deriving the right hand side at 
-3 different stages iteratively. 
-Thus, the current HINIRK method only considers 
-a 3 point Gauss-Lobatto type quadrature 
-(with the middle abscissa moved and order of accuracy reduced).   
+If the quadrature rule in HIRK is
+replaced with Gauss-Legendre rule,
+the method immediately becomes a special case of the
+Gauss type NIRK method of order 4
+described in \cite{kulikov2006familyNIRKOrig}.
+For large scale CFD application,
+using 2 point Gauss-Legendre rule
+would mean deriving the right hand side at
+3 different stages iteratively.
+Thus, the current HIRK method only considers
+a 3 point Gauss-Lobatto type quadrature
+(with the middle abscissa moved and order of accuracy reduced).
 
 
 
@@ -481,33 +486,510 @@ a 3 point Gauss-Lobatto type quadrature
 \subsection{Linear Stability}
 
 Following standard analysis based on Dahlquist's equation
- $\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving}, 
-the stability function giving $y^{1}=R(h\lambda)y^0$ 
-when applying HINIRK is in the form:
+$\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
+the stability function giving $y^{1}=R(h\lambda)y^0$
+when applying HIRK is in the form:
 \begin{equation}
+    \label{eq:stabilityFunc}
     R(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
 \end{equation}
-which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and HINIRK
-becomes Lobatto IIIA. The limit 
+which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and HIRK
+becomes Lobatto IIIA. The limit
 \begin{equation}
     \lim_{z\rightarrow\infty}R(z) = \frac{1-c_2}{c_2}
 \end{equation}
-gives that a necessary condition for $A$-stability of 
-HINIRK is $c_2 \in [1/2,1)$, and shows that HINIRK 
+gives that a necessary condition for $A$-stability of
+HIRK is $c_2 \in [1/2,1)$, and shows that HIRK
 is unable to achieve $L$-stability.
+Further analysis on \eqref{eq:stabilityFunc}
+would confirm $c_2 \in [1/2,1)$ is a sufficient
+condition for $A$-stability.
 
-HINIRK($1/2$) or Lobatto IIIA method is symmetric, 
-which is a preferable property when integrating 
-reversible systems, 
+HIRK($1/2$) or Lobatto IIIA method is symmetric,
+which is a preferable property when integrating
+reversible systems,
 but the symmetry could be considered harmful in CFD application.
 Most CFD systems of interest are physically dissipative,
-while for symmetric RK methods 
-$R(z) \rightarrow 1$ when $z \rightarrow \infty$, 
-which is more likely to preserve 
-spurious modes arising from spacial discretization.  
-Moreover, 
+while for symmetric RK methods
+$R(z) \rightarrow 1$ when $z \rightarrow \infty$,
+which is more likely to preserve
+spurious modes arising from spacial discretization.
+Although HIRK cannot achieve $L$-stability
+by simply adjusting $c_2$,
+using a non-trivial value $c_2 > 1/2$ would still
+produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
+is a useful property in simulation of dissipative systems.
+With  $c_2 > 1/2$, stiff modes could better vanish over the time
+steps, while $c_2 = 1/2$ tends to preserve them.
 
-\subsection{Alternating Solving Strategy}
+
+\subsection{Solving Strategy}
+
+\newcommand{\Res}{\mathcal{R}}
+\newcommand{\Jres}{\mathcal{J}}
+\newcommand{\eye}{\mathbf{I}}
+\newcommand{\J}{\mathbf{J}}
+
+HIRK's Butcher tableau in table \ref{tab:HM3Butcher}
+indicates that apart from the first stage,
+the other two stages seem fully coupled,
+but following the original formulation
+of HIRK \eqref{eq:HM3} which originates from
+interpolation and integration,
+clearly the internal stage $\uu^*$ can be explicitly
+expressed by $\uu^n, \uu^{n+1}$ with the interpolation
+relation \eqref{eq:HM3-2}, and one only need
+to solve \eqref{eq:HM3-1} implicitly.
+Therefore, the first solving strategy this paper
+considers is identical to the spirit of NIRK,
+which solves the equation:
+\begin{equation}
+    \label{eq:eqFull}
+    \uu^{n+1} -
+    \left(\uu^{n} + \inc t
+    \left[
+        b_1\R(t^{n,1}, \uu^n) +
+        b_2\R(t^{n,2}, \uu^*) +
+        b_3\R(t^{n,3}, \uu^{n+1})
+        \right]
+    \right)  =  0
+\end{equation}
+For simplicity, we denote the residual of \eqref{eq:eqFull}
+as:
+\begin{equation}
+    \uu^{n+1} -
+    \left(\uu^{n} + \inc t
+    \left[
+        b_1\R(t^{n,1}, \uu^{n}) +
+        b_2\R(t^{n,2}, \uu^{*}) +
+        b_3\R(t^{n,3}, \uu^{n+1})
+        \right]
+    \right) \doteq \Res(\uu^{n+1})
+\end{equation}
+Considering $\uu^{n}$ is known,
+and $\uu^{*}$ is explicitly expressed,
+$\Res(\uu^{n+1})$ is considered only a
+function of unknown $\uu^{n+1}$.
+The Newton-Raphson method applied to
+\eqref{eq:eqFull}'s solving would be
+\begin{equation}
+    \begin{aligned}
+        \uu^{n+1,m+1}                  & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        \frac{\partial \Res(\uu^{n+1,m})}
+        {\uu^{n+1,m}} \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+and adding the pseudo time continuation
+would be
+\begin{equation}
+    \label{eq:ntDtau}
+    \begin{aligned}
+        \uu^{n+1,m+1}            & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        \left(
+        \frac{\partial \Res(\uu^{n+1,m})}
+        {\uu^{n+1,m}} + \inc t \Tau^{-1}
+        \right) \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+where $\Tau=\mathrm{diag}(\tau_1,...\tau_N)$ is a diagonal matrix with
+local pseudo time steps as its diagonal values.
+The pseudo time continuation of Newton iteration
+could be both understood as a relaxation of original
+method for nonlinear stability,
+or as the result of solving dual time stepping
+method Jameson developed \cite{jameson1991time}.
+In other words, \eqref{eq:ntDtau} is the result
+of solving pseudo time evolution
+$\frac{d\uu^{n+1}}{d\tau} = -\frac{\Res}{\inc t}$
+with linearly implicit backward Euler method and
+a local time stepping.
+Such dual time stepping is prevalent in transient
+flow solution due to the nonlinearity in
+fluid systems.
+However, pseudo time term could
+cause trouble if we try to solve HIRK
+of any MIRK type system with certain approaches, which
+will be illustrated later.
+
+The expanded form of residual's Jacobian
+is
+\begin{equation}
+    \label{eq:fullJCB}
+    \begin{aligned}
+        \frac{\partial \Res(\uu^{n+1})}
+        {\uu^{n+1}}
+                     & = \eye - \inc t b_3 \J^{n+1} -
+        \inc t b_2\J^*(a_2\eye +\inc t d_2 \J^{n+1})                                \\
+                     & = \frac{d_2 + a_2b_3}{d_2}\eye
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)                                                                     \\
+        \text{with:} &                                                              \\
+                     & \J^* = \frac{\partial \R(t^{n,2},\uu^*)}{\partial \uu^*},\ \
+        \J^{n+1} = \frac{\partial \R(t^{n,3},\uu^{n+1})}{\partial \uu^{n+1}}
+    \end{aligned}
+\end{equation}
+which is a quadratic polynomial of right-hand-sides'
+Jacobian.
+If the Jacobian matrices could be explicitly formed and
+manipulated, solving \eqref{eq:ntDtau} would be straightforward.
+But a lot of high order methods rely on matrix-free
+Jacobian evaluation, thus solving the linear system
+with its matrix in the form of \eqref{eq:fullJCB}
+would be troublesome or impossible.
+Even if one would like to use a matrix-less linear solver
+like Krylov space solvers,
+powerful matrix-free preconditioners like ILU(0) or
+LUSGS would be unavailable.
+
+The solution to the complexity of Jacobian
+by Kulikov and Shindin
+is using an approximate factorization
+\cite{kulikov2006familyNIRKOrig,kulikov2009adaptive}.
+For the forth order
+Gauss type NIRK in \cite{kulikov2006familyNIRKOrig},
+Kulikov and Shindin used $(\eye-\inc t /4 \J)^2$
+as an approximation.
+This paper considers the form
+\begin{equation}
+    \label{eq:factJCB}
+    \begin{aligned}
+        \frac{\partial \Res(\uu^{n+1})}
+        {\uu^{n+1}}
+         & \approx
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)    \\
+    \end{aligned}
+\end{equation}
+which is directly taken from the last term
+in \eqref{eq:fullJCB}, and the omitted term
+is identity matrix with coefficient $\frac{d_2 + a_2b_3}{d_2}>0$
+for $c_2\in(0,1)$. Note that $d_2<0$ for any possible $c_2$.
+
+Using a factorized form of approximate
+Jacobian like \eqref{eq:factJCB} enables the use of
+two successive matrix-free solvers to obtain
+the increment for Newton iteration.
+
+For practical CFD implementation,
+pseudo time term is now considered.
+In order to preserve the factorized form,
+this paper finds using
+\begin{equation}
+    \label{eq:ntDtau_Fact}
+    \begin{aligned}
+        \uu^{n+1,m+1}    & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        + \inc t \Tau^{-1}
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)
+        \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+as the pseudo time continued Newton iteration
+satisfactory.
+In the linear sense, using this this approximate
+Jacobian and pseudo time stepping does not sabotage
+the convergence of Newton iteration, which can
+be shown by applying the iteration \eqref{eq:ntDtau_Fact}
+to solving scalar ODE $\frac{dy}{dt} = \lambda y$.
+For multi-dimensional linear ODEs, using a Jordan decomposition
+would make the proof reduce to scalar equation. \#\#\#\#
+
+
+% Due to the explicit nature of the internal 
+% stage $\uu^*$, when solving nonlinear systems,
+% the un-converged state of $\uu^{n+1}$ at 
+% the beginning of iteration could put $\uu^*$
+% far from the real solution, 
+% causing the right-hand-side to behave bad
+% and possibly make the iteration breakdown. 
+% Therefore, this paper presents another approach of solving 
+% HIRK step which is vital for nonlinear ODEs.
+
+% In order to account for nonlinearity, 
+% we forsake the explicit nature in the 
+% determination of $\uu^*$ as described in \eqref{eq:HM3-2}, 
+% which is an Hermite interpolation linear dependent 
+% on $\uu^{n},\uu^{n+1},\R^n, \R^{n+1}$.
+
+This paper also provides another kind of
+solving strategy,
+which forsakes the explicitness in \eqref{eq:HM3-2},
+thus making $\uu^*$ the dof to be solved,
+which is the case for a general IRK scheme.
+The equation to solve would be:
+\begin{equation}
+    \begin{aligned}
+                                  & \left\{
+        \begin{array}[2]{ll}
+            \Res(\uu^{n+1},\uu^{*})   & = 0 \\
+            \Res^*(\uu^{n+1},\uu^{*}) & = 0 \\
+        \end{array}
+        \right.                                               \\
+        \text{with}               &                           \\
+        \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
+        \uu^{n} +
+        \inc t
+        \left[
+            b_1\R(t^{n,1}, \uu^n) +
+            b_2\R(t^{n,2}, \uu^*) +
+            b_3\R(t^{n,3}, \uu^{n+1})
+            \right]
+        \right)                                               \\
+        \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
+        a_1\uu^{n} +
+        a_2\uu^{n+1} +
+        \inc t
+        \left[
+            d_1\R(t^{n,1}, \uu^n) +
+            d_2\R(t^{n,3}, \uu^{n+1})
+            \right]
+        \right)
+    \end{aligned}
+\end{equation}
+Making $\uu^*$ unknown has two major drawbacks.
+The first drawback is that additional memory
+would be required for $\uu^*$'s storage.
+Considering HIRK saves much space compared to
+DIRK methods, and HIRK also requires some more space
+for intermediate results even using explicit $\uu^*$ evaluation,
+the first drawback would not be significant.
+The second drawback is the increase in the dimension of
+algebraic system.
+Normally, the enlarged system can be solved
+using appropriate blocking strategy,
+for example in \cite{pazner2017stage}.
+However, the current scheme takes a different form of
+iteration which takes two sub-steps:
+\begin{equation}
+    \label{eq:intersolve}
+    \begin{aligned}
+        \uu^{*,m+1}   & = \uu^{*,m} - \left[
+            \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
+            {\partial \uu^{*,m}}
+            + \inc t \Tau^{-1}
+            \right]
+        \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
+        \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
+            \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
+            {\partial \uu^{n+1,m}}
+            + \inc t \Tau^{-1}
+            \right]
+        \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
+    \end{aligned}
+\end{equation}
+where the $\mathbf{A}\backslash \mathbf{b}$
+notation means to solve the linear problem $\mathbf{A}\mathbf{x}=\mathbf{b}$ once.
+The residual $\Res^{*'}$ is defined with:
+\begin{equation}
+    \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
+\end{equation}
+which serves as the residual preconditioned with transformation
+\begin{equation*}
+    \begin{bmatrix}
+        \Res^{} \\
+        \Res^{*'}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \eye & 0 \\ \beta\eye & \eye
+    \end{bmatrix}
+    \begin{bmatrix}
+        \Res^{} \\
+        \Res^{*}
+    \end{bmatrix}
+\end{equation*}
+with $\beta\in\mathbb{R}$.
+In \cite{jameson2017evaluation} Jameson used the inverse of Butcher coefficients
+for preconditioning, which makes off-diagonal blocks of
+the Jacobian scalar.
+That preconditioning could
+be adopted in the current method,
+but is not recommended for
+possible instabilities in the presence of negative pressure fixing in
+numeric tests. \#\#\#\#
+
+The solving procedure \eqref{eq:intersolve} could be regarded as
+successively updating $\uu^*$ with $\Res^{*'}$ and $\uu$
+with $\Res^{}$, by using the latest values of the other DOF.
+Within a linear context,
+this would be a blocks Gauss-Seidel iteration
+over the $2\times2$ blocks of system with each block being $N\times N$.
+In other words,to solve:
+\begin{equation*}
+    \begin{bmatrix}
+        \Res^{}(\uu^{n+1},\uu^{*}) \\
+        \Res^{*'}(\uu^{n+1},\uu^{*})
+    \end{bmatrix} = 0
+\end{equation*}
+the canonical quasi Newton iteration would need to solve
+\begin{equation}
+    \label{eq:fullCoupled}
+    \begin{bmatrix}
+        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}} + \inc t\Tau^{-1} &
+        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}}                       \\
+        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}}                 &
+        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}} + \inc t\Tau^{-1}   \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \inc\uu^{n+1,m} \\
+        \inc\uu^{*,m}
+    \end{bmatrix}
+    =
+    -\begin{bmatrix}
+        \Res^{}(\uu^{n+1,m},\uu^{*,m}) \\
+        \Res^{*'}(\uu^{n+1,m},\uu^{*,m})
+    \end{bmatrix}
+\end{equation}
+to update both stage values concurrently.
+The current method \eqref{eq:intersolve}
+first solve the second block row of
+\eqref{eq:fullCoupled} for the increment of $\uu^*$,
+then solve the first block row
+for the increment of $\uu^{n+1}$ using updated $\uu^*$.
+The current solving strategy will
+be referred to as successive solving in the following parts.
+
+The omitting of off-diagonal relations in \eqref{eq:fullCoupled},
+or the block nonlinear Gauss-Seidel handling on the top layer of
+algorithm brings about extra error in iteration,
+causing slow-down of iteration and possible divergence.
+To analyze such behavior, the current research investigates
+the impact of successive solving \eqref{eq:intersolve}
+brought to solution of HIRK applied to linear problems
+using precise linear solvers.
+With a traditional quasi Newton iteration,
+if pseudo time steps approaches infinity,
+the iteration would converge in the first step in such
+situation.
+The introduction of successive solving \eqref{eq:intersolve}
+renders this one-step-convergence impossible, thus
+the convergence with successive solving will represent
+all the deceleration effect caused by it.
+The linear situation discussed could also be a linearization
+of a non-linear ODE when the stage values converge near the
+solution, and the instant convergence of Newton iteration would
+be first order accurate.
+In the linear or linearized scene,
+the residual takes the form:
+\begin{equation}
+    \label{eq:linearized}
+    \begin{aligned}
+        \Res^{}(\uu^{n+1},\uu^{*})   & =
+        \Res^{}_0 - \inc t b_2\J^*\uu^{*} + (\eye - \inc t b_3\J)\uu^{n+1} \\
+        \Res^{*'}(\uu^{n+1},\uu^{*}) & =
+        \Res^{*'}_0 + (\eye - \beta\inc t b_2\J^*)\uu^{*}
+        + ((\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J)\uu^{n+1}
+    \end{aligned}
+\end{equation}
+where $\J^*, \J$ are Jacobian of $\R$
+at the solution of
+$\uu^{*}, \uu^{n+1}$.
+Applying \eqref{eq:intersolve} to
+this linear form and assuming a infinite pseudo 
+time step,
+following textbook analysis conduced on
+Gauss-Seidel iteration,
+the successive solving becomes a linear
+fixed point iteration, with fixed point
+mapping's matrix being
+\begin{equation}
+    \mathbf{B}_{SS}=\begin{bmatrix}
+        \eye - \beta\inc t b_2\J^* & 0                   \\
+        - \inc t b_2\J^*           & \eye - \inc t b_3\J \\
+    \end{bmatrix}^{-1}
+    \begin{bmatrix}
+        0 & (\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J \\
+        0 & 0                                            \\
+    \end{bmatrix}
+\end{equation}
+Thus, convergence of the fixed point iteration equals to
+the condition
+\begin{equation}
+    \label{eq:rhoGS}
+    \begin{aligned}
+         & \varUpsilon(\mathbf{B}_{SS}) \\
+         & =\varUpsilon\left(
+        -[\eye - \inc t b_3\J]^{-1}
+        [- \inc t b_2\J^*]
+        [\eye - \beta\inc t b_2\J^*]^{-1}
+        [(\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J]
+        \right)                     \\
+         & < 1
+    \end{aligned}
+\end{equation}
+where $\varUpsilon$ is spectral radius of matrix.
+For arbitrary $\J,\J^*$, further analysis is difficult,
+so we limit the situation to where $\J = \J^*$ is an acceptable
+approximation, or the ODE is linear itself.
+Using the Jordan form,
+and assuming all the inverse are existent and precisely solved,
+\eqref{eq:rhoGS} would become
+\begin{equation}
+    \label{eq:rhoGS1}
+    \begin{aligned}
+        \varrho_i = 
+        \left|
+        -[1 -  b_3z_i]^{-1}
+        [- b_2z_i]
+        [1 - \beta b_2z_i]^{-1}
+        [(\beta-a_2) - (\beta b_3 - d_2)z_i]
+        \right| & < 1,\ \ \forall z_i = \inc t \lambda_i
+    \end{aligned}
+\end{equation}
+where $\lambda_i$ is eigenvalues of $\J$. 
+By further assuming $\mathfrak{Re} z_i < 0$ 
+which is true for stable semi-discretized 
+method used on bounded linear problems, 
+special cases were analyzed. 
+For $c_2=0.5, \beta=0.5$, it is found 
+$\varrho_i < 0.5$. 
+For $c_2=0.5, \beta=1$, it is found $\varrho_i < 0.42$.
+For $c_2=0.55, \beta=0.5$, $\varrho_i$ could exceed 1.
+For $c_2=0.55, \beta=1$, it is found $\varrho_i < 0.36$.
+These analyses are trivial which involve finding maximal points 
+in the left complex plane and on the imaginary axis. 
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=3in]{pics/numSearchRho.png}
+    \caption{Numerical search result }
+    \label{fig:numSearchRho}
+\end{figure}
+
+Numerical search is conduced to find
+\begin{equation}
+    \varrho_m(\beta) = \max_{\forall i}(\varrho_i)
+\end{equation}
+whose result is shown in figure \ref{fig:numSearchRho}.
+Figure \ref{fig:numSearchRho} indicates 
+at least for $c_2\in[0.5,0.6]$, $\varrho_m<1$
+could be satisfied easily by adjusting $\beta$, therefore 
+achieving convergence in Gauss-Seidel iteration.
+For optimal Gauss-Seidel convergence rate, 
+values of $\beta$ could be found by numeric searching 
+as shown in figure \ref{fig:numSearchRho}. 
+Figure \ref{fig:numSearchRho} also suggests
+$c_2=0.5$ helps acquiring better convergence rage 
+in successive solving.
+
+The current successive solving approach 
+differs from previous ones,
+which only requires linear solutions of
+the same dimension as the ODE.
+This property makes HIRK's implementation
+very similar to traditional DIRK or BDF methods,
+thus taking less effort.
+
+
+
 
 \section{Spacial Discretization Method}
 
