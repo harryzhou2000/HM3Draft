@@ -60,6 +60,7 @@
     filecolor=magenta,      
     urlcolor=cyan,
     }
+\usepackage{subcaption}
 
 \journal{Journal's Name}
 
@@ -893,7 +894,7 @@ where $\J^*, \J$ are Jacobian of $\R$
 at the solution of
 $\uu^{*}, \uu^{n+1}$.
 Applying \eqref{eq:intersolve} to
-this linear form and assuming a infinite pseudo 
+this linear form and assuming a infinite pseudo
 time step,
 following textbook analysis conduced on
 Gauss-Seidel iteration,
@@ -921,7 +922,7 @@ the condition
         [- \inc t b_2\J^*]
         [\eye - \beta\inc t b_2\J^*]^{-1}
         [(\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J]
-        \right)                     \\
+        \right)                         \\
          & < 1
     \end{aligned}
 \end{equation}
@@ -935,7 +936,7 @@ and assuming all the inverse are existent and precisely solved,
 \begin{equation}
     \label{eq:rhoGS1}
     \begin{aligned}
-        \varrho_i = 
+        \varrho_i =
         \left|
         -[1 -  b_3z_i]^{-1}
         [- b_2z_i]
@@ -944,18 +945,18 @@ and assuming all the inverse are existent and precisely solved,
         \right| & < 1,\ \ \forall z_i = \inc t \lambda_i
     \end{aligned}
 \end{equation}
-where $\lambda_i$ is eigenvalues of $\J$. 
-By further assuming $\mathfrak{Re} z_i < 0$ 
-which is true for stable semi-discretized 
-method used on bounded linear problems, 
-special cases were analyzed. 
-For $c_2=0.5, \beta=0.5$, it is found 
-$\varrho_i < 0.5$. 
+where $\lambda_i$ is eigenvalues of $\J$.
+By further assuming $\mathfrak{Re} z_i < 0$
+which is true for stable semi-discretized
+method used on bounded linear problems,
+special cases were analyzed.
+For $c_2=0.5, \beta=0.5$, it is found
+$\varrho_i < 0.5$.
 For $c_2=0.5, \beta=1$, it is found $\varrho_i < 0.42$.
 For $c_2=0.55, \beta=0.5$, $\varrho_i$ could exceed 1.
 For $c_2=0.55, \beta=1$, it is found $\varrho_i < 0.36$.
-These analyses are trivial which involve finding maximal points 
-in the left complex plane and on the imaginary axis. 
+These analyses are trivial which involve finding maximal points
+in the left complex plane and on the imaginary axis.
 
 \begin{figure}[htbp]
     \centering
@@ -969,18 +970,18 @@ Numerical search is conduced to find
     \varrho_m(\beta) = \max_{\forall i}(\varrho_i)
 \end{equation}
 whose result is shown in figure \ref{fig:numSearchRho}.
-Figure \ref{fig:numSearchRho} indicates 
+Figure \ref{fig:numSearchRho} indicates
 at least for $c_2\in[0.5,0.6]$, $\varrho_m<1$
-could be satisfied easily by adjusting $\beta$, therefore 
+could be satisfied easily by adjusting $\beta$, therefore
 achieving convergence in Gauss-Seidel iteration.
-For optimal Gauss-Seidel convergence rate, 
-values of $\beta$ could be found by numeric searching 
-as shown in figure \ref{fig:numSearchRho}. 
+For optimal Gauss-Seidel convergence rate,
+values of $\beta$ could be found by numeric searching
+as shown in figure \ref{fig:numSearchRho}.
 Figure \ref{fig:numSearchRho} also suggests
-$c_2=0.5$ helps acquiring better convergence rage 
+$c_2=0.5$ helps acquiring better convergence rage
 in successive solving.
 
-The current successive solving approach 
+The current successive solving approach
 differs from previous ones,
 which only requires linear solutions of
 the same dimension as the ODE.
@@ -995,6 +996,190 @@ thus taking less effort.
 
 
 \section{Numerical Tests}
+
+\subsection{Isentropic Vortex}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3LBT.png}
+        \caption[]{HIRK $c_2=0.5$}
+        \label{sfig:IV10Step_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3.png}
+        \caption[]{HIRK $c_2=0.55$}
+        \label{sfig:IV10Step_HM3}
+    \end{subfigure}\\
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_ESDIRK4.png}
+        \caption[]{ESDIRK4}
+        \label{sfig:IV10Step_ESDIRK4}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_BDF2.png}
+        \caption[]{BDF2}
+        \label{sfig:IV10Step_BDF2}
+    \end{subfigure}
+    \caption{Density distribution of isentropic vortex problem, with $\inc t = 1$ at $t=10$}
+    \label{fig:IV10Step}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.png}
+        \caption[]{Density error vs. time step size }
+        \label{sfig:IVTests_Conv}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.png}
+        \caption[]{Density error vs. total cpu time consumption}
+        \label{sfig:IVTests_Eff}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency test with isentropic vortex problem}
+    \label{fig:IVTests}
+\end{figure}
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_21.png}
+        \caption[]{Density error vs. effective iterations }
+        \label{sfig:IVTests2_EffIt}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_4.png}
+        \caption[]{Cpu time vs. effective iterations}
+        \label{sfig:IVTests2_CPUVEffIt}
+    \end{subfigure}
+    \caption[]{The impact of using iteration counting to measure total work}
+    \label{fig:IVTests2}
+\end{figure}
+
+\subsection{Two Dimensional Vortex Shedding}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{pics/CylinderA1_Re2000_Mesh.png}
+    \caption[]{Part of mesh used in $Re=2000$ vortex shedding problem}
+    \label{fig:CylinderRe2000_Mesh}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3LBT.png}
+        \caption[]{HIRK $c_2=0.5$}
+        \label{sfig:CylinderRe2000_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3.png}
+        \caption[]{HIRK $c_2=0.55$}
+        \label{sfig:CylinderRe2000_HM3}
+    \end{subfigure}
+    \caption[]{Comparison of pressure distribution in $Re=2000$ vortex shedding problem}
+    \label{fig:CylinderRe2000}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
+        \caption[]{Mesh}
+        \label{sfig:CylinderRe1200Demo_Mesh}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
+        \caption[]{Vorticity distribution}
+        \label{sfig:CylinderRe1200Demo_Vort}
+    \end{subfigure}
+    \caption[]{Mesh and a instance of z-vorticity distribution
+        in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200Demo}
+\end{figure}
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig14.png}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_My_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig4.png}
+        \caption[]{Error vs. effective iterations}
+        \label{sfig:CylinderRe1200_My_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_My}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig15.png}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_Mx_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig5.png}
+        \caption[]{Error vs. effective iterations}
+        \label{sfig:CylinderRe1200_Mx_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{Mx}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_Mx}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig13.png}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_St_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig3.png}
+        \caption[]{Error vs. effective iterations}
+        \label{sfig:CylinderRe1200_St_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{St}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_St}
+\end{figure}
+
+
+
+
+\subsection{Double Mach Reflection}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
+        \caption[]{HIRK $c_2=0.5$}
+        \label{sfig:DM480_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
+        \caption[]{HIRK $c_2=0.55$}
+        \label{sfig:DM480_HM3}
+    \end{subfigure}\\
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_ESDIRK.png}
+        \caption[]{ESDIRK4}
+        \label{sfig:DM480_ESDIRK4}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_BDF.png}
+        \caption[]{BDF2}
+        \label{sfig:DM480_BDF2}
+    \end{subfigure}
+    \caption{Density distribution in double mach reflection problem}
+    \label{fig:DM480}
+\end{figure}
 
 \section{Conclusion}
 
