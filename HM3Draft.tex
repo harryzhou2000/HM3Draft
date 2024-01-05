@@ -485,6 +485,7 @@ a 3 point Gauss-Lobatto type quadrature
 % \end{equation}
 
 \subsection{Linear Stability}
+\label{ssec:linStab}
 
 Following standard analysis based on Dahlquist's equation
 $\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
@@ -990,14 +991,94 @@ very similar to traditional DIRK or BDF methods,
 thus taking less effort.
 
 
+\section{High-order Compact Finite Volume Method}
+\label{sec:CFV}
 
+\subsection{Governing Equations}
+\label{ssec:GovEq}
 
-\section{Spacial Discretization Method}
+\subsection{Finite Volume Discretization}
+\label{ssec:FV}
+
+\subsection{Variational Reconstruction}
+\label{ssec:VR}
 
 
 \section{Numerical Tests}
 
+During numerical tests,
+BDF2 and ESDIRK4 methods taken from
+\cite{bijl2002implicitBDFvESDIRK,kennedy2003additiveARK}
+are chosen to be
+baseline ODE integrators.
+For HIRK method, instances of
+$c_2 = 0.5$ and $c_2 = 0.55$ are tested.
+For $c_2 = 0.5$, the method is 4th order accurate and
+is essentially the Lobatto IIIA method \cite{wanner1996solving}.
+For $c_2 = 0.55$ which has 3rd order accuracy,
+the symmetry is broken and linear stability is
+improved as clarified in \ref{ssec:linStab}.
+Both HIRK methods employ successive
+solving in the form of \eqref{eq:intersolve},
+with $\beta$ chosen as empirical values $1,4/3$ respectively.
+
+
+The isentropic vortex, two dimensional vortex shedding
+and  double mach reflection problem use
+$P^3$ variational finite volume method declared in
+section \ref{sec:CFV} as spacial discretization.
+Iterative solution of the implicit reconstruction
+is conducted before each right-hand-side evaluation,
+which consists of 1 block-Jacobi iteration by default.
+Pseudo time continued Newton iteration on mean values are
+solved using 5 times of block-Jacobi iteration by default,
+which is found both stable and efficient enough for VFV solving
+transient problems.
+It should be noted that, in other words,
+both the reconstruction system and
+the time stepping implicit system use linear solvers that
+runs for a fixed number of steps without monitoring convergence.
+Only the convergence of nonlinear time stepping residual
+is monitored to ensure convergence.
+This linear solving method simplifies the control flow of
+the program,
+while providing a simple yet reliable way of
+comparing total calculation consumption between ODE solvers,
+which will be explained in section \ref{ssec:resultIV}.
+
+
+
 \subsection{Isentropic Vortex}
+\label{ssec:resultIV}
+
+The isentropic vortex problem is a classic
+accuracy testing problem for Euler equations.
+The settings can be found in \cite{hu1999weighted_WENO}.
+The free-stream flow is $(\rho,u,v,p)=(1,1,1,1)$,
+and a perturbation at initial time:
+\begin{equation}
+    \left\{
+    \begin{array}[2]{ll}
+        (\delta u, \delta v) & = \frac{\epsilon}{2\pi}\exp(\frac{1-[(x-x_c)^2+(y-y_c)^2]}{2})(-y+y_c,x-x_c) \\
+        \delta T             & = - \frac{(\gamma-1)\epsilon^2}{8\gamma\pi^2}\exp(1-[(x-x_c)^2+(y-y_c)^2])   \\
+        \delta S             & = 0                                                                          \\
+    \end{array}
+    \right.
+\end{equation}
+with ideal gas setting of $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$.
+Initial vortex center is chosen $(x_c,y_c)=(5,5)$.
+The analytic solution to the isentropic vortex problem is a 
+translation of initial field with speed $(1,1)$.
+The computational domain is $[0,10]\times[0,10]$, 
+using periodic boundary conditions.
+
+First, the implicit ODE integrators are tested with large 
+time steps. 
+The mesh is $40\times40$ square grid, 
+and solution is calculated until $t=10$ with $\inc t=1$.
+The CFL number based on $\inc t, \inc x$ is roughly $11$,
+making the propagation of the vortex hard to 
+simulate.
 
 \begin{figure}[htbp]
     \centering
@@ -1024,6 +1105,31 @@ thus taking less effort.
     \caption{Density distribution of isentropic vortex problem, with $\inc t = 1$ at $t=10$}
     \label{fig:IV10Step}
 \end{figure}
+
+Results of large time step testing are shown in figure \ref{fig:IV10Step}.
+Clearly, from figure \ref{sfig:IV10Step_BDF2}, BDF2 almost completely 
+smears the initial vortex with only 10 steps for one period.
+The higher order methods somehow preserves the characteristics of 
+a vortex. HIRK $c_2=0.5$ produces significant numerical oscillation along 
+the propagation direction as shown in figure \ref{sfig:IV10Step_HM3LBT},
+while the $c_2=0.55$ HIRK inhibits them better in figure \ref{sfig:IV10Step_HM3}.
+The peak value in the vortex center produce by HIRK $c_2=0.5$ is comparable with 
+ESDIRK4, while HIRK $c_2=0.55$ gives a flatter density peak.
+
+Next, precision and efficiency of different ODE methods are 
+qualitatively evaluated with isentropic vortex solved on a $160\times160$
+grid until $t=2$. 
+The density error is defined as
+\begin{equation}
+    \epsilon_\rho = \frac{\int_{(x,y)\in[4,9]\times[4,9]}{|\rho-\rho_a dxdy}|}{
+        |[4,9]\times[4,9]|
+    }
+\end{equation}   
+with $[4,9]\times[4,9]=25$ the area of evaluating region, $\rho$ the numeric result 
+and $\rho_a$ the analytic result.
+The evaluating region is limited to $[4,9]\times[4,9]=25$ where the vortex core resides
+to exclude the effect of periodic boundary which 
+should have been a infinite boundary in analytic solution.
 
 \begin{figure}[htbp]
     \centering
