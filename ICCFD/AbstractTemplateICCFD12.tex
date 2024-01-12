@@ -11,17 +11,26 @@
 %%%% YOU CAN PUT YOUR OWN DEFINITIONS HERE
 \newfont{\toto}{msbm10 at 12 pt}
 \newfont{\ithd}{cmr9}
-\newcommand{\equa}[1]{(\ref{eq:#1})}
-\newcommand{\laeq}[1]{\label{eq:#1}}
-\newcommand{\figu}[1]{\ref{fig:#1}} 
-\newcommand{\lafi}[1]{\label{fig:#1}}
-\newcommand{\fmo}{\tilde{U}}
-\newcommand{\fve}{\tilde{u}}
-\newcommand{\Dt}{\Delta t}
 
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\Z}{\mathbb{Z}}
-\newcommand{\si}[1]{\rm\scriptscriptstyle{#1}}
+
+\newcommand{\U}{\mathbf{U}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\x}{\mathbf{x}}
+
+\newcommand{\OO}{\mathbf{\Omega}}
+\newcommand{\UM}{\overline{\U}}
+\newcommand{\Fn}{\tilde{\F}}
+\newcommand{\n}{\mathbf{n}}
+\newcommand{\uu}{\overline{\mathbf{U}}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\inc}{\mathrm\Delta}
+\newcommand{\Tau}{\mathrm{T}}
+\newcommand{\Res}{\mathcal{R}}
+\newcommand{\Jres}{\mathcal{J}}
+\newcommand{\eye}{\mathbf{I}}
+\newcommand{\J}{\mathbf{J}}
+\usepackage{subcaption}
+
 %%%% END OF YOUR DEFINITIONS 
 
 \pagestyle{fancyplain}
@@ -69,43 +78,228 @@ $^{*}$ Tsinghua University, Beijing, China.
 %\vskip0.5cm
 \centerline{
 }
-\vskip0.5cm 
+\vskip0.5cm
 
 %%%% MAIN PART
 \section{Introduction}
-Please use this adapted version of the full paper to provide the 1-2 page abstract, please include details of the problem and a brief summary of your findings. 
+% High-order numerical methods for spacial discretization are typically 
+% combined with high-order time marching schemes. 
+% Meanwhile, for stiff problems including wall-bounded flow 
+% or reaction flow, an implicit ODE method is 
+% more preferable. 
+% Due to Dahlquist's second barrier
+% \cite{dahlquist1963special}, 
+% high-order linear multi-step methods 
+% can not acquire $A$-stability, 
+% resulting in the development of 
+% high-order implicit single step methods,
+% which mainly consist of implicit Runge-Kutta (IRK)
+% methods \cite{butcher2016ODEBook}. 
+% When applied to time marching for CFD systems, 
+% fully IRK methods are efficient but
+% require additional effort in the solution 
+% of implicit algebraic systems \cite{pazner2017stage, jameson2017evaluation}. 
+% Singly diagonally implicit Runge-Kutta (SDIRK)
+% methods, including SDIRK with an explicit first 
+% stage (ESDIRK) \cite{kennedy2003additiveARK,kvaerno2004singly},  
+% are more prevalent due to their 
+% simplicity in solving the stage values and nice stability.
 
+The present research proposes a new type of implicit time marching
+scheme based on temporal Hermite interpolation with adjustable
+stability.
+The scheme is equivalent with a
+3rd to 4th order IRK
+with high stage order.
+A simple but efficient solving strategy
+dedicated to application of the new scheme
+in high-order finite volume
+method is developed, and several numerical
+tests are conducted which shows its
+high efficiency and accuracy.
 
-\section{Problem Statement}
-This document allows you to easily include references \cite{book,journalpaper}, equations, figures (see Figure \figu{logo}) or anything else you
-desire into a clean and compact environment of \LaTeX.  For example if you'd like to impress a date you can write
-the unsteady heat equation as
+\section{Hermite Interpolation Implicit Runge-Kutta Method}
 
-\begin{eqnarray}
-\frac{\partial \mathbf{V}}{\partial t} - \alpha \left( \frac{\partial^2 \mathbf{V}}{\partial x^2} +
-       \frac{\partial^2 \mathbf{V}}{\partial y^2} +
-       \frac{\partial^2 \mathbf{V}}{\partial z^2} \right)
-= 0
-\laeq{heat}
-\end{eqnarray}
-where $x, y, z$ are the space dimensions and $\alpha$ is a parameter.  If you felt inclined you could define $\mathbf{V}$ as
-%
-$$\mathbf{V} = y^2 z - \text{cos}(0.1 x)$$
-%
-for a non-exact solution.  Computational fluid dynamics~\cite{paper} can be used to discretize the equations, apply boundary conditions and 
-simulation the unsteady nature of the flow.  An innovative method to simulate the heat equation could even be submitted to ICCFD10.
+For clarity, suppose we aim to solve
+the semi-discretized ODE system arising from high-order
+finite volume method
+\begin{equation}
+  \frac{d\uu}{dt} = \R(t, \uu)
+\end{equation}
+The Hermite Interpolation Implicit Runge-Kutta Method (HIRK)
+is defined as
+\begin{subequations}
+  \label{eq:HM3}
+  \begin{align}
+    \uu^{n+1} & = \uu^{n} +
+    \inc t
+    \left[
+      b_1\R(t^{n,1}, \uu^n) +
+      b_2\R(t^{n,2}, \uu^*) +
+      b_3\R(t^{n,3}, \uu^{n+1})
+    \right]   \label{eq:HM3-1} \\
+    \uu^{*}   & =
+    a_1\uu^{n} +
+    a_2\uu^{n+1} +
+    \inc t
+    \left[
+      d_1\R(t^{n,1}, \uu^n) +
+      d_2\R(t^{n,3}, \uu^{n+1})
+      \right] \label{eq:HM3-2}
+  \end{align}
+\end{subequations}
+where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1, c_2\in(0,1)$,
+and $\uu^*$ is the stage value at $c_2$.
+The first equation \eqref{eq:HM3-1} is
+a quadrature rule for $t\in[t^n,t^{n+1}]$,
+while the second equation \eqref{eq:HM3-2} is a Hermite interpolation
+evaluated at $t=t^n + c_2\inc t$.
+Due to these relations, coefficients in \eqref{eq:HM3}
+could be determined by the only free parameter $c_2$.
+The quadrature rule yields
+\(
+b_1  = \frac{1}{2} - \frac{1}{6{c_2}},\ \
+b_2  = \frac{1}{6{c_2}(1-{c_2})},\ \
+b_3  = \frac{1}{2} - \frac{1}{6(1-{c_2})}
+\),
+and the interpolation yields
+\(
+a_2 = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3,\ \
+d_1  = {c_2} - 2 {c_2}^2 + {c_2}^3   ,\ \
+d_2  = - {c_2}^2 + {c_2}^3
+\).
 
-\begin{figure}[H]
+It can be proved when $c_2=1/2$, the scheme \eqref{eq:HM3}
+is 4th-order accurate, and 3rd-order accurate otherwise.
+Also, linear stability analysis provides when $c_2=1/2$, the
+scheme is $A$-stable and when $c_2>1/2$, the scheme's
+stability improves for large eigenvalues.
+
+In order to solve each implicit time stepping reliably and efficiently
+when conducting time marching on high-order CFD systems,
+a successive solving strategy is proposed and tested.
+The strategy is defined by iteratively conducted two
+successive updating:
+\begin{equation}
+  \label{eq:intersolve}
+  \begin{aligned}
+    \uu^{*,m+1}   & = \uu^{*,m} - \left[
+      \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
+      {\partial \uu^{*,m}}
+      + \inc t \Tau^{-1}
+      \right]
+    \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
+    \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
+      \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
+      {\partial \uu^{n+1,m}}
+      + \inc t \Tau^{-1}
+      \right]
+    \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
+  \end{aligned}
+\end{equation}
+where the residuals are
+\begin{equation}
+  \begin{aligned}
+    \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
+    \uu^{n} +
+    \inc t
+    \left[
+      b_1\R(t^{n,1}, \uu^n) +
+      b_2\R(t^{n,2}, \uu^*) +
+      b_3\R(t^{n,3}, \uu^{n+1})
+      \right]
+    \right)                                               \\
+    \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
+    a_1\uu^{n} +
+    a_2\uu^{n+1} +
+    \inc t
+    \left[
+      d_1\R(t^{n,1}, \uu^n) +
+      d_2\R(t^{n,3}, \uu^{n+1})
+      \right]
+    \right)
+  \end{aligned}
+\end{equation}
+and
+\(
+  \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
+\).
+The parameter $\beta$ is a preconditioning coefficient,
+and $\Tau^{-1}$ is the diagonal matrix of pseudo time step.
+The $\mathbf{A}\backslash \mathbf{b}$
+notation means to solve the linear problem $\mathbf{A}\mathbf{x}=\mathbf{b}$.
+The operations defined in \eqref{eq:intersolve}
+are very similar to those used in BDF methods, and can be easily implemented
+in a Jacobian-free manner.
+
+\section{Numerical Tests}
+
+Tests of HIRK are conducted solving Euler equation with $p=3$ variational
+reconstruction finite volume method \cite{wang2017compact_VR}.
+Cases shown here solve the isentropic vortex problem \cite{hu1999weighted_WENO}.
+The results are compared with classic 2nd order backward difference formula (BDF2)
+and 4th order singly diagonally implicit Runge-Kutta (ESDIRK4) \cite{kennedy2003additiveARK}.
+
+\begin{figure}[htbp]
   \centering
-  \includegraphics[height=2.0in]{exampleFigure.jpg}
-  \caption{This is the logo of ICCFD.}
-  \lafi{logo}
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/IV40_10steps_HM3LBT.png}
+    \caption[]{HIRK $c_2=0.5$}
+    \label{sfig:IV10Step_HM3LBT}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/IV40_10steps_HM3.png}
+    \caption[]{HIRK $c_2=0.55$}
+    \label{sfig:IV10Step_HM3}
+  \end{subfigure}\hfill %\\
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/IV40_10steps_ESDIRK4.png}
+    \caption[]{ESDIRK4}
+    \label{sfig:IV10Step_ESDIRK4}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/IV40_10steps_BDF2.png}
+    \caption[]{BDF2}
+    \label{sfig:IV10Step_BDF2}
+  \end{subfigure}
+  \caption{Density distribution of isentropic vortex problem, with $\inc t = 1$ at $t=10$}
+  \label{fig:IV10Step}
 \end{figure}
 
+Figure \ref{fig:IV10Step} illustrates the results on a $40\times40$ square mesh using
+large time step size $\inc t = 1$, which corresponds to a CFL number roughly $11$.
+The high-order time marching methods preserves some vortex characteristics, while
+the 2nd order BDF2 smears the vortex completely. HIRK with $c_2 = 0.5$ generates
+additional numeric oscillation, while ESDIRK and HIRK $c_2 = 0.55$ suppress them
+better.
 
-\subsection{Subsection Title Example}
 
-\subsubsection{Sub-subsection Title Example}
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_1.png}
+    \caption[]{Density error vs. time step size }
+    \label{sfig:IVTests_Conv}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_2.png}
+    \caption[]{Density error vs. CPU time}
+    \label{sfig:IVTests_Eff}
+  \end{subfigure}
+  \caption[]{Convergence and efficiency test with isentropic vortex problem}
+  \label{fig:IVTests}
+\end{figure}
+
+Convergence and efficiency tests are conducted on a fine $160\times160$ mesh with
+negligible spacial error, and density error from analytic solution at $t=2$ is evaluated.
+Figure \ref{sfig:IVTests_Conv} indicates all the time marching methods
+roughly reach their temporal orders of accuracy. When time step sizes are
+the same, ESDIRK4 is the most accurate, while HIRK methods are
+quite close.
+Figure \ref{sfig:IVTests_Eff} offers a insight of efficiency. With
+the same CPU time consumed, HIRK methods are more accurate than
+ESDIRK4, indicating HIRK's higher efficiency.
+
 
 
 

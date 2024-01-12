@@ -10,4 +10,4 @@
 *.fdb_*
 *.gz
 *.lyx~
-*.lyx
+# *.lyx

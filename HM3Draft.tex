@@ -249,8 +249,8 @@ SDIRK methods have lower-triangular butcher tableau,
 enabling the stage values to be solved in a sequence.
 As a special case of SDIRK,
 ESDIRK methods are SDIRK with an explicit first stage,
-which are constructed to be
-stiffly accurate and $L$-stable
+which are constructed to have 
+stage order of 2 and $L$-stable
 \cite{kennedy2003additiveARK,kvaerno2004singly}.
 High-order ESDIRK schemes and
 BDF2 have been tested in
@@ -1017,7 +1017,11 @@ The equation to solve would be:
             \Res^*(\uu^{n+1},\uu^{*}) & = 0 \\
         \end{array}
         \right.                                               \\
-        \text{with}               &                           \\
+    \end{aligned}
+\end{equation}
+with
+\begin{equation}
+    \begin{aligned}
         \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
         \uu^{n} +
         \inc t
@@ -1337,7 +1341,8 @@ and a perturbation at initial time:
     \right.
 \end{equation}
 with ideal gas setting of $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$.
-Initial vortex center is chosen $(x_c,y_c)=(5,5)$.
+Initial vortex center is chosen $(x_c,y_c)=(5,5)$, 
+and vortex strength is $\epsilon = 5$.
 The analytic solution to the isentropic vortex problem is a
 translation of initial field with speed $(1,1)$.
 The computational domain is $[0,10]\times[0,10]$,

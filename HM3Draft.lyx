@@ -1,0 +1,7487 @@
+#LyX file created by tex2lyx 2.3
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin D:/Documents/HM3Draft/
+\textclass elsarticle
+\begin_preamble
+%% 
+%% Copyright 2007-2020 Elsevier Ltd
+%% 
+%% This file is part of the 'Elsarticle Bundle'.
+%% ---------------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.2 of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.2 or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'Elsarticle Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+
+%% Template article for Elsevier's document class `elsarticle'
+%% with numbered style bibliographic references
+%% SP 2008/03/01
+%%
+%% 
+%%
+%% $Id: elsarticle-template-num.tex 190 2020-11-23 11:12:32Z rishi $
+%%
+%%
+
+
+%% Use the option review to obtain double line spacing
+%% \documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+%% Use the options 1p,twocolumn; 3p; 3p,twocolumn; 5p; or 5p,twocolumn
+%% for a journal layout:
+%% \documentclass[final,1p,times]{elsarticle}
+%% \documentclass[final,1p,times,twocolumn]{elsarticle}
+%% \documentclass[final,3p,times]{elsarticle}
+%% \documentclass[final,3p,times,twocolumn]{elsarticle}
+%% \documentclass[final,5p,times]{elsarticle}
+%% \documentclass[final,5p,times,twocolumn]{elsarticle}
+
+%% For including figures, graphicx.sty has been loaded in
+%% elsarticle.cls. If you prefer to use the old commands
+%% please give \usepackage{epsfig}
+
+%% The amssymb package provides various useful mathematical symbols
+%% The amsthm package provides extended theorem environments
+%% \usepackage{amsthm}
+
+%% The lineno packages adds line numbers. Start line numbering with
+%% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
+%% for the whole article with \linenumbers.
+%% \usepackage{lineno}
+
+
+\usepackage{subcaption}
+
+
+\journal{Journal's Name}
+
+
+\end_preamble
+\options preprint
+\use_default_options false
+\begin_modules
+subequations
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package none
+\inputencoding auto
+\fontencoding default
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref true
+\pdf_bookmarks 0
+\pdf_bookmarksnumbered 0
+\pdf_bookmarksopen 0
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks 0
+\pdf_pdfborder 0
+\pdf_colorlinks 1
+\pdf_backref section
+\pdf_pdfusetitle 0
+\pdf_quoted_options "linkcolor=blue,filecolor=magenta,urlcolor=cyan,"
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine natbib
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{frontmatter}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% Title, authors and addresses
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the tnoteref command within 
+\backslash
+title for footnotes;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the tnotetext command for theassociated footnote;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the fnref command within 
+\backslash
+author or 
+\backslash
+address for footnotes;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the fntext command for theassociated footnote;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the corref command within 
+\backslash
+author for corresponding author footnotes;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the cortext command for theassociated footnote;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use the ead command for the email address,
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% and the form 
+\backslash
+ead[url] for the home page:
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+An Efficient Implicit Runge-Kutta Method Based on Time Interpolation for High-order Finite Volume Method
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+tnotetext[label1]{}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+ead{email address}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+ead[url]{home page}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+fntext[label2]{}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+cortext[cor1]{}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+fntext[label3]{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% use optional labels to link authors explicitly to addresses:
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+author[label1,label2]{}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+affiliation[label1]{organization={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             addressline={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             city={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             postcode={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             state={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             country={}}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+affiliation[label2]{organization={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             addressline={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             city={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             postcode={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             state={},
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%             country={}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+
+\begin_inset Argument 1
+status collapsed
+
+
+\begin_layout Standard
+THUDEM
+\end_layout
+
+\end_inset
+
+Hanyu Zhou
+\end_layout
+
+\begin_layout Author
+
+\begin_inset Argument 1
+status collapsed
+
+
+\begin_layout Standard
+THUDEM
+\end_layout
+
+\end_inset
+
+Yuxin Ren
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+affiliation
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+[
+\end_layout
+
+\end_inset
+
+THUDEM
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+]
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+ organization= 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+ Department of Engineering Mechanices, Tsinghua Universiy
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+,
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%Department and Organization
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ addressline=
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{}
+\end_layout
+
+\end_inset
+
+, city=
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{}
+\end_layout
+
+\end_inset
+
+, postcode=
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{}
+\end_layout
+
+\end_inset
+
+, state=
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+Beijing
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+, country=
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+China
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Abstract
+Text of abstract
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% %%Graphical abstract
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+begin{graphicalabstract}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% %
+\backslash
+includegraphics{grabs}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+end{graphicalabstract}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%Research highlights
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{highlights}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+item 
+\end_layout
+
+\end_inset
+
+Research highlight 1 
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+item 
+\end_layout
+
+\end_inset
+
+Research highlight 2 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{highlights}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% keywords here, in the form: keyword 
+\backslash
+sep keyword
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% PACS codes here, in the form: 
+\backslash
+PACS code 
+\backslash
+sep code
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% MSC codes here, in the form: 
+\backslash
+MSC code 
+\backslash
+sep code
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% or 
+\backslash
+MSC[2008] code 
+\backslash
+sep code (2000 is the default)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{frontmatter}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+linenumbers
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% main text
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:intro"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In computational fluid dynamics (CFD), high-order numerical methods have the capability of resolving complex flows effectively and efficiently, which have been attracting great attention recently. Popular high-order CFD methods, including discontinuous Galerkin (DG) methods 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "reed1973triangularDG,     BASSI1997251DG,     BASSI1997267DG,     cockburn1989DGII,     cockburn2001rungeDG"
+literal "false"
+
+\end_inset
+
+, spectral volume 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "WANG2002210_SV"
+literal "false"
+
+\end_inset
+
+ and spectral difference 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "LIU2006780_SD"
+literal "false"
+
+\end_inset
+
+ methods, PnPm procedures 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "DUMBSER20088209_PNPM"
+literal "false"
+
+\end_inset
+
+, FR/CPR methods 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "huynh2007flux_FR,     huynh2009reconstruction_FR,     vincent2011new_FR,     wang2009unifying_CPR"
+literal "false"
+
+\end_inset
+
+, and finite volume (FV) methods 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wang2016compact_VR,     wang2016compact1_VR,     wang2017compact_VR,     pan2018high_VR,     zhang2019compact_VR,     barth1990higher_FV,     delanaye1999quadratic_FV,     ollivier1997quasi_ENO,     friedrich1998weighted_WENO,     hu1999weighted_WENO,     dumbser2007quadrature_WENO"
+literal "false"
+
+\end_inset
+
+, generally provides spacial discretization methods which produce semi-discretized forms of the original partial differential equations (PDEs). The semi-discretized PDEs are sets of first order ordinary differential equations (ODEs), which are usually further solved with ODE integrators such as the popular strong stability preserving Runge-Kutta (SSPRK) methods 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "gottlieb2001strong_SSPRK"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Although explicit ODE integrators are simple and efficient in a wide range of CFD problems, the Courant-Friedrichs-Lewy (CFL) constraint that limits physical time step in explicit methods could make them inefficient in notably inhomogeneous or anisotropic transient flows, such as wall-bounded turbulence. Such inefficiency could be overcome by applying implicit ODE methods with sufficient stability. Due to Dahlquist's second barrier 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "dahlquist1963special"
+literal "false"
+
+\end_inset
+
+, only second and first order multi-step ODE methods could achieve 
+\begin_inset Formula $A$
+\end_inset
+
+-stability, and trapezoid rule not being 
+\begin_inset Formula $L$
+\end_inset
+
+-stable, only the 
+\begin_inset Formula $L$
+\end_inset
+
+-stable second-order backward differentiation formula (BDF2) is extensively adopted in transient CFD problems. Different from multi-step methods, the single-step implicit Runge-Kutta (IRK) methods with multiple internal stages can achieve higher order of accuracy while preserving stability 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "butcher2016ODEBook"
+literal "false"
+
+\end_inset
+
+. Among the IRK methods, fully coupled IRK methods could achieve optimal order given number of stages, but they require the solution of a nonlinear system with its dimension multiple times larger than the ODE, which could be especially troublesome for its implementation in CFD schemes. Pazner and Persson 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "pazner2017stage"
+literal "false"
+
+\end_inset
+
+ made effort in efficiently solving fully IRK methods with DG, and Jameson 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "jameson2017evaluation"
+literal "false"
+
+\end_inset
+
+ discussed how to adopt dual time stepping into fully IRK. As a result of the difficulties in the solution of fully IRK methods, singly diagonally implicit Runge-Kutta (SDIRK) methods are more commonly used in CFD, for example in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wang2017compact_VR"
+literal "false"
+
+\end_inset
+
+. SDIRK methods have lower-triangular butcher tableau, enabling the stage values to be solved in a sequence. As a special case of SDIRK, ESDIRK methods are SDIRK with an explicit first stage, which are constructed to have stage order of 2 and 
+\begin_inset Formula $L$
+\end_inset
+
+-stable 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kennedy2003additiveARK,kvaerno2004singly"
+literal "false"
+
+\end_inset
+
+. High-order ESDIRK schemes and BDF2 have been tested in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "     bijl2002implicitBDFvESDIRK,     wang2007implicitDGTests"
+literal "false"
+
+\end_inset
+
+ to solve flow problems, whose results illustrate better accuracy and higher efficiency of high-order ESDIRK methods compared to second order BDF2.
+\end_layout
+
+\begin_layout Standard
+Apart from fully IRK and SDIRK methods, another class of implicit RK methods, mono implicit RK methods (MIRK) 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "cash1975classMIRKOrig"
+literal "false"
+
+\end_inset
+
+ have explicit internal stages and puts all the implicitness into the final stage, allowing the implicit system to remain have the same number of dimensions as the original ODE. Cash and Signhal derived examples of 
+\begin_inset Formula $A$
+\end_inset
+
+-stable and 
+\begin_inset Formula $L$
+\end_inset
+
+-stable high-order MIRK methods in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "cash1977clasMIRK1,cash1982monoMIRK2"
+literal "false"
+
+\end_inset
+
+. Kulikov and Shindin presented a similar type of method called nested implicit RK (NIRK) 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2006familyNIRKOrig"
+literal "false"
+
+\end_inset
+
+. Discussion was made on symmetry, stiff accuracy and other advantageous properties of a series of Gauss type NIRK methods. 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2009adaptive"
+literal "false"
+
+\end_inset
+
+. The major drawback of NIRK or MIRK schemes is that the Jacobian matrices of the nonlinear algebraic problems for each NIRK or MIRK step are polynomials of the Jacobian of ODE's right hand side. Cash and Singhal proposed to find MIRK methods whose Jacobian could be factorized or approximate the Jacobian with a factorization, so that the Newton iteration step could be solved by solving a series of successive linear problems 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "cash1982monoMIRK2"
+literal "false"
+
+\end_inset
+
+. Kulikov and Shindin found certain factorization approximation could sabotage the stability of the method in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2009adaptive"
+literal "false"
+
+\end_inset
+
+, and analyzed how to choose the approximation of Jacobian in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2007asymptotic"
+literal "false"
+
+\end_inset
+
+. MIRK and NIRK methods are more attractive than SDIRK methods for they require fewer inner stage solving. Typical forth order stiffly accurate ESDIRK requires 5 implicit internal stages to be solved, while MIRK and NIRK could solve only one implicit stage.
+\end_layout
+
+\begin_layout Standard
+MIRK and NIRK methods have less implicit stages than SDIRK methods, which gives them potential to gain better efficiency in large scale problems. However, current literature has seldom explored the application of MIRK or NIRK methods in PDE solving. The fully IRK methods, on the hand, have been practiced in finite volume 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "jameson2017evaluation"
+literal "false"
+
+\end_inset
+
+ and DG 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "pazner2017stage"
+literal "false"
+
+\end_inset
+
+ as mentioned before, but their implementations in CFD methods are significantly more complex compared to DIRK methods.
+\end_layout
+
+\begin_layout Standard
+The current paper develops a single step implicit method HIRK based on time interpolation, and explores its implementation in high-order finite volume method. The present research illustrates that the new time marching method HIRK is equivalent with a implicit RK method with 3rd to 4th order of accuracy, with high stage order. Meanwhile, the current provides practical matrix-free solving strategy for the implicit algebraic problem arising from HIRK time marching of high-order finite volume method. In numerical tests with 2D Euler equation and NS equation, the current paper demonstrates the potential of HIRK to exceed the popular 4th order ESDIRK method in efficiency. ####
+\end_layout
+
+\begin_layout Standard
+Paper's structure:...
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%TODO
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+High-order Compact Finite Volume Method
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:CFV"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset FormulaMacro
+\newcommand{\U}{\mathbf{U}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\F}{\mathbf{F}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\x}{\mathbf{x}}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The new time-marching method developed in the current paper, HIRK, is aimed to support high-order finite volume method. Therefore, this section will provide a description of finite volume spacial discretization, and specify details of the high-order finite volume scheme used in numerical tests.
+\end_layout
+
+\begin_layout Subsection
+Governing Equations
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "ssec:GovEq"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The compressible Navier-Stokes equations has the conservative form: 
+\begin_inset Formula \begin{equation}
+    \label{eq:NS}
+    \frac{\partial \U}{\partial t} +
+    (\F - \F_v) \cdot \mathbf\nabla = 0
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\U$
+\end_inset
+
+ is vector of conservative quantities and 
+\begin_inset Formula $\F=[\F_1,\F_2,\F_3]$
+\end_inset
+
+, 
+\begin_inset Formula $\F_v=[\F_{v,1},\F_{v,2},\F_{v,3}]$
+\end_inset
+
+ are inviscid and viscous tensors of their flux. In cartesian coordinates 
+\begin_inset Formula $x_k, k=1,2,3$
+\end_inset
+
+, the components are 
+\begin_inset Formula \begin{equation}
+    \U = \begin{bmatrix}
+        \rho \\ \rho u_1 \\ \rho u_2 \\ \rho u_3 \\ E
+    \end{bmatrix},\ \
+    \F_j = \begin{bmatrix}
+        \rho u_j                   \\
+        \rho u_1u_j + p\delta_{1j} \\
+        \rho u_2u_j + p\delta_{2j} \\
+        \rho u_3u_j + p\delta_{3j} \\
+        (E+p)u_j                   \\
+    \end{bmatrix},\ \
+    \F_{v,j} = \begin{bmatrix}
+        0                                \\
+        \tau_{1j}                        \\
+        \tau_{2j}                        \\
+        \tau_{3j}                        \\
+        \sum_{k=1}^3{u_k\tau_{kj}} - K_j \\
+    \end{bmatrix}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\rho$
+\end_inset
+
+ is density, 
+\begin_inset Formula $u_i, i=1,2,3$
+\end_inset
+
+ are velocity components, 
+\begin_inset Formula $p$
+\end_inset
+
+ is pressure, 
+\begin_inset Formula $E$
+\end_inset
+
+ is total energy per unit volume, 
+\begin_inset Formula $\tau_{ij}, i,j=1,2,3$
+\end_inset
+
+ are viscous stress tensor components and 
+\begin_inset Formula $K_i, i=1,2,3$
+\end_inset
+
+ are heat flux components. 
+\begin_inset Formula $\delta_{ij}$
+\end_inset
+
+ is Kronecker delta. With ideal gas equation of state, Newtonian viscosity and Fourier heat conduction, additional relations 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+        E         & = \frac{p}{\gamma -1 } + \frac{1}{2}\rho\sum_{k=1}^{3}(u_ku_k)  \\
+        p         & =\rho R_g T                                                     \\
+        \tau_{ij} & =
+        \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+        -
+        \frac{2}{3}\mu \delta_{ij}\sum_{k=1}^{3}{\frac{\partial u_k}{\partial x_k}} \\
+        K_i       & = - \kappa \frac{\partial T}{\partial x_i}
+    \end{aligned}
+\end{equation}
+\end_inset
+
+are used to close the equations with 
+\begin_inset Formula $T$
+\end_inset
+
+ being temperature, 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ being specific heat ratio, 
+\begin_inset Formula $R_g$
+\end_inset
+
+ being gas constant, 
+\begin_inset Formula $\mu$
+\end_inset
+
+ being dynamic viscosity, 
+\begin_inset Formula $\kappa$
+\end_inset
+
+ being thermal conductivity. Specific heat ratio 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ is fixed to 
+\begin_inset Formula $1.4$
+\end_inset
+
+ in this paper. The current paper only considers using simple gas property with 
+\begin_inset Formula $\kappa = \mu c_p / Pr$
+\end_inset
+
+, and 
+\begin_inset Formula $\mu=\mu_{\infty}$
+\end_inset
+
+ being a constant, while 
+\begin_inset Formula $c_p$
+\end_inset
+
+ is special heat capacity at constant pressure and Prandtl number 
+\begin_inset Formula $Pr$
+\end_inset
+
+ is fixed to 0.71 in this paper. When 
+\begin_inset Formula $\mu=0$
+\end_inset
+
+, 
+\begin_inset Formula $\F_v=0$
+\end_inset
+
+ and equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:NS"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ becomes Euler equation. The equations discussed above are in 3D form, and assuming constant distribution of values over 
+\begin_inset Formula $x_3$
+\end_inset
+
+ yields the 2D version of NS and Euler equations.
+\end_layout
+
+\begin_layout Subsection
+Finite Volume Spacial Discretization
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "ssec:FV"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset FormulaMacro
+\newcommand{\OO}{\mathbf{\Omega}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\UM}{\overline{\U}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\Fn}{\tilde{\F}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\n}{\mathbf{n}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\uu}{\overline{\mathbf{U}}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\R}{\mathbf{R}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\inc}{\mathrm\Delta}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\Tau}{\mathrm{T}}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This subsection provides a general framework of high-order finite volume discretization. The computational domain 
+\begin_inset Formula $\OO$
+\end_inset
+
+ is divided into 
+\begin_inset Formula $N_{cell}$
+\end_inset
+
+ cells 
+\begin_inset Formula $\OO_i, i=1,2,...N_{cell}$
+\end_inset
+
+ which are non-overlapping, forming a mesh. An averaging of conservative quantities over each cell is 
+\begin_inset Formula \begin{equation}
+    \label{eq:FVMean}
+    \UM_j = \frac{1}{\overline{\OO}_j}\int_{\OO_j}\U(\x)dV
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\overline{\OO}_j$
+\end_inset
+
+ is the volume of 
+\begin_inset Formula $\OO_j$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Next, a degree 
+\begin_inset Formula $p$
+\end_inset
+
+ piecewise polynomial reconstruction is conducted to approximate the distribution of quantities 
+\begin_inset Formula \begin{equation}
+    \label{eq:FVRec}
+    \U_j(\x) = \UM_j + \sum_{i=1}^{\mathrm{NDOF}(p)}{\U_j^i\varphi_{j,i}(\x) }
+\end{equation}
+\end_inset
+
+in which 
+\begin_inset Formula $\U_j(\x)$
+\end_inset
+
+ is the local polynomial distribution on cell 
+\begin_inset Formula $j$
+\end_inset
+
+, and 
+\begin_inset Formula $\varphi_{j,i}(\x)$
+\end_inset
+
+ are polynomial basis functions. The current paper uses zero-mean Taylor basis for reconstruction 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wang2017compact_VR"
+literal "false"
+
+\end_inset
+
+. Given a specific reconstruction method, the reconstruction coefficients 
+\begin_inset Formula $\U_j^i$
+\end_inset
+
+ can be determined using the distribution of mean value 
+\begin_inset Formula $\UM_k, k=1,2...N_{cell}$
+\end_inset
+
+ and boundary conditions.
+\end_layout
+
+\begin_layout Standard
+With the piecewise polynomial approximation, the PDEs 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:NS"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ can therefore become ODEs with cell averaging applied 
+\begin_inset Formula \begin{equation}
+    \label{eq:FVInt}
+    \frac{d\UM_i}{dt}
+    +\sum_{j\in S_i, j\neq i}{\left(
+        \int_{f_{i,j}}{
+            [\Fn(\U_i,\U_j) - \Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)] \cdot \n  dA
+        }\right)
+    }
+    = 0
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\Fn(\U_i,\U_j)$
+\end_inset
+
+ and 
+\begin_inset Formula $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
+\end_inset
+
+ are approximations of exact fluxes on the cell interfaces, and 
+\begin_inset Formula $f_{i,j}=\OO_i \cap \OO_j$
+\end_inset
+
+ is the interface between 
+\begin_inset Formula $i,j$
+\end_inset
+
+ cells. Set 
+\begin_inset Formula $S_i$
+\end_inset
+
+ denotes the compact stencil of cell 
+\begin_inset Formula $i$
+\end_inset
+
+. The piecewise polynomial approximation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:FVRec"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ does not guarantee a continuous distribution on interfaces, thus the numerical fluxes 
+\begin_inset Formula $\Fn(\U_i,\U_j)$
+\end_inset
+
+, 
+\begin_inset Formula $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
+\end_inset
+
+ are functions of the approximate field on both sides. Inviscid numerical flux 
+\begin_inset Formula $\Fn(\U_i,\U_j)$
+\end_inset
+
+ is typically an approximate Riemann solver which will be specified for each numerical test in the paper. Numerical viscous flux 
+\begin_inset Formula $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
+\end_inset
+
+ in this paper follows the practice of Wang 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wang2017compact_VR"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+As the spacial derivatives are approximated in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:FVInt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, it is referred to as the semi-discretized form of finite volume method. The inviscid term has a truncation error of 
+\begin_inset Formula $O(h^{p+1})$
+\end_inset
+
+ for smooth problems, with 
+\begin_inset Formula $h$
+\end_inset
+
+ being the size of mesh. As the approximate fields 
+\begin_inset Formula $\U_i$
+\end_inset
+
+ are functions of average values 
+\begin_inset Formula $\UM_i$
+\end_inset
+
+, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:FVInt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ can be rearranged into the assembled form 
+\begin_inset Formula \begin{equation}
+    \label{eq:FVODE}
+    \frac{d\uu}{dt} = \R(t, \uu)
+\end{equation}
+\end_inset
+
+with 
+\begin_inset Formula \begin{equation}
+    \uu = \begin{bmatrix}
+        \UM_1 \\
+        \dots \\
+        \UM_{N_{cell}}
+    \end{bmatrix},\ \
+    \R = \begin{bmatrix}
+        -\sum_{j\in S_1, j\neq 1}{\left(
+            \int_{f_{1,j}}{
+                [\Fn - \Fn_v] \cdot \n  dA
+            }\right)
+        }     \\
+        \dots \\
+        -\sum_{j\in S_{N_{cell}}, j\neq N_{cell}}{\left(
+            \int_{f_{N_{cell},j}}{
+                [\Fn - \Fn_v] \cdot \n  dA
+            }\right)
+        }
+    \end{bmatrix}
+\end{equation}
+\end_inset
+
+The arguments in the numerical fluxes are omitted. The right-hand-side vector 
+\begin_inset Formula $\R$
+\end_inset
+
+ is also a function of 
+\begin_inset Formula $t$
+\end_inset
+
+ as boundary conditions or additional source terms could depend on 
+\begin_inset Formula $t$
+\end_inset
+
+ generally speaking.
+\end_layout
+
+\begin_layout Subsection
+Variational Reconstruction
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "ssec:VR"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% TODO
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+###
+\end_layout
+
+\begin_layout Section
+Hermite Interpolation Implicit Runge Kutta Method
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:HIRK"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Time Marching Based on Interpolation
+\end_layout
+
+\begin_layout Standard
+The acquiring of an NIRK method with certain order of accuracy is usually based on a certain integration method and corresponding taylor expansion analysis, as described in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2006familyNIRKOrig"
+literal "false"
+
+\end_inset
+
+. However, the present paper proposes a single step method derived with Hermite interpolation (thus called HIRK), which simplifies the acquiring of high stage order and provides an approach to modify the scheme's stability.
+\end_layout
+
+\begin_layout Standard
+Considering the first order ODE arising from high-order finite volume method with 
+\begin_inset Formula $t\in[0,\infty)$
+\end_inset
+
+ and 
+\begin_inset Formula $\uu\in \mathbb{R}^N$
+\end_inset
+
+: 
+\begin_inset Formula \begin{equation*}
+    \frac{d\uu}{dt} = \R(t, \uu)
+\end{equation*}
+\end_inset
+
+which is directly taken from equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:FVODE"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ With 
+\begin_inset Formula $\uu^n$
+\end_inset
+
+ as the known numerical solution at 
+\begin_inset Formula $t=t^n$
+\end_inset
+
+ and 
+\begin_inset Formula $t^{n+1} = t^{n} + \inc t$
+\end_inset
+
+, we first consider the construction of implicit second order time marching methods as an introduction. First, form a linear interpolation for 
+\begin_inset Formula $t\in[t^n, t^{n+1}]$
+\end_inset
+
+, which gives an approximate time-distribution of 
+\begin_inset Formula $\uu(t)=\frac{t^{n+1} - t}{\inc t}\uu^n + \frac{t - t^n}{\inc t}\uu^{n+1}$
+\end_inset
+
+. Second, use a second order accurate quadrature rule on the linear time distribution. Evidently a trapezoid rule yields trapezoid rule method or Crank-Nicolson method, and midpoint rule yields the second order midpoint method. Inspired by this procedure, now we proceed to construct a high-order version.
+\end_layout
+
+\begin_layout Standard
+For a single step implicit method, if the implicitness is already solved, the endpoint values 
+\begin_inset Formula $\uu^n, \uu^{n+1}$
+\end_inset
+
+ are given. Moreover, 
+\begin_inset Formula $\R^n, \R^{n+1}$
+\end_inset
+
+ can be directly evaluated, where 
+\begin_inset Formula $\R^n = \R(t^n, \uu^n)$
+\end_inset
+
+. Given the endpoint values and corresponding first derivatives, an Hermite interpolation can be given: 
+\begin_inset FormulaMacro
+\newcommand{\ttt}{t^*}
+\end_inset
+
+ 
+\begin_inset Formula \begin{equation}
+    \label{eq:Hermite}
+    \begin{aligned}
+        \uu(t) & \approx (1-3{\ttt}^2 - 2 {\ttt}^3)\uu^n
+        + (3{\ttt}^2 - 2 {\ttt}^3)\uu^{n+1}                    \\
+               & + \inc t ({\ttt} - 2 {\ttt}^2 + {\ttt}^3) \R^n
+        + \inc t (- {\ttt}^2 + {\ttt}^3) \R^{n+1}
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\ttt = (t - t^n)/\inc t$
+\end_inset
+
+ and 
+\begin_inset Formula $\ttt \in [0,1]$
+\end_inset
+
+. The Hermite interpolation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:Hermite"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ has 
+\begin_inset Formula $O(\inc t^4)$
+\end_inset
+
+ truncation error. Next, a quadrature rule is applied. To utilize the endpoints and reduce memory requirement, we only insert one middle stage at 
+\begin_inset Formula $\ttt = c_2$
+\end_inset
+
+. Using polynomial interpolation based numerical integration, with nodes 
+\begin_inset Formula $\ttt = 0,c_2,1$
+\end_inset
+
+, the numerical integration of some function 
+\begin_inset Formula $r(t)$
+\end_inset
+
+ would be 
+\begin_inset Formula \begin{equation}
+    \label{eq:Quad}
+    \begin{aligned}
+        \int_{t^n}^{t^{n+1}}r(t)dt & \approx \\
+         \left(\frac{1}{2} - \frac{1}{6{c_2}}\right)r(t^n)
+         &+
+        \left(\frac{1}{6{c_2}(1-{c_2})}\right)r(t^n + c_2\inc t )
+        +
+        \left(\frac{1}{2} - \frac{1}{6(1-{c_2})}\right)r(t^{n+1})
+    \end{aligned}
+\end{equation}
+\end_inset
+
+using the relation 
+\begin_inset Formula $\int_{t^n}^{t^{n+1}}\R dt = \uu^{n+1} -\uu^{n}$
+\end_inset
+
+, there are two algebraic relations and two unknown vectors in total, which is able to form a solvable system. The quadrature rule 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:Quad"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ has truncation error 
+\begin_inset Formula $O(\inc t^3)$
+\end_inset
+
+ at least, for it is based on second degree polynomial interpolation.
+\end_layout
+
+\begin_layout Standard
+Summarizing the discussions above, the HIRK method has the form: 
+\begin_inset Flex Flex:Subequations
+status collapsed
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "eq:HM3"
+
+\end_inset
+
+ 
+\begin_inset Formula \begin{align}
+        \uu^{n+1} & = \uu^{n} +
+        \inc t
+        \left[
+            b_1\R(t^{n,1}, \uu^n) +
+            b_2\R(t^{n,2}, \uu^*) +
+            b_3\R(t^{n,3}, \uu^{n+1})
+        \right]   \label{eq:HM3-1} \\
+        \uu^{*}   & =
+        a_1\uu^{n} +
+        a_2\uu^{n+1} +
+        \inc t
+        \left[
+            d_1\R(t^{n,1}, \uu^n) +
+            d_2\R(t^{n,3}, \uu^{n+1})
+            \right] \label{eq:HM3-2}
+    \end{align}
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ where 
+\begin_inset Formula $t^{n,i}=t^n+c_i\inc t$
+\end_inset
+
+, and 
+\begin_inset Formula $c_1 = 0, c_3 = 1, c_2\in(0,1)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The only stage value besides endpoints is 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+. The internal stage 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ can be explicitly calculated with 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, which is derived directly from the cubic Hermite interpolation of 
+\begin_inset Formula $\uu$
+\end_inset
+
+ on interval 
+\begin_inset Formula $[t^n,t^{n+1}]$
+\end_inset
+
+ evaluated at 
+\begin_inset Formula $t^{n,2}$
+\end_inset
+
+, which result in the interpolation relation: 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+        a_2 & = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3 \\
+        d_1 & = {c_2} - 2 {c_2}^2 + {c_2}^3    \\
+        d_2 & = - {c_2}^2 + {c_2}^3            \\
+    \end{aligned}
+    \label{eq:interp}
+\end{equation}
+\end_inset
+
+The first equation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is a numeric integration on interval 
+\begin_inset Formula $[t^n,t^{n+1}]$
+\end_inset
+
+ with polynomial nodes 
+\begin_inset Formula $t^{n,1}=t^n,t^{n,2}=t^n+c_2\inc t,t^{n,3}=t^{n+1}$
+\end_inset
+
+, which demands: 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+        b_1 & = \frac{1}{2} - \frac{1}{6{c_2}}     \\
+        b_2 & = \frac{1}{6{c_2}(1-{c_2})}          \\
+        b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})} \\
+    \end{aligned}
+    \label{eq:integ}
+\end{equation}
+\end_inset
+
+The Hermite interpolation gives 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ local truncation error 
+\begin_inset Formula $O(\inc t^4)$
+\end_inset
+
+, and the numeric integration gives 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ local truncation error 
+\begin_inset Formula $O(\inc t^3)$
+\end_inset
+
+, therefore the classic order of accuracy of HIRK 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is 3. If 
+\begin_inset Formula $c_2=1/2$
+\end_inset
+
+, then the numeric integration 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ becomes a Gauss-Lobatto quadrature rule, which yields a local truncation error of 
+\begin_inset Formula $O(\inc t^4)$
+\end_inset
+
+, making the scheme 4th order accurate. Also, from the interpolation, no matter the choice of 
+\begin_inset Formula $c_2$
+\end_inset
+
+, HIRK has a stage order of 3, making it stiffly accurate.
+\end_layout
+
+\begin_layout Subsection
+Order of Accuracy
+\end_layout
+
+\begin_layout Standard
+To discuss the order of accuracy and stage order formally, HIRK can be considered as a standard IRK. Reformulating 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ into a standard Runge-Kutta form yields a Butcher tableau: 
+\begin_inset Float table
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Tabular 
+<lyxtabular version="3" rows="4" columns="4">
+<features rotate="0" tabularvalignment="middle" tabularwidth="0pt">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+0 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+0 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+0 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+0 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $c_2$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $d_1 + a_2b_1$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $a_2b_2$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $d_2 + a_2b_3$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+1 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_1$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_2$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_3$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_1$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_2$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Standard
+
+\begin_inset Formula $b_3$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Butcher tableau of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:HM3Butcher"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:HM3Butcher"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ with the coefficients decided with 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:interp"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:integ"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, one can find that the 4th order accurate HIRK 
+\begin_inset Formula $c_2=1/2$
+\end_inset
+
+ method is indeed the Lobatto IIIA method of order 4 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wanner1996solving"
+literal "false"
+
+\end_inset
+
+. The classic order and stage order of HIRK could also be evaluated from table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:HM3Butcher"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ via the simplifying assumptions, which is a trivial procedure given the formulae provided in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wanner1996solving"
+literal "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If the quadrature rule in HIRK is replaced with Gauss-Legendre rule, the method immediately becomes a special case of the Gauss type NIRK method of order 4 described in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2006familyNIRKOrig"
+literal "false"
+
+\end_inset
+
+. For large scale CFD application, using 2 point Gauss-Legendre rule would mean deriving the right hand side at 3 different stages iteratively. Thus, the current HIRK method only considers a 3 point Gauss-Lobatto type quadrature (with the middle abscissa moved and order of accuracy reduced), which would provide sufficient accuracy and only require 2 unknown stages.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+begin{equation}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     
+\backslash
+label{eq:HM3R}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     
+\backslash
+begin{aligned}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+uu^{n+1} & = 
+\backslash
+uu^{n} +
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+inc t
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+left(
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         b_1
+\backslash
+R(t^{n,1}, 
+\backslash
+uu^n) +
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         b_2
+\backslash
+R(t^{n,2}, 
+\backslash
+uu^*) +
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         b_3
+\backslash
+R(t^{n,3}, 
+\backslash
+uu^{n+1})
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+right) 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+uu^{*}   & =
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+uu^{n}  + 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+inc t
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+left(
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         (d_1 + a_2b_1)
+\backslash
+R(t^{n,1}, 
+\backslash
+uu^n) +
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         a_2b_2
+\backslash
+R(t^{n,2}, 
+\backslash
+uu^*) +
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         (d_2 + a_2b_3)
+\backslash
+R(t^{n,3}, 
+\backslash
+uu^{n+1})
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%         
+\backslash
+right)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     
+\backslash
+end{aligned}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+end{equation}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Linear Stability
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "ssec:linStab"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Following standard analysis based on Dahlquist's equation 
+\begin_inset Formula $\frac{dy}{dt} = \lambda y$
+\end_inset
+
+ 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wanner1996solving"
+literal "false"
+
+\end_inset
+
+, the stability function giving 
+\begin_inset Formula $y^{1}=R(h\lambda)y^0$
+\end_inset
+
+ when applying HIRK is in the form: 
+\begin_inset Formula \begin{equation}
+    \label{eq:stabilityFunc}
+    R(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
+\end{equation}
+\end_inset
+
+which becomes the (2,2)-Pad
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+é
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ approximation when 
+\begin_inset Formula $c_2=1/2$
+\end_inset
+
+ and HIRK becomes Lobatto IIIA. The limit 
+\begin_inset Formula \begin{equation}
+    \lim_{z\rightarrow\infty}R(z) = \frac{1-c_2}{c_2}
+\end{equation}
+\end_inset
+
+gives that a necessary condition for 
+\begin_inset Formula $A$
+\end_inset
+
+-stability of HIRK is 
+\begin_inset Formula $c_2 \in [1/2,1)$
+\end_inset
+
+, and shows that HIRK is unable to achieve 
+\begin_inset Formula $L$
+\end_inset
+
+-stability. Further analysis on 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:stabilityFunc"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ would confirm 
+\begin_inset Formula $c_2 \in [1/2,1)$
+\end_inset
+
+ is a sufficient condition for 
+\begin_inset Formula $A$
+\end_inset
+
+-stability.
+\end_layout
+
+\begin_layout Standard
+HIRK(
+\begin_inset Formula $1/2$
+\end_inset
+
+) or Lobatto IIIA method is symmetric, which is a preferable property when integrating reversible systems, but the symmetry could be considered harmful in CFD application. Most CFD systems of interest are physically dissipative, while for symmetric RK methods 
+\begin_inset Formula $R(z) \rightarrow 1$
+\end_inset
+
+ when 
+\begin_inset Formula $z \rightarrow \infty$
+\end_inset
+
+, which is more likely to preserve spurious modes arising from spacial discretization. Although HIRK cannot achieve 
+\begin_inset Formula $L$
+\end_inset
+
+-stability by simply adjusting 
+\begin_inset Formula $c_2$
+\end_inset
+
+, using a non-trivial value 
+\begin_inset Formula $c_2 > 1/2$
+\end_inset
+
+ would still produce 
+\begin_inset Formula $\lim_{z\rightarrow\infty}R(z)\in(0,1)$
+\end_inset
+
+, which is a useful property in simulation of dissipative systems. With 
+\begin_inset Formula $c_2 > 1/2$
+\end_inset
+
+, stiff modes could better vanish over the time steps, while 
+\begin_inset Formula $c_2 = 1/2$
+\end_inset
+
+ tends to preserve them.
+\end_layout
+
+\begin_layout Subsection
+Solving Strategy
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset FormulaMacro
+\newcommand{\Res}{\mathcal{R}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\Jres}{\mathcal{J}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\eye}{\mathbf{I}}
+\end_inset
+
+ 
+\begin_inset FormulaMacro
+\newcommand{\J}{\mathbf{J}}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+HIRK's Butcher tableau in table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:HM3Butcher"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ indicates that apart from the first stage, the other two stages seem fully coupled, but following the original formulation of HIRK 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ which originates from interpolation and integration, clearly the internal stage 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ can be explicitly expressed by 
+\begin_inset Formula $\uu^n, \uu^{n+1}$
+\end_inset
+
+ with the interpolation relation 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, and one only need to solve 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-1"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ implicitly. Therefore, the first solving strategy this paper considers is identical to the spirit of NIRK, which solves the equation: 
+\begin_inset Formula \begin{equation}
+    \label{eq:eqFull}
+    \uu^{n+1} -
+    \left(\uu^{n} + \inc t
+    \left[
+        b_1\R(t^{n,1}, \uu^n) +
+        b_2\R(t^{n,2}, \uu^*) +
+        b_3\R(t^{n,3}, \uu^{n+1})
+        \right]
+    \right)  =  0
+\end{equation}
+\end_inset
+
+For simplicity, we denote the residual of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:eqFull"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ as: 
+\begin_inset Formula \begin{equation}
+    \Res(\uu^{n+1}) \doteq \uu^{n+1} -
+    \left(\uu^{n} + \inc t
+    \left[
+        b_1\R(t^{n,1}, \uu^{n}) +
+        b_2\R(t^{n,2}, \uu^{*}) +
+        b_3\R(t^{n,3}, \uu^{n+1})
+        \right]
+    \right)
+\end{equation}
+\end_inset
+
+Considering 
+\begin_inset Formula $\uu^{n}$
+\end_inset
+
+ is known, and 
+\begin_inset Formula $\uu^{*}$
+\end_inset
+
+ is explicitly expressed, 
+\begin_inset Formula $\Res(\uu^{n+1})$
+\end_inset
+
+ is considered only a function of unknown 
+\begin_inset Formula $\uu^{n+1}$
+\end_inset
+
+. The Newton-Raphson method applied to 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:eqFull"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+'s solving would be 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+        \uu^{n+1,m+1}                  & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        \frac{\partial \Res(\uu^{n+1,m})}
+        {\uu^{n+1,m}} \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+\end_inset
+
+and adding the pseudo time continuation would be 
+\begin_inset Formula \begin{equation}
+    \label{eq:ntDtau}
+    \begin{aligned}
+        \uu^{n+1,m+1}            & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        \left(
+        \frac{\partial \Res(\uu^{n+1,m})}
+        {\uu^{n+1,m}} + \inc t \Tau^{-1}
+        \right) \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\Tau=\mathrm{diag}(\tau_1,...\tau_N)$
+\end_inset
+
+ is a diagonal matrix with local pseudo time steps as its diagonal values. The pseudo time continuation of Newton iteration could be both understood as a relaxation of original method for nonlinear stability, or as the result of solving dual time stepping method Jameson developed 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "jameson1991time"
+literal "false"
+
+\end_inset
+
+. In other words, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:ntDtau"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is the result of solving pseudo time evolution 
+\begin_inset Formula $\frac{d\uu^{n+1}}{d\tau} = -\frac{\Res}{\inc t}$
+\end_inset
+
+ with linearly implicit backward Euler method and a local time stepping. Such dual time stepping is prevalent in transient flow solution due to the nonlinearity in fluid systems. However, pseudo time term could cause trouble if we try to solve HIRK of any MIRK type system with certain approaches, which will be illustrated later.
+\end_layout
+
+\begin_layout Standard
+The expanded form of residual's Jacobian is 
+\begin_inset Formula \begin{equation}
+    \label{eq:fullJCB}
+    \begin{aligned}
+        \frac{\partial \Res(\uu^{n+1})}
+        {\uu^{n+1}}
+                     & = \eye - \inc t b_3 \J^{n+1} -
+        \inc t b_2\J^*(a_2\eye +\inc t d_2 \J^{n+1})                                \\
+                     & = \frac{d_2 + a_2b_3}{d_2}\eye
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)                                                                     \\
+        \text{with:} &                                                              \\
+                     & \J^* = \frac{\partial \R(t^{n,2},\uu^*)}{\partial \uu^*},\ \
+        \J^{n+1} = \frac{\partial \R(t^{n,3},\uu^{n+1})}{\partial \uu^{n+1}}
+    \end{aligned}
+\end{equation}
+\end_inset
+
+which is a quadratic polynomial of right-hand-sides' Jacobian. If the Jacobian matrices could be explicitly formed and manipulated, solving 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:ntDtau"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ would be straightforward. But a lot of high order methods rely on matrix-free Jacobian evaluation, thus solving the linear system with its matrix in the form of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:fullJCB"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ would be troublesome or impossible. Even if one would like to use a matrix-less linear solver like Krylov space solvers, powerful matrix-free preconditioners like ILU(0) or LUSGS would be unavailable.
+\end_layout
+
+\begin_layout Standard
+The solution to the complexity of Jacobian by Kulikov and Shindin is using an approximate factorization 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2006familyNIRKOrig,kulikov2009adaptive"
+literal "false"
+
+\end_inset
+
+. For the forth order Gauss type NIRK in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "kulikov2006familyNIRKOrig"
+literal "false"
+
+\end_inset
+
+, Kulikov and Shindin used 
+\begin_inset Formula $(\eye-\inc t /4 \J)^2$
+\end_inset
+
+ as an approximation. This paper considers the form 
+\begin_inset Formula \begin{equation}
+    \label{eq:factJCB}
+    \begin{aligned}
+        \frac{\partial \Res(\uu^{n+1})}
+        {\uu^{n+1}}
+         & \approx
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)    \\
+    \end{aligned}
+\end{equation}
+\end_inset
+
+which is directly taken from the last term in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:fullJCB"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, and the omitted term is identity matrix with coefficient 
+\begin_inset Formula $\frac{d_2 + a_2b_3}{d_2}>0$
+\end_inset
+
+ for 
+\begin_inset Formula $c_2\in(0,1)$
+\end_inset
+
+. Note that 
+\begin_inset Formula $d_2<0$
+\end_inset
+
+ for any possible 
+\begin_inset Formula $c_2$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Using a factorized form of approximate Jacobian like 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:factJCB"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ enables the use of two successive matrix-free solvers to obtain the increment for Newton iteration.
+\end_layout
+
+\begin_layout Standard
+For practical CFD implementation, pseudo time term is now considered. In order to preserve the factorized form, this paper finds using 
+\begin_inset Formula \begin{equation}
+    \label{eq:ntDtau_Fact}
+    \begin{aligned}
+        \uu^{n+1,m+1}    & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
+        -\frac{a_2b_3}{d_2}\left(
+        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
+        + \inc t \Tau^{-1}
+        \right)\left(
+        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
+        \right)
+        \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
+    \end{aligned}
+\end{equation}
+\end_inset
+
+as the pseudo time continued Newton iteration satisfactory. In the linear sense, using this this approximate Jacobian and pseudo time stepping does not sabotage the convergence of Newton iteration, which can be shown by applying the iteration 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:ntDtau_Fact"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to solving scalar ODE 
+\begin_inset Formula $\frac{dy}{dt} = \lambda y$
+\end_inset
+
+. For multi-dimensional linear ODEs, using a Jordan decomposition would make the proof reduce to scalar equation. ####
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% Due to the explicit nature of the internal 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% stage $
+\backslash
+uu^*$, when solving nonlinear systems,
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% the un-converged state of $
+\backslash
+uu^{n+1}$ at 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% the beginning of iteration could put $
+\backslash
+uu^*$
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% far from the real solution, 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% causing the right-hand-side to behave bad
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% and possibly make the iteration breakdown. 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% Therefore, this paper presents another approach of solving 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% HIRK step which is vital for nonlinear ODEs.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% In order to account for nonlinearity, 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% we forsake the explicit nature in the 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% determination of $
+\backslash
+uu^*$ as described in 
+\backslash
+eqref{eq:HM3-2}, 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% which is an Hermite interpolation linear dependent 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% on $
+\backslash
+uu^{n},
+\backslash
+uu^{n+1},
+\backslash
+R^n, 
+\backslash
+R^{n+1}$.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This paper also provides another kind of solving strategy, which forsakes the explicitness in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:HM3-2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, thus making 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ the dof to be solved, which is the case for a general IRK scheme. The equation to solve would be: 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+                                  & \left\{
+        \begin{array}[2]{ll}
+            \Res(\uu^{n+1},\uu^{*})   & = 0 \\
+            \Res^*(\uu^{n+1},\uu^{*}) & = 0 \\
+        \end{array}
+        \right.                                               \\
+    \end{aligned}
+\end{equation}
+\end_inset
+
+with 
+\begin_inset Formula \begin{equation}
+    \begin{aligned}
+        \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
+        \uu^{n} +
+        \inc t
+        \left[
+            b_1\R(t^{n,1}, \uu^n) +
+            b_2\R(t^{n,2}, \uu^*) +
+            b_3\R(t^{n,3}, \uu^{n+1})
+            \right]
+        \right)                                               \\
+        \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
+        a_1\uu^{n} +
+        a_2\uu^{n+1} +
+        \inc t
+        \left[
+            d_1\R(t^{n,1}, \uu^n) +
+            d_2\R(t^{n,3}, \uu^{n+1})
+            \right]
+        \right)
+    \end{aligned}
+\end{equation}
+\end_inset
+
+Making 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ unknown has two major drawbacks. The first drawback is that additional memory would be required for 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+'s storage. Considering HIRK saves much space compared to DIRK methods, and HIRK also requires some more space for intermediate results even using explicit 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ evaluation, the first drawback would not be significant. The second drawback is the increase in the dimension of algebraic system. Normally, the enlarged system can be solved using appropriate blocking strategy, for example in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "pazner2017stage"
+literal "false"
+
+\end_inset
+
+. However, the current scheme takes a different form of iteration which takes two sub-steps: 
+\begin_inset Formula \begin{equation}
+    \label{eq:intersolve}
+    \begin{aligned}
+        \uu^{*,m+1}   & = \uu^{*,m} - \left[
+            \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
+            {\partial \uu^{*,m}}
+            + \inc t \Tau^{-1}
+            \right]
+        \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
+        \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
+            \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
+            {\partial \uu^{n+1,m}}
+            + \inc t \Tau^{-1}
+            \right]
+        \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where the 
+\begin_inset Formula $\mathbf{A}\backslash \mathbf{b}$
+\end_inset
+
+ notation means to solve the linear problem 
+\begin_inset Formula $\mathbf{A}\mathbf{x}=\mathbf{b}$
+\end_inset
+
+ once. The residual 
+\begin_inset Formula $\Res^{*'}$
+\end_inset
+
+ is defined with: 
+\begin_inset Formula \begin{equation}
+    \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
+\end{equation}
+\end_inset
+
+which serves as the residual preconditioned with transformation 
+\begin_inset Formula \begin{equation*}
+    \begin{bmatrix}
+        \Res^{} \\
+        \Res^{*'}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        \eye & 0 \\ \beta\eye & \eye
+    \end{bmatrix}
+    \begin{bmatrix}
+        \Res^{} \\
+        \Res^{*}
+    \end{bmatrix}
+\end{equation*}
+\end_inset
+
+with 
+\begin_inset Formula $\beta\in\mathbb{R}$
+\end_inset
+
+. In 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "jameson2017evaluation"
+literal "false"
+
+\end_inset
+
+ Jameson used the inverse of Butcher coefficients for preconditioning, which makes off-diagonal blocks of the Jacobian scalar. That preconditioning could be adopted in the current method, but is not recommended for possible instabilities in the presence of negative pressure fixing in numeric tests. ####
+\end_layout
+
+\begin_layout Standard
+The solving procedure 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ could be regarded as successively updating 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+ with 
+\begin_inset Formula $\Res^{*'}$
+\end_inset
+
+ and 
+\begin_inset Formula $\uu$
+\end_inset
+
+ with 
+\begin_inset Formula $\Res^{}$
+\end_inset
+
+, by using the latest values of the other DOF. Within a linear context, this would be a blocks Gauss-Seidel iteration over the 
+\begin_inset Formula $2\times2$
+\end_inset
+
+ blocks of system with each block being 
+\begin_inset Formula $N\times N$
+\end_inset
+
+. In other words,to solve: 
+\begin_inset Formula \begin{equation*}
+    \begin{bmatrix}
+        \Res^{}(\uu^{n+1},\uu^{*}) \\
+        \Res^{*'}(\uu^{n+1},\uu^{*})
+    \end{bmatrix} = 0
+\end{equation*}
+\end_inset
+
+the canonical quasi Newton iteration would need to solve 
+\begin_inset Formula \begin{equation}
+    \label{eq:fullCoupled}
+    \begin{bmatrix}
+        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}} + \inc t\Tau^{-1} &
+        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}}                       \\
+        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}}                 &
+        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}} + \inc t\Tau^{-1}   \\
+    \end{bmatrix}
+    \begin{bmatrix}
+        \inc\uu^{n+1,m} \\
+        \inc\uu^{*,m}
+    \end{bmatrix}
+    =
+    -\begin{bmatrix}
+        \Res^{}(\uu^{n+1,m},\uu^{*,m}) \\
+        \Res^{*'}(\uu^{n+1,m},\uu^{*,m})
+    \end{bmatrix}
+\end{equation}
+\end_inset
+
+to update both stage values concurrently. The current method 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ first solve the second block row of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:fullCoupled"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ for the increment of 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+, then solve the first block row for the increment of 
+\begin_inset Formula $\uu^{n+1}$
+\end_inset
+
+ using updated 
+\begin_inset Formula $\uu^*$
+\end_inset
+
+. The current solving strategy will be referred to as successive solving in the following parts.
+\end_layout
+
+\begin_layout Standard
+The omitting of off-diagonal relations in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:fullCoupled"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, or the block nonlinear Gauss-Seidel handling on the top layer of algorithm brings about extra error in iteration, causing slow-down of iteration and possible divergence. To analyze such behavior, the current research investigates the impact of successive solving 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ brought to solution of HIRK applied to linear problems using precise linear solvers. With a traditional quasi Newton iteration, if pseudo time steps approaches infinity, the iteration would converge in the first step in such situation. The introduction of successive solving 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ renders this one-step-convergence impossible, thus the convergence with successive solving will represent all the deceleration effect caused by it. The linear situation discussed could also be a linearization of a non-linear ODE when the stage values converge near the solution, and the instant convergence of Newton iteration would be first order accurate. In the linear or linearized scene, the residual takes the form: 
+\begin_inset Formula \begin{equation}
+    \label{eq:linearized}
+    \begin{aligned}
+        \Res^{}(\uu^{n+1},\uu^{*})   & =
+        \Res^{}_0 - \inc t b_2\J^*\uu^{*} + (\eye - \inc t b_3\J)\uu^{n+1} \\
+        \Res^{*'}(\uu^{n+1},\uu^{*}) & =
+        \Res^{*'}_0 + (\eye - \beta\inc t b_2\J^*)\uu^{*}
+        + ((\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J)\uu^{n+1}
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\J^*, \J$
+\end_inset
+
+ are Jacobian of 
+\begin_inset Formula $\R$
+\end_inset
+
+ at the solution of 
+\begin_inset Formula $\uu^{*}, \uu^{n+1}$
+\end_inset
+
+. Applying 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ to this linear form and assuming a infinite pseudo time step, following textbook analysis conducted on Gauss-Seidel iteration, the successive solving becomes a linear fixed point iteration, with fixed point mapping's matrix being 
+\begin_inset Formula \begin{equation}
+    \mathbf{B}_{SS}=\begin{bmatrix}
+        \eye - \beta\inc t b_2\J^* & 0                   \\
+        - \inc t b_2\J^*           & \eye - \inc t b_3\J \\
+    \end{bmatrix}^{-1}
+    \begin{bmatrix}
+        0 & (\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J \\
+        0 & 0                                            \\
+    \end{bmatrix}
+\end{equation}
+\end_inset
+
+Thus, convergence of the fixed point iteration equals to the condition 
+\begin_inset Formula \begin{equation}
+    \label{eq:rhoGS}
+    \begin{aligned}
+         & \varUpsilon(\mathbf{B}_{SS}) \\
+         & =\varUpsilon\left(
+        -[\eye - \inc t b_3\J]^{-1}
+        [- \inc t b_2\J^*]
+        [\eye - \beta\inc t b_2\J^*]^{-1}
+        [(\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J]
+        \right)                         \\
+         & < 1
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\varUpsilon$
+\end_inset
+
+ is spectral radius of matrix. For arbitrary 
+\begin_inset Formula $\J,\J^*$
+\end_inset
+
+, further analysis is difficult, so we limit the situation to where 
+\begin_inset Formula $\J = \J^*$
+\end_inset
+
+ is an acceptable approximation, or the ODE is linear itself. Using the Jordan form, and assuming all the inverse are existent and precisely solved, 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:rhoGS"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ would become 
+\begin_inset Formula \begin{equation}
+    \label{eq:rhoGS1}
+    \begin{aligned}
+        \varrho_i =
+        \left|
+        -[1 -  b_3z_i]^{-1}
+        [- b_2z_i]
+        [1 - \beta b_2z_i]^{-1}
+        [(\beta-a_2) - (\beta b_3 - d_2)z_i]
+        \right| & < 1,\ \ \forall z_i = \inc t \lambda_i
+    \end{aligned}
+\end{equation}
+\end_inset
+
+where 
+\begin_inset Formula $\lambda_i$
+\end_inset
+
+ is eigenvalues of 
+\begin_inset Formula $\J$
+\end_inset
+
+. By further assuming 
+\begin_inset Formula $\mathfrak{Re} z_i < 0$
+\end_inset
+
+ which is true for stable semi-discretized method used on bounded linear problems, special cases were analyzed. For 
+\begin_inset Formula $c_2=0.5, \beta=0.5$
+\end_inset
+
+, it is found 
+\begin_inset Formula $\varrho_i < 0.5$
+\end_inset
+
+. For 
+\begin_inset Formula $c_2=0.5, \beta=1$
+\end_inset
+
+, it is found 
+\begin_inset Formula $\varrho_i < 0.42$
+\end_inset
+
+. For 
+\begin_inset Formula $c_2=0.55, \beta=0.5$
+\end_inset
+
+, 
+\begin_inset Formula $\varrho_i$
+\end_inset
+
+ could exceed 1. For 
+\begin_inset Formula $c_2=0.55, \beta=1$
+\end_inset
+
+, it is found 
+\begin_inset Formula $\varrho_i < 0.36$
+\end_inset
+
+. These analyses are trivial which involve finding maximal points in the left complex plane and on the imaginary axis.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/numSearchRho.png
+	width 3in
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Numerical search result 
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:numSearchRho"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Numerical search is conducted to find 
+\begin_inset Formula \begin{equation}
+    \varrho_m(\beta) = \max_{\forall i}(\varrho_i)
+\end{equation}
+\end_inset
+
+whose result is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:numSearchRho"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:numSearchRho"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ indicates at least for 
+\begin_inset Formula $c_2\in[0.5,0.6]$
+\end_inset
+
+, 
+\begin_inset Formula $\varrho_m<1$
+\end_inset
+
+ could be satisfied easily by adjusting 
+\begin_inset Formula $\beta$
+\end_inset
+
+, therefore achieving convergence in Gauss-Seidel iteration. For optimal Gauss-Seidel convergence rate, values of 
+\begin_inset Formula $\beta$
+\end_inset
+
+ could be found by numeric searching as shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:numSearchRho"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:numSearchRho"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ also suggests 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ helps acquiring better convergence rage in successive solving.
+\end_layout
+
+\begin_layout Standard
+The current successive solving approach differs from previous ones, which only requires linear solutions of the same dimension as the ODE. This property makes HIRK's implementation very similar to traditional DIRK or BDF methods, thus taking less effort.
+\end_layout
+
+\begin_layout Section
+Numerical Tests
+\end_layout
+
+\begin_layout Standard
+During numerical tests, BDF2 and ESDIRK4 methods taken from 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "bijl2002implicitBDFvESDIRK,kennedy2003additiveARK"
+literal "false"
+
+\end_inset
+
+ are chosen to be baseline time marching methods. For HIRK method, instances of 
+\begin_inset Formula $c_2 = 0.5$
+\end_inset
+
+ and 
+\begin_inset Formula $c_2 = 0.55$
+\end_inset
+
+ are tested. For 
+\begin_inset Formula $c_2 = 0.5$
+\end_inset
+
+, the method is 4th order accurate and is essentially the Lobatto IIIA method 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "wanner1996solving"
+literal "false"
+
+\end_inset
+
+. For 
+\begin_inset Formula $c_2 = 0.55$
+\end_inset
+
+ which has 3rd order accuracy, the symmetry is broken and linear stability is improved as clarified in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "ssec:linStab"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. Both HIRK methods employ successive solving in the form of 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:intersolve"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, with 
+\begin_inset Formula $\beta$
+\end_inset
+
+ chosen as empirical values 
+\begin_inset Formula $1,4/3$
+\end_inset
+
+ respectively.
+\end_layout
+
+\begin_layout Standard
+The isentropic vortex, two dimensional vortex shedding and double mach reflection problems use 
+\begin_inset Formula $P^3$
+\end_inset
+
+ variational reconstruction finite volume method declared in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:CFV"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ as spacial discretization. Iterative solution of the implicit reconstruction is conducted before each right-hand-side evaluation, which consists of 1 block-Jacobi iteration by default. Pseudo time continued Newton iteration on mean values are solved using 5 times of block-Jacobi iteration by default, which is found both stable and efficient enough for VFV solving transient problems. It should be noted that, in other words, both the reconstruction system and the time stepping implicit system use linear solvers that runs for a fixed number of steps without monitoring convergence. Only the magnitude of the nonlinear time stepping residual is monitored to ensure convergence. This linear solving method simplifies the control flow of the program, while providing a simple yet reliable way of comparing total calculation consumption between ODE solvers, which will be explained in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "ssec:resultIV"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Isentropic Vortex
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset CommandInset label
+LatexCommand label
+name "ssec:resultIV"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The isentropic vortex problem is a classic accuracy testing problem for Euler equations. The settings can be found in 
+\begin_inset CommandInset citation
+LatexCommand citet
+after ""
+before ""
+key "hu1999weighted_WENO"
+literal "false"
+
+\end_inset
+
+. The free-stream flow is 
+\begin_inset Formula $(\rho,u,v,p)=(1,1,1,1)$
+\end_inset
+
+, and a perturbation at initial time: 
+\begin_inset Formula \begin{equation}
+    \left\{
+    \begin{array}[2]{ll}
+        (\delta u, \delta v) & = \frac{\epsilon}{2\pi}\exp(\frac{1-[(x-x_c)^2+(y-y_c)^2]}{2})(-y+y_c,x-x_c) \\
+        \delta T             & = - \frac{(\gamma-1)\epsilon^2}{8\gamma\pi^2}\exp(1-[(x-x_c)^2+(y-y_c)^2])   \\
+        \delta S             & = 0                                                                          \\
+    \end{array}
+    \right.
+\end{equation}
+\end_inset
+
+with ideal gas setting of 
+\begin_inset Formula $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$
+\end_inset
+
+. Initial vortex center is chosen 
+\begin_inset Formula $(x_c,y_c)=(5,5)$
+\end_inset
+
+, and vortex strength is 
+\begin_inset Formula $\epsilon = 5$
+\end_inset
+
+. The analytic solution to the isentropic vortex problem is a translation of initial field with speed 
+\begin_inset Formula $(1,1)$
+\end_inset
+
+. The computational domain is 
+\begin_inset Formula $[0,10]\times[0,10]$
+\end_inset
+
+, using periodic boundary conditions.
+\end_layout
+
+\begin_layout Standard
+First, the implicit ODE integrators are tested with large time steps. The mesh is 
+\begin_inset Formula $40\times40$
+\end_inset
+
+ square grid, and solution is calculated until 
+\begin_inset Formula $t=10$
+\end_inset
+
+ with 
+\begin_inset Formula $\inc t=1$
+\end_inset
+
+. The CFL number based on 
+\begin_inset Formula $\inc t, \inc x$
+\end_inset
+
+ is roughly 
+\begin_inset Formula $11$
+\end_inset
+
+, making the propagation of the vortex hard to simulate.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/IV40_10steps_HM3LBT.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IV10Step_HM3LBT"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/IV40_10steps_HM3.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IV10Step_HM3"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/IV40_10steps_ESDIRK4.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+ESDIRK4
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IV10Step_ESDIRK4"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/IV40_10steps_BDF2.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+BDF2
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IV10Step_BDF2"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Density distribution of isentropic vortex problem, with 
+\begin_inset Formula $\inc t = 1$
+\end_inset
+
+ at 
+\begin_inset Formula $t=10$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:IV10Step"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Results of large time step testing are shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:IV10Step"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. Clearly, from figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IV10Step_BDF2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, BDF2 almost completely smears the initial vortex with only 10 steps for one period. The higher order methods somehow preserves the characteristics of a vortex. HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ produces significant numerical oscillation along the propagation direction as shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IV10Step_HM3LBT"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, while the 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+ HIRK inhibits them better in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IV10Step_HM3"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. The peak value in the vortex center produced by HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ is comparable with ESDIRK4, while HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+ gives a flatter density peak.
+\end_layout
+
+\begin_layout Standard
+Next, precision and efficiency of different ODE methods are qualitatively evaluated with isentropic vortex solved on a 
+\begin_inset Formula $160\times160$
+\end_inset
+
+ grid until 
+\begin_inset Formula $t=2$
+\end_inset
+
+. The fine mesh makes spacial error negligible compared with temporal error. The density error is defined as 
+\begin_inset Formula \begin{equation}
+    \epsilon_\rho = \frac{\int_{(x,y)\in[4,9]\times[4,9]}{|\rho-\rho_a dxdy}|}{
+    |[4,9]\times[4,9]|
+    }
+\end{equation}
+\end_inset
+
+with 
+\begin_inset Formula $[4,9]\times[4,9]=25$
+\end_inset
+
+ the area of evaluating region, 
+\begin_inset Formula $\rho$
+\end_inset
+
+ the numeric result and 
+\begin_inset Formula $\rho_a$
+\end_inset
+
+ the analytic result. The evaluating region is limited to 
+\begin_inset Formula $[4,9]\times[4,9]=25$
+\end_inset
+
+ where the vortex center and most numerical error resides.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/HM3_IV160_fig_1.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Density error vs. time step size 
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IVTests_Conv"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/HM3_IV160_fig_2.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Density error vs. total CPU time consumption
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IVTests_Eff"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Convergence and efficiency test with isentropic vortex problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:IVTests"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Results of convergence and efficiency study with isentropic vortex is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:IVTests"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+. Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests_Conv"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ indicates that all the ODE methods could roughly achieve their theoretical order of accuracy. With the same time step size, figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests_Conv"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows ESDIRK4 has best accuracy, while HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ is close to ESDIRK4 when time step is refined. HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+ is less accurate than HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+, but it performs almost as well as HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ when time step is large. Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests_Eff"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ implies that when consuming the same computational resource, HIRK methods have best accuracy or efficiency. All the high order time marching methods have better efficiency than BDF2, while HIRK methods have better efficiency than ESDIRK4. The symmetric HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+ has better efficiency compared with more stable HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The convergence and efficiency study with isentropic vortex was conducted on a isolated server with 2 Intel Xeon 6326 processors with 16 cores each, with measures to ensure the stability of CPU time measurement. Further tests with vortex shedding and double mach reflection were conducted on a large cluster, which unfortunately produces more unstable CPU time due to disturbances of the communication network. Therefore, following numerical tests will use the effective iterations to represent total computational consumption. Due to the settings of the current research, each updating in the implicit solving consumes almost identical time. For BDF2, each right-hand-side evaluation, linear solving and updating is counted as 
+\begin_inset Formula $1.0$
+\end_inset
+
+ effective iteration. For ESDIRK4, as each updating of some stage value is quite similar with BDF2 apart from some extra linear summations, each updating is also counted as 
+\begin_inset Formula $1.0$
+\end_inset
+
+ effective consumption. For HIRK methods, each updating of 
+\begin_inset Formula $\uu^*,\uu^{n+1}$
+\end_inset
+
+ involves two right-hand-side evaluations and linear solver executions. Therefore, each HIRK updating is counted as 
+\begin_inset Formula $2.0$
+\end_inset
+
+ effective iterations. Although one could calibrate the coefficients using theoretical analyses or empirical data to get a more precise measurement of consumption, the current simple coefficients for effective iterations are found to be sufficient.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/HM3_IV160_fig_21.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Density error vs. effective iterations 
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IVTests2_EffIt"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/HM3_IV160_fig_4.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+CPU time vs. effective iterations
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:IVTests2_CPUVEffIt"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+The impact of using iteration counting to measure total work
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:IVTests2"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:IVTests2"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ illustrates the impact of using effective iteration as total computational work. Qualitatively, figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests2_EffIt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ is identical to figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests_Eff"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, and figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sfig:IVTests2_CPUVEffIt"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows strong linear correlation between CPU time and effective iterations with their 
+\begin_inset Formula $log_{10}$
+\end_inset
+
+ values having correlation coefficient 
+\begin_inset Formula $r=0.9943$
+\end_inset
+
+. Therefore, the cases of isentropic vortex which are conducted in a stable environment indicate that the effective iteration is a reliable measurement of computational consumption.
+\end_layout
+
+\begin_layout Subsection
+Two Dimensional Vortex Shedding
+\end_layout
+
+\begin_layout Standard
+Vortex shedding from a circular cylinder and forming a vortex street is a classic test problem for transient fluid simulation. Due to the refined mesh near solid wall, such cases usually prefer implicit time marching over explicit ones whose time steps are bounded by CFL condition. The current paper studies the 2D laminar case, where Reynolds number 
+\begin_inset Formula $Re_d=\rho_\infty u_\infty d / \mu_\infty $
+\end_inset
+
+ is around 
+\begin_inset Formula $10^3$
+\end_inset
+
+, with Mach number 
+\begin_inset Formula $Ma=0.1$
+\end_inset
+
+ which makes the flow almost incompressible.
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/CylinderA1_Re2000_Mesh.png
+	width 70text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Part of mesh used in 
+\begin_inset Formula $Re=2000$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe2000_Mesh"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/CylinderA1_Re2000_HM3LBT.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe2000_HM3LBT"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/CylinderA1_Re2000_HM3.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe2000_HM3"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Comparison of pressure distribution in 
+\begin_inset Formula $Re=2000$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe2000"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/CylinderB1_Re1200_Mesh.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Mesh
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200Demo_Mesh"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/CylinderB1_Re1200.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Vorticity distribution
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200Demo_Vort"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Mesh and a instance of z-vorticity distribution in 
+\begin_inset Formula $Re=1200$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe1200Demo"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig14.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. time step size
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_My_C"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig4.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. effective iterations
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_My_E"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Convergence and efficiency analysis with 
+\begin_inset Formula $\epsilon_{My}$
+\end_inset
+
+ in 
+\begin_inset Formula $Re=1200$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe1200_My"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig15.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. time step size
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_Mx_C"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig5.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. effective iterations
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_Mx_E"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Convergence and efficiency analysis with 
+\begin_inset Formula $\epsilon_{Mx}$
+\end_inset
+
+ in 
+\begin_inset Formula $Re=1200$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe1200_Mx"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig13.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. time step size
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_St_C"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/Cylinder_fig3.pdf
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Error vs. effective iterations
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:CylinderRe1200_St_E"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+Convergence and efficiency analysis with 
+\begin_inset Formula $\epsilon_{St}$
+\end_inset
+
+ in 
+\begin_inset Formula $Re=1200$
+\end_inset
+
+ vortex shedding problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CylinderRe1200_St"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Double Mach Reflection
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset Float figure
+placement htbp
+wide false
+sideways false
+status open
+
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+centering
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/DM480_HM3LBT.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.5$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:DM480_HM3LBT"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/DM480_HM3.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+HIRK 
+\begin_inset Formula $c_2=0.55$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:DM480_HM3"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/DM480_ESDIRK.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+ESDIRK4
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:DM480_ESDIRK4"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+begin{subfigure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+{
+\end_layout
+
+\end_inset
+
+0.5
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+textwidth
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Graphics 
+	filename pics/DM480_BDF.png
+	width 100text%
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+
+\begin_inset Argument 1
+status collapsed
+
+
+\end_inset
+
+BDF2
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "sfig:DM480_BDF2"
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+\backslash
+end{subfigure}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Density distribution in double mach reflection problem
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:DM480"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% The Appendices part is started with the command 
+\backslash
+appendix;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% appendix sections are then done as normal sections
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+appendix
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+section{}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% 
+\backslash
+label{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% If you have bibdatabase file and want bibtex to generate the
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% bibitems, please use
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%%
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "HM3DraftRefs.bib"
+options "elsarticle-num"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% else use the following coding to input the bibitems directly in the
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%% TeX file.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+begin{thebibliography}{00}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     %% 
+\backslash
+bibitem{label}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     %% Text of bibliographic item
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+%     
+\backslash
+bibitem{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+% 
+\backslash
+end{thebibliography}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
