@@ -6,6 +6,7 @@
 \usepackage{setspace}
 \usepackage{bibspacing}
 \usepackage{float}
+\usepackage{physics}
 \singlespacing
 
 %%%% YOU CAN PUT YOUR OWN DEFINITIONS HERE
@@ -15,6 +16,8 @@
 
 \newcommand{\U}{\mathbf{U}}
 \newcommand{\F}{\mathbf{F}}
+\newcommand{\SRC}{\mathbf{S}}
+\newcommand{\FF}{\mathbf{F}}
 \newcommand{\x}{\mathbf{x}}
 
 \newcommand{\OO}{\mathbf{\Omega}}
@@ -25,7 +28,7 @@
 \newcommand{\R}{\mathbf{R}}
 \newcommand{\inc}{\mathrm\Delta}
 \newcommand{\Tau}{\mathrm{T}}
-\newcommand{\Res}{\mathcal{R}}
+\renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
 \newcommand{\eye}{\mathbf{I}}
 \newcommand{\J}{\mathbf{J}}
@@ -59,12 +62,13 @@ Kobe, Japan, July 14-19, 2024
 
 \title{
 \bf 
-An Efficient Implicit Runge Kutta Method for High-order Finite Volume Method 
-Based on Temporal Interpolation 
+High-order Accurate Implicit Scheme Based on 
+Temporal Reconstruction for Solving Compressible 
+Navier-Stokes Equations
 }
 \author{
-Hanyu Zhou$^{*}$, Yuxin Ren$^{*}$ \\
-$^{*}$ Tsinghua University, Beijing, China.
+Hanyu Zhou$^{*}$, Yu-Xin Ren$^{*}$ \\
+$^{*}$ Department of Engineering Mechanics, Tsinghua University, Beijing, China.
 }
 \date{}
 
@@ -78,11 +82,11 @@ $^{*}$ Tsinghua University, Beijing, China.
 %\vskip0.5cm
 \centerline{
 }
-\vskip0.5cm
+\vskip 0.5 cm
 
 %%%% MAIN PART
 \section{Introduction}
-% High-order numerical methods for spacial discretization are typically 
+% High-order numerical methods for spatial discretization are typically 
 % combined with high-order time marching schemes. 
 % Meanwhile, for stiff problems including wall-bounded flow 
 % or reaction flow, an implicit ODE method is 
@@ -105,200 +109,336 @@ $^{*}$ Tsinghua University, Beijing, China.
 % are more prevalent due to their 
 % simplicity in solving the stage values and nice stability.
 
-The present research proposes a new type of implicit time marching
-scheme based on temporal Hermite interpolation with adjustable
-stability.
-The scheme is equivalent with a
-3rd to 4th order IRK
-with high stage order.
-A simple but efficient solving strategy
-dedicated to application of the new scheme
-in high-order finite volume
-method is developed, and several numerical
-tests are conducted which shows its
-high efficiency and accuracy.
+% The present research proposes a new type of implicit time marching
+% scheme based on temporal Hermite interpolation with adjustable
+% stability.
+% The scheme is equivalent with a
+% 3rd to 4th order IRK
+% with high stage order.
+% A simple but efficient solving strategy
+% dedicated to application of the new scheme
+% in high-order finite volume
+% method is developed, and several numerical
+% tests are conducted which shows its 
+% high efficiency and accuracy.
 
-\section{Hermite Interpolation Implicit Runge-Kutta Method}
+A new high-order accurate implicit scheme for
+solving the compressible Navier-Stokes (NS) equations is proposed.
+This scheme is a Direct Integration method based on Temporal Reconstruction,
+which is called DITR method for short.
+The DITR methods represent a general class of implicit scheme for solving
+both the ordinary and partial differential equations.
+Advantages of the DITR method are the simplicity in its construction
+and the capability to handle governing equations
+with unsteady source terms.
+In this paper, we focus on single step 3rd and 4th order accurate
+Direct Integration methods based on Temporal
+Hermite Reconstruction (DITHR).
+DITHR's accuracy and stability properties are studied,
+and an efficient iteration technique is proposed.
+Numerical tests show that the proposed schemes have 
+similar stability dealing with a large CFL number 
+compared with the 4th order ESDIRK scheme \cite{kennedy2003additiveARK}. %,kvaerno2004singly
+However, DITHR is more efficient in the sense that it spends less CPU time 
+than ESDIRK4 for achieving the same accuracy
+due to less stage require by DITHR.
 
-For clarity, suppose we aim to solve
-the semi-discretized ODE system arising from high-order
-finite volume method
+\section{Hermite DITR method}
+
+DITR schemes can be applied to any spatial discretization including
+finite volume, discontinuous Galerkin and so on.
+The present research practices DITR upon the high-order compact FV
+scheme based on variational reconstruction \cite{wang2017compact_VR}.
+When the method of line is used to solve the compressible
+NS equations,
+the following systems of first-order nonlinear ODEs
+will emerge after spatial discretization
 \begin{equation}
-  \frac{d\uu}{dt} = \R(t, \uu)
+  \label{eq:ODE}
+  \dv{\uu}{t} = \R(t, \uu)+\SRC(t, \uu)\,,
 \end{equation}
-The Hermite Interpolation Implicit Runge-Kutta Method (HIRK)
-is defined as
+where $\uu$ is a real vector consisting of cell averaged quantities of
+the entire field, and $\R(t, \uu),\SRC(t, \uu)$ are discretized flux and source terms respectively.
+Basic idea of the new implicit schemes is to perform
+a temporal polynomial reconstruction using $\uu$ and $\dv{\uu}{t}$
+at $t=t^{n+1}, t^{n}, t^{n-1}...$ Next, Eq. \eqref{eq:ODE} is integrated
+directly to obtain 
+\(
+  \uu^{n+1} - \uu^{n} = \int_{t^n}^{t^{n+1}}{\R(t,\uu(t))+\SRC(t,\uu(t))\dd{t}}
+\).
+% Given $\uu$ and $\dv{\uu}{t}$ at $t=t^{n+1}, t^{n}, t^{n-1}...$,
+% a temporal polynomial reconstruction of $\uu(t)$ could be 
+% obtained. With this temporal reconstruction, a numeric approximation of 
+% temporal integration 
+% \(
+%   \label{eq:intGeneral}
+%   \uu^{n+1} - \uu^{n} = \int_{t^n}^{t^{n+1}}{\R(t,\uu(t))\dd{t}}
+% \)
+% finally defines the implicit scheme.
+% Choosing of different reconstruction 
+% and integration schemes offers
+% DITR ability to achieve high-order 
+% with few steps or stages and versatility
+% in handling stiff source terms. 
+Different temporal reconstructions and numerical quadrature rules
+result in DITR schemes with different accuracy and stability properties.
+One advantage of this approach is that DITR can be designed 
+to have fewer stages than traditional SDIRK methods.
+Moreover, $\SRC(t,\uu(t))$ can be
+integrated differently from $\R(t,\uu(t))$ to account for possible 
+stiffness in the source terms.
+% When the NS equations without source term 
+% is solved, integration \eqref{eq:intGeneral}
+% could be approximated by simple quadrature rules
+% including Gauss-Legendre and Gauss-Lobatto rules. 
+% When a flow system with unsteady source term 
+% such as external force or chemical reaction is 
+% involved, splitting the right-hand-side (RHS) 
+% into flux term and source term as 
+% \(\R = \FF + \SRC\), the stiff part of RHS
+% $\SRC$ could be integrated  with refined time steps.
+% Therefore, DITRs could provide a source term
+% treatment method different from the commonly practiced
+% splitting method. 
+% A special case of DITR is the 
+% Adams-Moulton methods, which is DITR
+% using Lagrange interpolation and 
+% quadrature rule based on nodal values.
+% Meanwhile, second order trapezoid rule and implicit midpoint
+% methods are DITR using linear reconstruction with 
+% trapezoid quadrature rule or midpoint quadrature rule.
+
+The present paper 
+studies DITHR which is constructed with 
+Hermite interpolation and a modified Gauss-Lobatto quadrature rule.
+% , 
+% applied to NS equations with flux terms only 
+The Hermite interpolation only requires 
+$\uu$ and $\dv{\uu}{t}$ at $t=t^{n+1}, t^{n}$, 
+making DITHR a single step method.
+% The middle abscissa of Gauss-Lobatto rule
+% can be modified to trade accuracy for stability.
+% For clarity, suppose we aim to solve
+% the semi-discretized ODE system arising from high-order
+% finite volume method
+% \begin{equation}
+%   \frac{d\uu}{dt} = \R(t, \uu)
+% \end{equation}
+% The Hermite Interpolation Implicit Runge-Kutta Method
+% is defined as
+DITHR can be summarized in the form of 
 \begin{subequations}
   \label{eq:HM3}
   \begin{align}
     \uu^{n+1} & = \uu^{n} +
     \inc t
     \left[
-      b_1\R(t^{n,1}, \uu^n) +
+      b_1\R(t^n, \uu^n) +
       b_2\R(t^{n,2}, \uu^*) +
-      b_3\R(t^{n,3}, \uu^{n+1})
-    \right]   \label{eq:HM3-1} \\
+      b_3\R(t^{n+1}, \uu^{n+1})
+    \right]   \label{eq:HM3-1}\,, \\
     \uu^{*}   & =
     a_1\uu^{n} +
     a_2\uu^{n+1} +
     \inc t
     \left[
-      d_1\R(t^{n,1}, \uu^n) +
-      d_2\R(t^{n,3}, \uu^{n+1})
-      \right] \label{eq:HM3-2}
+      d_1\R(t^{n}, \uu^n) +
+      d_2\R(t^{n+1}, \uu^{n+1})
+      \right] \label{eq:HM3-2}\,,
   \end{align}
 \end{subequations}
-where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1, c_2\in(0,1)$,
-and $\uu^*$ is the stage value at $c_2$.
+where $t^{n,2}=t^n+c_2\inc t$, $c_2\in(0,1)$,
+and $\uu^*$ is the interpolated value at $c_2$.
 The first equation \eqref{eq:HM3-1} is
 a quadrature rule for $t\in[t^n,t^{n+1}]$,
 while the second equation \eqref{eq:HM3-2} is a Hermite interpolation
 evaluated at $t=t^n + c_2\inc t$.
-Due to these relations, coefficients in \eqref{eq:HM3}
-could be determined by the only free parameter $c_2$.
-The quadrature rule yields
+Coefficient $c_2$ is the only free parameter and other coefficients are 
+determined by
+% Due to these relations, coefficients in \eqref{eq:HM3}
+% could be determined by the only free parameter $c_2$.
+% The quadrature rule yields
 \(
 b_1  = \frac{1}{2} - \frac{1}{6{c_2}},\ \
 b_2  = \frac{1}{6{c_2}(1-{c_2})},\ \
 b_3  = \frac{1}{2} - \frac{1}{6(1-{c_2})}
 \),
-and the interpolation yields
+% and the interpolation yields
 \(
 a_2 = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3,\ \
 d_1  = {c_2} - 2 {c_2}^2 + {c_2}^3   ,\ \
 d_2  = - {c_2}^2 + {c_2}^3
-\).
-
-It can be proved when $c_2=1/2$, the scheme \eqref{eq:HM3}
+\). When $c_2=1/2$, the scheme Eq. \eqref{eq:HM3}
 is 4th-order accurate, and 3rd-order accurate otherwise.
-Also, linear stability analysis provides when $c_2=1/2$, the
-scheme is $A$-stable and when $c_2>1/2$, the scheme's
-stability improves for large eigenvalues.
+Linear stability analysis provides when $c_2\geq1/2$, the
+scheme is $A$-stable and when $c_2$ increases from $1/2$, 
+DITHR's stability is improved.
 
-In order to solve each implicit time stepping reliably and efficiently
-when conducting time marching on high-order CFD systems,
-a successive solving strategy is proposed and tested.
-The strategy is defined by iteratively conducted two
-successive updating:
-\begin{equation}
-  \label{eq:intersolve}
-  \begin{aligned}
-    \uu^{*,m+1}   & = \uu^{*,m} - \left[
-      \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
-      {\partial \uu^{*,m}}
-      + \inc t \Tau^{-1}
-      \right]
-    \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
-    \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
-      \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
-      {\partial \uu^{n+1,m}}
-      + \inc t \Tau^{-1}
-      \right]
-    \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
-  \end{aligned}
-\end{equation}
-where the residuals are
-\begin{equation}
-  \begin{aligned}
-    \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
-    \uu^{n} +
-    \inc t
-    \left[
-      b_1\R(t^{n,1}, \uu^n) +
-      b_2\R(t^{n,2}, \uu^*) +
-      b_3\R(t^{n,3}, \uu^{n+1})
-      \right]
-    \right)                                               \\
-    \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
-    a_1\uu^{n} +
-    a_2\uu^{n+1} +
-    \inc t
-    \left[
-      d_1\R(t^{n,1}, \uu^n) +
-      d_2\R(t^{n,3}, \uu^{n+1})
-      \right]
-    \right)
-  \end{aligned}
-\end{equation}
-and
-\(
-  \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
-\).
-The parameter $\beta$ is a preconditioning coefficient,
-and $\Tau^{-1}$ is the diagonal matrix of pseudo time step.
-The $\mathbf{A}\backslash \mathbf{b}$
-notation means to solve the linear problem $\mathbf{A}\mathbf{x}=\mathbf{b}$.
-The operations defined in \eqref{eq:intersolve}
-are very similar to those used in BDF methods, and can be easily implemented
-in a Jacobian-free manner.
+To solve this implicit scheme efficiently,
+a successive iteration strategy is proposed and tested.
+The successive iteration strategy only requires 
+matrix-free operations, making its implementation
+essentially the same as BDF and ESDIRK schemes.
+
+% The strategy is defined by iteratively conducted two
+% successive updating:
+% \begin{equation}
+%   \label{eq:intersolve}
+%   \begin{aligned}
+%     \uu^{*,m+1}   & = \uu^{*,m} - \left[
+%       \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
+%       {\partial \uu^{*,m}}
+%       + \inc t \Tau^{-1}
+%       \right]
+%     \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
+%     \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
+%       \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
+%       {\partial \uu^{n+1,m}}
+%       + \inc t \Tau^{-1}
+%       \right]
+%     \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
+%   \end{aligned}
+% \end{equation}
+% where the residuals are
+% \begin{equation}
+%   \begin{aligned}
+%     \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
+%     \uu^{n} +
+%     \inc t
+%     \left[
+%       b_1\R(t^{n,1}, \uu^n) +
+%       b_2\R(t^{n,2}, \uu^*) +
+%       b_3\R(t^{n,3}, \uu^{n+1})
+%       \right]
+%     \right)                                               \\
+%     \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
+%     a_1\uu^{n} +
+%     a_2\uu^{n+1} +
+%     \inc t
+%     \left[
+%       d_1\R(t^{n,1}, \uu^n) +
+%       d_2\R(t^{n,3}, \uu^{n+1})
+%       \right]
+%     \right)
+%   \end{aligned}
+% \end{equation}
+% and
+% \(
+% \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
+% \).
+% The parameter $\beta$ is a preconditioning coefficient,
+% and $\Tau^{-1}$ is the diagonal matrix of pseudo time step.
+% The $\mathbf{A}\backslash \mathbf{b}$
+% notation means to solve the linear problem $\mathbf{A}\mathbf{x}=\mathbf{b}$.
+% The operations defined in \eqref{eq:intersolve}
+% are very similar to those used in BDF methods, and can be easily implemented
+% in a Jacobian-free manner.
 
 \section{Numerical Tests}
 
-Tests of HIRK are conducted solving Euler equation with $p=3$ variational
-reconstruction finite volume method \cite{wang2017compact_VR}.
-Cases shown here solve the isentropic vortex problem \cite{hu1999weighted_WENO}.
-The results are compared with classic 2nd order backward difference formula (BDF2)
-and 4th order singly diagonally implicit Runge-Kutta (ESDIRK4) \cite{kennedy2003additiveARK}.
+Tests are conducted solving NS and Euler equations with 4th order variational
+reconstruction finite volume method \cite{wang2017compact_VR}. 
+Convergence tests using isotropic vortex problem 
+indicate that DITHR schemes can reach 3rd and 4th order
+of accuracy. 
+% Cases shown here solve the isotropic vortex problem \cite{hu1999weighted_WENO},
+% and a $Re$ 1200 two dimensional vortex shedding of a cylinder.
+% The results are compared with classic 2nd order backward difference formula (BDF2)
+% and 4th order singly diagonally implicit Runge-Kutta (ESDIRK4) \cite{kennedy2003additiveARK}.
 
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}{0.25\textwidth}
-    \includegraphics[width=\textwidth]{../pics/IV40_10steps_HM3LBT.png}
-    \caption[]{HIRK $c_2=0.5$}
-    \label{sfig:IV10Step_HM3LBT}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.25\textwidth}
-    \includegraphics[width=\textwidth]{../pics/IV40_10steps_HM3.png}
-    \caption[]{HIRK $c_2=0.55$}
-    \label{sfig:IV10Step_HM3}
-  \end{subfigure}\hfill %\\
-  \begin{subfigure}{0.25\textwidth}
-    \includegraphics[width=\textwidth]{../pics/IV40_10steps_ESDIRK4.png}
-    \caption[]{ESDIRK4}
-    \label{sfig:IV10Step_ESDIRK4}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.25\textwidth}
-    \includegraphics[width=\textwidth]{../pics/IV40_10steps_BDF2.png}
-    \caption[]{BDF2}
-    \label{sfig:IV10Step_BDF2}
-  \end{subfigure}
-  \caption{Density distribution of isentropic vortex problem, with $\inc t = 1$ at $t=10$}
-  \label{fig:IV10Step}
-\end{figure}
-
-Figure \ref{fig:IV10Step} illustrates the results on a $40\times40$ square mesh using
-large time step size $\inc t = 1$, which corresponds to a CFL number roughly $11$.
-The high-order time marching methods preserves some vortex characteristics, while
-the 2nd order BDF2 smears the vortex completely. HIRK with $c_2 = 0.5$ generates
-additional numeric oscillation, while ESDIRK and HIRK $c_2 = 0.55$ suppress them
-better.
-
-
-\begin{figure}[htbp]
-  \centering
+  % \begin{subfigure}{0.3\textwidth}
+  %   \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_1.pdf}
+  %   \caption[]{Error vs. time step size, isotropic vortex}
+  %   \label{sfig:IVTests_Conv}
+  % \end{subfigure}\hfill
   \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_1.png}
-    \caption[]{Density error vs. time step size }
-    \label{sfig:IVTests_Conv}
-  \end{subfigure}\hfill
-  \begin{subfigure}{0.4\textwidth}
-    \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_2.png}
-    \caption[]{Density error vs. CPU time}
+    \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_2.pdf}
+    \caption[]{Error vs. CPU time, isotropic vortex}
     \label{sfig:IVTests_Eff}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.4\textwidth}
+    \includegraphics[width=\textwidth]{../pics/Cylinder_fig4.pdf}
+    \caption[]{Error vs. Consumption, vortex shedding}
+    \label{sfig:CyTests_Eff}
   \end{subfigure}
-  \caption[]{Convergence and efficiency test with isentropic vortex problem}
+  \caption[]{Efficiency test with isotropic vortex and vortex shedding problems}
   \label{fig:IVTests}
 \end{figure}
 
-Convergence and efficiency tests are conducted on a fine $160\times160$ mesh with
-negligible spacial error, and density error from analytic solution at $t=2$ is evaluated.
-Figure \ref{sfig:IVTests_Conv} indicates all the time marching methods
-roughly reach their temporal orders of accuracy. When time step sizes are
-the same, ESDIRK4 is the most accurate, while HIRK methods are
-quite close.
-Figure \ref{sfig:IVTests_Eff} offers a insight of efficiency. With
-the same CPU time consumed, HIRK methods are more accurate than
-ESDIRK4, indicating HIRK's higher efficiency.
+DITHR's performance is compared with BDF2 and ESDIRK4 \cite{kennedy2003additiveARK}.
+Efficiency of different schemes is compared by 
+recording their time marching error at different CPU time consumption,
+as presented in Figure \ref{fig:IVTests}. 
+The $Re=1200$ 
+circular cylinder external flow is used as the vortex shedding problem.
+Isotropic vortex uses density for error indication, while the 
+vortex shedding problem uses transient $y$ momentum right-hand-side.
+Figure \ref{fig:IVTests} indicates that with the same computational 
+consumption, DITHR schemes can achieve the highest accuracy, 
+and DITHR $c_2=0.5$ is better than $c_2=0.55$.
+Having 5 implicit stages to solve each step makes ESDIRK4 even less efficient than 
+the 3rd order DITHR $c_2=0.55$.
+
+% Convergence and efficiency tests are conducted with the isentropic vortex 
+% problem solved on fine $160\times160$ mesh which introduces
+% negligible spatial error, and density errors at $t=2$ is evaluated.
+% Figure \ref{sfig:IVTests_Conv} indicates all the time marching methods
+% roughly reach their theoretical temporal orders of accuracy. 
+% When time step sizes are the same, ESDIRK4 is the most accurate, while DITHR methods are only slightly less accurate.
+% Figure \ref{sfig:IVTests_Eff} offers a insight of efficiency. With
+% the same CPU time consumed, DITHR methods are more accurate than
+% ESDIRK4, indicating DITHR's higher efficiency.
+% Meanwhile, similar efficiency analysis is also conducted on $Re$ 1200 two dimensional cylinder vortex shedding 
+% problem 
+% initialized with a fully developed solution,
+% using $y$-direction momentum RHS as the error indicator.
+% % Vortex shedding problems use a fully developed numeric solution as initial condition,
+% % whose results are compared with a reference solution calculated using ESDIRK4 with very 
+% % small time step $\inc t = 1.25\times10^{-3}$. 
+% % Solution of $t\in[0,10]$ is calculated to evaluate 
+% % error induced by temporal discretization.
+% Efficiency results of the vortex shedding problem are shown in figure \ref{sfig:CyTests_Eff},
+% indicating larger difference in efficiency between schemes while the qualitative 
+% results are identical with   the isentropic vortex problem. 
+% % In figure \ref{sfig:CyTests_Eff}, DITHR schemes have best efficiency, 
+% % while DITHR $c_2=0.5$ is more efficient than DITHR $c_2=0.55$ and ESDIRK4.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/CylinderB1_Re1200_TH9_BDF.png}
+    \caption[]{BDF2}
+    \label{sfig:Cytests_BDF}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/CylinderB1_Re1200_TH9_ESDIRK.png}
+    \caption[]{ESDIRK4}
+    \label{sfig:Cytests_ESDIRK}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/CylinderB1_Re1200_TH9_HM3.png}
+    \caption[]{DITHR $c_2=0.55$}
+    \label{sfig:Cytests_HM3}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.25\textwidth}
+    \includegraphics[width=\textwidth]{../pics/CylinderB1_Re1200_TH9_REF_TH1.png}
+    \caption[]{Reference Solution}
+    \label{sfig:Cytests_ref}
+  \end{subfigure}
+  \caption[]{Vorticity distribution of different schemes at $t=10$}
+  \label{fig:Cytests}
+\end{figure}
+
+Figure \ref{fig:Cytests} visualizes the vortex shedding problem's $z$-vorticity computed with different schemes using $\inc t = 0.1$ where $CFL$ is 
+approximately $1000$. 
+The reference 
+result is computed using ESDIRK4 with very small time step $\inc t = 1.25\times10^{-3}$.
+Results of high-order schemes in Figure \ref{sfig:Cytests_ESDIRK}, \ref{sfig:Cytests_HM3}
+are almost identical to the reference solution in Figure \ref{sfig:Cytests_ref}, 
+while 2nd order BDF2 generates a vortex street with observably smaller vorticity peak and 
+different vortex positions in Figure \ref{sfig:Cytests_BDF}.
 
 
 

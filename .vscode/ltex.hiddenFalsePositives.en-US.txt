@@ -1,0 +1,5 @@
+{"rule":"EN_COMPOUNDS","sentence":"^\\QThe reference result is computed using ESDIRK4 with very small time step \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QWhen \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q, the scheme Eq.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QNext, Eq.\\E$"}
+{"rule":"WHITESPACE_RULE","sentence":"^\\Qmsbm10 at 12 pt  cmr9\\E$"}
+{"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qmsbm10 at 12 pt  cmr9\\E$"}
