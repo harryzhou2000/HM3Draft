@@ -143,7 +143,7 @@ However, DITHR is more efficient in the sense that it spends less CPU time
 than ESDIRK4 for achieving the same accuracy
 due to less stage require by DITHR.
 
-\section{Hermite DITR method}
+\section{DITHR method}
 
 DITR schemes can be applied to any spatial discretization including
 finite volume, discontinuous Galerkin and so on.
@@ -338,10 +338,10 @@ essentially the same as BDF and ESDIRK schemes.
 
 Tests are conducted solving NS and Euler equations with 4th order variational
 reconstruction finite volume method \cite{wang2017compact_VR}. 
-Convergence tests using isotropic vortex problem 
+Convergence tests using isentropic vortex problem 
 indicate that DITHR schemes can reach 3rd and 4th order
 of accuracy. 
-% Cases shown here solve the isotropic vortex problem \cite{hu1999weighted_WENO},
+% Cases shown here solve the isentropic vortex problem \cite{hu1999weighted_WENO},
 % and a $Re$ 1200 two dimensional vortex shedding of a cylinder.
 % The results are compared with classic 2nd order backward difference formula (BDF2)
 % and 4th order singly diagonally implicit Runge-Kutta (ESDIRK4) \cite{kennedy2003additiveARK}.
@@ -350,12 +350,12 @@ of accuracy.
   \centering
   % \begin{subfigure}{0.3\textwidth}
   %   \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_1.pdf}
-  %   \caption[]{Error vs. time step size, isotropic vortex}
+  %   \caption[]{Error vs. time step size, isentropic vortex}
   %   \label{sfig:IVTests_Conv}
   % \end{subfigure}\hfill
   \begin{subfigure}{0.4\textwidth}
     \includegraphics[width=\textwidth]{../pics/HM3_IV160_fig_2.pdf}
-    \caption[]{Error vs. CPU time, isotropic vortex}
+    \caption[]{Error vs. CPU time, isentropic vortex}
     \label{sfig:IVTests_Eff}
   \end{subfigure}\hfill
   \begin{subfigure}{0.4\textwidth}
@@ -363,7 +363,7 @@ of accuracy.
     \caption[]{Error vs. Consumption, vortex shedding}
     \label{sfig:CyTests_Eff}
   \end{subfigure}
-  \caption[]{Efficiency test with isotropic vortex and vortex shedding problems}
+  \caption[]{Efficiency test with isentropic vortex and vortex shedding problems}
   \label{fig:IVTests}
 \end{figure}
 
@@ -373,7 +373,7 @@ recording their time marching error at different CPU time consumption,
 as presented in Figure \ref{fig:IVTests}. 
 The $Re=1200$ 
 circular cylinder external flow is used as the vortex shedding problem.
-Isotropic vortex uses density for error indication, while the 
+Isentropic vortex uses density for error indication, while the 
 vortex shedding problem uses transient $y$ momentum right-hand-side.
 Figure \ref{fig:IVTests} indicates that with the same computational 
 consumption, DITHR schemes can achieve the highest accuracy, 

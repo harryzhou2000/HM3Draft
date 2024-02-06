@@ -8,3 +8,5 @@ FV
 ODEs
 Hanyu
 Yu-Xin
+isentropic
+Isentropic
