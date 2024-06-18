@@ -340,7 +340,7 @@ The new implicit methods are further applied to
 high-order compact finite volume method to
 test their capabilities in flow problems. Numerical results
 illustrate that the new methods are high-order accurate
-and competitive with 4th order ESDIRK methods in efficiency.
+and competitive with the 4th order ESDIRK method in efficiency.
 
 
 
@@ -357,7 +357,7 @@ Paper's structure:...%TODO
 \newcommand{\x}{\mathbf{x}}
 
 The new time-marching method developed in
-the current paper, HIRK, is aimed to support
+the current paper, is aimed to support
 high-order finite volume method.
 Therefore,
 this section will provide a description of
@@ -443,7 +443,7 @@ The equations discussed above are in 3D form, and
 assuming constant distribution of values over $x_3$
 yields the 2D version of NS and Euler equations.
 
-\subsection{Finite Volume Spacial Discretization}
+\subsection{High-order Finite Volume Spacial Discretization}
 \label{ssec:FV}
 
 \newcommand{\OO}{\mathbf{\Omega}}
@@ -454,6 +454,11 @@ yields the 2D version of NS and Euler equations.
 \newcommand{\R}{\mathbf{R}}
 \newcommand{\inc}{\mathrm\Delta}
 \newcommand{\Tau}{\mathrm{T}}
+\renewcommand{\real}{\mathrm{Re}}
+\newcommand{\imag}{\mathrm{Im}}
+
+\newcommand{\CFLt}{\text{CFL}_t}
+\newcommand{\CFLtau}{\text{CFL}_\tau}
 
 This subsection provides a general framework of
 high-order
@@ -565,14 +570,17 @@ could depend on $t$ generally speaking.
 
 \subsection{General Construction of DITR Methods}
 
-Considering the first order ODE arising
+Considering the first order ODE equation \eqref{eq:FVODE} arising
 from high-order finite volume method
 with
 $t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
 \begin{equation*}
     \frac{\dd \uu}{\dd t} = \R(t, \uu)
 \end{equation*}
-which is equation \eqref{eq:FVODE}.
+which can be
+considered a more general first order ODE with $\uu$ being
+a general vector. For example, in finite difference,
+$\uu$ represents the vector of grid point values.
 A direct integration of equation \eqref{eq:FVODE}
 leads to a time-marching relation
 \begin{equation}
@@ -758,13 +766,8 @@ Therefore, for smooth problems the
 order of accuracy of a DITR
 method is theoretically $\min(m,n) + 1$.
 
-
-
-
-
-
 The following sections will illustrate some
-practical DITR methods based on equation \eqref{eq:Quad3} and \eqref{eq:TR}.
+practical DITR methods based on equations \eqref{eq:Quad3} and \eqref{eq:TR}.
 
 
 \subsection{Variants of DITR Methods}
@@ -849,22 +852,22 @@ applied to DITR U2R2 is in the form:
     R_{U2R2}(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
 \end{equation}
 which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and
-DITR U2R2 becomes Lobatto IIIA. 
-Analysis on equation \eqref{eq:stabilityFuncU2R2} 
-would show that $c_2\in[1/2,1)$ is a sufficient and necessary 
-condition of DITR U2R2 being $A$-stable given $c_2\in(0,1)$. 
+DITR U2R2 becomes Lobatto IIIA.
+Analysis on equation \eqref{eq:stabilityFuncU2R2}
+would show that $c_2\in[1/2,1)$ is a sufficient and necessary
+condition of DITR U2R2 being $A$-stable given $c_2\in(0,1)$.
 The limit at infinity
 \begin{equation}
     \lim_{z\rightarrow\infty}R_{U2R2}(z) = \frac{1-c_2}{c_2}
 \end{equation}
-confirm that DITR U2R2 is unable to achieve $L$-stability 
+confirm that DITR U2R2 is unable to achieve $L$-stability
 by adjusting $c_2$.
 
 
 DITR U2R2 ($c_2=1/2$) or Lobatto IIIA method is symmetric,
 which is a preferable property when integrating
-reversible systems including orbital motion and particle 
-systems. 
+reversible systems including orbital motion and particle
+systems.
 However,
 the symmetry in this ODE method could be considered harmful in CFD application.
 Most CFD systems of interest are physically dissipative,
@@ -872,7 +875,7 @@ while for a symmetric method
 $R(z) \rightarrow 1$ when $z \rightarrow \infty$,
 which means the method is more likely to preserve
 spurious modes arising from spacial discretization.
-Although DITR U2R2 cannot achieve $L$-stability, 
+Although DITR U2R2 cannot achieve $L$-stability,
 using a value of $c_2 > 1/2$ would still
 produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
 would be a useful property in simulation of dissipative systems.
@@ -905,9 +908,9 @@ of $\uu(t^{n+c_2})$
 and the interpolation bases at $c_2$ node being:
 \begin{equation}
     \begin{aligned}
-        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2)\\
-        a_{2,U2R1} & = 2c_2 - {c_2}^2 \\
-        d_{2,U2R1} & = {c_2}^2 - {c_2}                 \\
+        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2) \\
+        a_{2,U2R1} & = 2c_2 - {c_2}^2       \\
+        d_{2,U2R1} & = {c_2}^2 - {c_2}      \\
     \end{aligned}
     \label{eq:interpU2R1}
 \end{equation}
@@ -1027,15 +1030,18 @@ The U2R2, U2R1 and U3R1 variants of the
 DITR method can be written is a unified form.
 The first equation is the direct integration:
 \begin{equation}
-    \uu^{n+1} = \uu^{n} + \inc t\left(
-    b_1 \R(t^n, \uu^n) +
-    b_1 \R(t^{n+c_2}, \uu^{n+c_2}) +
-    b_1 \R(t^{n+1}, \uu^{n+1})
+    \uu^{n+1} = \uu^{n} + \inc t^n\left(
+    b_1 \R^n +
+    b_2 \R^{n+c_2} +
+    b_3 \R^{n+1}
     \right)
     \label{eq:DISum}
 \end{equation}
 with weights decided by \eqref{eq:integ0},
-or Table \ref{tab:integ0Tab}
+and also listed Table \ref{tab:integ0Tab}.
+For simplicity, in numerical expressions,
+notations such as $\R^{n+c_2}=\R(t^{n+c_2}, \uu^{n+c_2})$
+are used from now on.
 \begin{table}[htbp]
     \centering
     \begin{tabular}{|c|c|c|}
@@ -1055,7 +1061,7 @@ The second equation is the temporal reconstruction:
 \begin{equation}
     \label{eq:TRSum}
     \uu^{n+c_2}  =
-    a^n_0\uu^{n} +
+    a^n_0\uu^{n - 1} +
     a^n_1\uu^{n} +
     a^n_2\uu^{n + 1}
     +
@@ -1383,12 +1389,426 @@ $\Theta = \inc t^{n-1} / \inc t^{n}$.
 % steps, while $c_2 = 1/2$ tends to preserve them.
 
 
-\subsection{Solving Strategy}
-
+\subsection{Solving Approaches}
 \renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
 \newcommand{\eye}{\mathbf{I}}
 \newcommand{\J}{\mathbf{J}}
+\newcommand{\FF}{\mathcal{F}}
+
+The DITR methods discussed in the current paper
+consist of two implicit equations \eqref{eq:DISum} and
+\eqref{eq:TRSum}, which are results of direct integration
+and temporal reconstruction respectively.
+There are two unknown vectors $\uu^{n+1},\uu^{n+c_2}$ in the equations.
+In order to numerically conduct time marching with DITR, the equations
+need to be iteratively solved.
+The current section will discuss
+how to solve the equations arising from DITR methods
+when applied to spacial discretized flow problems, and
+describe a recommended solving approach in the end.
+
+\subsubsection{Dual Time Stepping}
+\label{sssec:dualTime}
+
+Dual time stepping \cite{jameson1991time,jameson2017evaluation}
+is a standard procedure of solving nonlinear
+implicit time stepping equations
+in flow problems.
+The nonlinear equations are written in the form of
+\begin{equation}
+    \FF^*(\uu^*) = 0
+    \label{eq:abstractImplicit}
+\end{equation}
+where $\uu^*$ represent one of the unknowns
+in DIRK, BDF or DITR methods.
+For example, for trapezoid rule (Crank-Nicolson method),
+equation \eqref{eq:abstractImplicit} reads
+\begin{equation}
+    \label{eq:trapF}
+    \FF(\uu^{n+1}) =
+    -\frac{\uu^{n+1}-\uu^{n}}{\inc t^n} + \frac{\R^{n} + \R^{n+1}}{2}
+    =0
+\end{equation}
+Generally, $\FF^*$ should be arranged so that
+$\R(\uu^*)$ in $\FF^*$ has coefficient being $O(1)$ and positive.
+With the idea of dual time stepping, namely
+\begin{equation}
+    \frac{\dd\uu^{*}}{\dd \tau} = \FF^*(\uu^{*,m+1})
+    \label{eq:exactDualTime}
+\end{equation}
+combined with a backward Euler method on the
+pseudo time $\tau$, equation \eqref{eq:abstractImplicit}
+is solved with
+\begin{equation}
+    \frac{\uu^{*,m+1} - \uu^{*,m}}{\inc \tau} = \FF^*(\uu^{*,m+1})
+\end{equation}
+where $m, m+1$ are pseudo time steps.
+Clearly $\tau$ has a dimension of time.
+Further linearizing would produce
+\begin{equation}
+    \left(\frac{\eye}{\inc\tau} -
+    \partialderivative{\FF^*}{\uu^*}  \right)
+    \inc\uu^{*,m} = \FF^*(\uu^{*,m})
+    \label{eq:abstractNewton}
+\end{equation}
+where $\inc\uu^{*,m} = \uu^{*,m+1} - \uu^{*,m}$ is the increment
+of the iteration.
+The Jacobian of residual $\partialderivative{\FF^*}{\uu^*}$
+is a non-trivial matrix, thus each update of $\uu^*$ requires
+the solution of a sparse linear problem.
+When $\inc\tau\rightarrow0$, Equation \eqref{eq:abstractNewton}
+tends to reflect the exact evolution of dual time stepping
+equation \eqref{eq:exactDualTime}.
+Equation \eqref{eq:abstractNewton} becomes the
+standard Newton-Raphson method when $\inc\tau\rightarrow\infty$.
+
+
+For DIRK type methods and linear multistep methods, at
+each step or stage, only one $\uu^{*}$ is unknown,
+thus equation \eqref{eq:abstractNewton} can be applied directly.
+However, in fully implicit RK methods and the current DITR methods,
+more than one unknown $\uu^{*}$ are present at each stage.
+For example, in DITR methods, both $\uu^{n+1},\uu^{n+c_2}$
+are present in both equations \eqref{eq:DISum} and \eqref{eq:TRSum}.
+Note that in equations \eqref{eq:DISum} and \eqref{eq:TRSum},
+$\R^{n+1},\R^{n+c_2}$ are also dependent on $\uu^{n+1},\uu^{n+c_2}$.
+Assuming $\R$ to be nonlinear, linear combinations of
+equations \eqref{eq:DISum} and \eqref{eq:TRSum} are
+impossible to completely eliminate
+the dependence on one of $\uu^{n+1},\uu^{n+c_2}$, and
+fully implicit RK methods share the same issue.
+
+One of the most obvious solutions to the multiple unknowns
+in DITR and fully implicit RK methods is to apply
+equation \eqref{eq:abstractNewton} to an enlarged
+system.
+The enlarged system concatenates different $\uu$
+stages as one vector and uses the concatenated vector as
+$\uu^*$ in \eqref{eq:abstractNewton}.
+The residual function $\FF^*$ is therefore a concatenated vector of
+different stage equations' residual vectors.
+Therefore, for methods with $k$ unknown stages, the number of
+unknowns solved concurrently is $k$ times of that in BDF or ESDIRK methods.
+For solvers that explicitly implement sparse matrix storage
+and solving methods, such enlargement is trivial at the cost of $k^2$ times
+of matrix storage. But for inherently matrix-free flow solvers,
+such enlargement could require drastic modification and addition to
+the original codebase.
+The direct enlargement of the problem is referred to as
+the fully coupled approach in the current paper.
+Due to its complexity of implementation,
+the current research does not consider using fully coupled approach
+to solve DITR time stepping.
+
+
+
+
+\subsubsection{DITR's Nested Solving Approach}
+
+A characteristic of equation \eqref{eq:TRSum} is that
+$\uu^{n+c_2}$ only exists on the left side, namely the
+right side of equation \eqref{eq:TRSum} has only $\uu^{n+1}$ as
+unknown. Consequently, by substitution, equivalent
+with the previous discussions causing equation \eqref{eq:fullLTE},
+$\uu^{n+c_2}$ can be eliminated nonlinearly:
+\begin{equation}
+    \begin{aligned}
+        \uu^{n+1} & =                       \\
+                  & \uu^{n} + \inc t\biggl[
+        b_1 \R^n                            \\
+                  & +
+            b_2 \R(t^{n+c_2},a^n_0\uu^{n - 1} +
+            a^n_1\uu^{n} +
+            a^n_2\uu^{n + 1}
+            +
+            \inc t^n
+            \left(
+            d^n_1\R^{n} +
+            d^n_2\R^{n + 1}
+        \right))                            \\
+                  & +
+            b_3 \R(t^{n+1},\uu^{n+1})
+            \biggr]
+        \label{eq:nestedDITR}
+    \end{aligned}
+\end{equation}
+which we rewrite into the general form required in section \ref{sssec:dualTime}:
+\begin{equation}
+    \begin{aligned}
+        \FF(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
+                       & +
+        b_1 \R^n                                                 \\
+                       & +
+        b_2 \R\left(t^{n+c_2},a^n_0\uu^{n - 1} +
+        a^n_1\uu^{n} +
+        a^n_2\uu^{n + 1}
+        +
+        \inc t^n
+        \left(
+        d^n_1\R^{n} +
+        d^n_2\R^{n + 1}
+        \right)\right)                                           \\
+                       & +
+        b_3 \R(t^{n+1},\uu^{n+1}) = 0
+        \label{eq:nestedDITR_F}
+    \end{aligned}
+\end{equation}
+Next, using the linearized implicit backward Euler approximation,
+namely equation \eqref{eq:abstractNewton}, DITR methods can be solved.
+
+The huge advantage of this approach is that only one equation is solved,
+with only the next step value as unknown.
+This approach requires $\R$ to be nested in another $\R$ evaluation and
+is referred to as the nested solving approach.
+
+The nested solving approach exploits the
+local explicitness of DITR's formulation.
+The nested solving approach is similar, and sometimes equivalent with
+the solving approaches used in MIRK \cite{cash1975classMIRKOrig,cash1977clasMIRK1,cash1982monoMIRK2}
+and NIRK \cite{kulikov2006familyNIRKOrig,kulikov2009adaptive,kulikov2007asymptotic}.
+However, previous research on MIRK and NIRK methods have not
+applied such solving approaches to flow problems.
+
+Numerical result indicate that with small $\inc\tau$
+and relatively large $\inc t$,
+the nested solving approach usually fails to converge even in
+linear problems.
+Since dealing with large local CFL number with local
+pseudo time stepping is an essential ability of implicit
+time stepping methods,
+this divergent result denies the practicality of the
+nested solving approach.
+
+\newcommand{\imagUnit}{\mathrm{i}}
+
+To explain the failure of the nested solving approach,
+a simple analysis with the linear convection problem
+solved on an infinitely large 1-D uniform
+grid.
+Suppose the 1-D linear convection problem reads
+\begin{equation}
+    \partialderivative{u}{t} = -a \partialderivative{u}{x}
+\end{equation}
+with positive convection speed $a$.
+Some difference scheme on uniform grid is used as spacial discretization:
+\begin{equation}
+    \derivative{u_i}{t} = -\frac{a}{\inc x} \sum_{j\in S_i}u_j\alpha_j
+    \label{eq:fd}
+\end{equation}
+where $\alpha_j$ is the coefficients for finite difference approximation
+and $S_i$ is the stencil set.
+As the problem is linear,
+a simple wave solution
+\begin{equation}
+    u = A(t)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+\end{equation}
+can be substituted in and produces
+a relation of
+\begin{equation}
+    \frac{\dd A(t)}{\dd t} = -\imagUnit a\frac{\kappa'}{\inc x}  A(t)
+\end{equation}
+where $\kappa'$ is the modified non-dimensional wave number,
+and $\imagUnit$ is the imaginary unit.
+For a finite difference scheme in equation \eqref{eq:fd},
+$\kappa'$ can be found as
+\begin{equation}
+    \kappa' = \frac{1}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
+\end{equation}
+The modified wave number $\kappa'$ is commonly used to evaluate the performance of
+spacial discretization schemes.
+A stable discretization would require $\imag(\kappa) \leq 0$ so that
+$A(t)$ does not exponentially increase in magnitude.
+
+Next, the classic linear analysis on dissipation and dispersion is
+extended to dual time stepping. The dual time
+stepping equation \eqref{eq:exactDualTime} can be
+considered an evolution of the solution.
+Thus, for the linear convection problem,
+a simple wave pseudo time solution
+\begin{equation}
+    u^*(\tau,x) = A^*(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+    \label{eq:simpleWaveTestTau}
+\end{equation}
+where $*$ represent a certain unknown stage or step value.
+Suppose
+\begin{equation}
+    \frac{\dd A^*(\tau)}{\dd \tau} = -\imagUnit a\frac{\kappa^*}{\inc x}  A^*(\tau) + C^*
+    \label{eq:kappaSDefTau}
+\end{equation}
+then $\kappa^*$ represents the modified wave number for pseudo time.
+The $C$ term in the above equation is a constant coefficient arising
+from the transient terms in the time stepping method.
+In order to find $\kappa^*$, $\FF^*$ need to be specified.
+If we assume $\FF^*$ is in the form of
+\begin{equation}
+    \FF^*(\uu^*) = \mathbf{C} - \frac{\mathcal{A}}{\inc t} \uu^* + \mathcal{B}\R(t^*, \uu^*)
+    \label{eq:canonicalFF}
+\end{equation}
+where $\mathbf{C}$ is the part of vectors irrelevant with $\uu^*$,
+$\mathcal{A},\mathcal{B}$ are positive coefficients.
+Evidently ESDIRK, BDF and trapezoid rule (as in equation \eqref{eq:trapF})
+can satisfy this form.
+Using the finite difference \eqref{eq:fd}, $\R$ is determined, and it is
+shown that for $\FF$ having equation \eqref{eq:canonicalFF}'s form,
+$\kappa^*$ is found to be
+\begin{equation}
+    \kappa^* = -\imagUnit\frac{\mathcal{A}}{\CFLt} +
+    \frac{\mathcal{B}}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
+    =-\imagUnit\frac{\mathcal{A}}{\CFLt} + \mathcal{B}\kappa'
+\end{equation}
+where $\CFLt = \frac{a\inc t }{\inc x}$ is the physical CFL number.
+When the finite difference is stable, $\imag (\kappa') \leq 0$, and consequently
+$\imag (\kappa^*) < 0$.
+
+To summarize, for stage residual function $\FF^*$ in the form of
+equation \eqref{eq:canonicalFF}, it is guaranteed $\imag (\kappa^*) < 0$,
+and the pseudo time evolution is stable in the sense of a continuous $\tau$.
+
+This result confirms the reason behind using dual time stepping,
+that it is automatically stable with certain ODE methods.
+
+Back to the current section's subject,
+DITR's nested solving approach,
+where $\FF$ is defined with equation \eqref{eq:nestedDITR_F},
+does not satisfy the form of equation \eqref{eq:canonicalFF},
+as a result of nested $\R$ terms.
+Continuing with a general finite difference scheme will
+complicate the analysis, so we choose the first-order
+upwind difference as an example:
+\begin{equation}
+    \derivative{u_i}{t} = -a \frac{u_i - u_{i-1}}{\inc x}
+    \label{eq:fdup1}
+\end{equation}
+Therefore from equations \eqref{eq:nestedDITR_F} and \eqref{eq:canonicalFF} we have:
+\begin{equation}
+    \begin{aligned}
+        \frac{\dd u_i^{n+1}}{\dd \tau} & =
+        -\frac{u_i^{n+1} - u_i^{n}}{\inc t^n}      \\
+                                       & +
+        b_1 (-a\frac{u_i^{n}-u_{i-1}^{n}}{\inc x}) \\
+                                       & +
+        b_2 \Bigl[-\frac{a}{\inc x} \nabla_i
+        \bigl[
+        a^n_0u^{n - 1}_i +
+        a^n_1u^{n}_i +
+        a^n_2u^{n + 1}_i                           \\
+                                       & +
+        \inc t^n
+        \left(
+        d^n_1(-a\frac{u_i^{n}-u_{i-1}^{n}}{\inc x}) +
+        d^n_2(-a\frac{u_i^{n+1}-u_{i-1}^{n+1}}{\inc x})
+        \right)\bigr]  \Bigr]                      \\
+                                       & +
+        b_3 (-a\frac{u_i^{n+1}-u_{i-1}^{n+1}}{\inc x})
+        \label{eq:nestedDITR_F1}
+    \end{aligned}
+\end{equation}
+where $\nabla_i(u_i) = u_i - u_{u_i-1}$ is the $i$ direction
+backward difference operator.
+Since only $n+1$ relevant part of
+the right side is of interest (which is non-constant in
+the time step solving), the equation \cite{eq:nestedDITR_F1} can be reformed into:
+\begin{equation}
+    \begin{aligned}
+        \frac{\dd u_i^{n+1}}{\dd \tau}\frac{\inc x}{a} & =
+        C_i^n                                              \\
+                                                       &
+        -  \frac{1}{\CFLt} u_i^{n+1}
+        -  b_2a_2^n u_i^{n+1}
+        +  b_2a_2^n u_{i-1}^{n+1}
+        \\
+                                                       &
+        + \CFLt b_2 d_2^n u_i^{n+1}
+        - \CFLt b_2 d_2^n u_{i-1}^{n+1}
+        \\
+                                                       &
+        - \CFLt b_2 d_2^n u_{i-1}^{n+1}
+        + \CFLt b_2 d_2^n u_{i-2}^{n+1}
+        \\
+                                                       &
+        -b_3 u_i^{n+1}
+        +b_3 u_{i-1}^{n+1}
+        \\
+                                                       &
+        =C_i^n  +  \CFLt b_2 d_2^n u_{i-2}^{n+1}
+        \\
+                                                       & +
+        (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)u_{i-1}^{n+1}
+        \\
+                                                       & +
+        (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})u_i^{n+1}
+        \label{eq:nestedDITR_F2}
+    \end{aligned}
+\end{equation}
+where $C_i^m$ are terms irrelevant with $u_i^{n+1}, u_{i-1}^{n+1}\dots$
+and remain constant throughout the pseudo time evolution.
+
+Once again simple wave solution from equation \eqref{eq:simpleWaveTestTau}
+is applied in \eqref{eq:nestedDITR_F2}, and comparing with
+\eqref{eq:kappaSDefTau}, it is found
+\begin{equation}
+    \begin{aligned}
+        \kappa^* = & \imagUnit
+        \Biggl[
+            \CFLt b_2 d_2^n \exp(-2\imagUnit\kappa)
+            +
+            (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)\exp(-\imagUnit\kappa)
+        \\ + &
+            (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})
+            \Biggr]
+    \end{aligned}
+\end{equation}
+and therefore the imaginary part:
+\begin{equation}
+    \begin{aligned}
+        \imag(\kappa^*) = &
+        \CFLt b_2 d_2^n \cos(2\kappa)
+        +
+        (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)\cos(\kappa)
+        \\ + &
+        (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})
+        \\
+        =                 &
+        \CFLt b_2 d_2^n \left[\cos(2\kappa) -2\cos(\kappa) + 1\right]
+        + (b_2a_2^n + b_3) (\cos(\kappa) - 1) - \frac{1}{\CFLt}
+    \end{aligned}
+    \label{eq:imagKsTauDITR}
+\end{equation}
+
+In equation \eqref{eq:imagKsTauDITR},
+the $\left[\cos(2\kappa) -2\cos(\kappa) + 1\right]$ term
+is negative for $\kappa \in (0, \pi/2)$, and for
+all current DITR methods, $b_2>0$ and $d_2^n < 0$.
+There always exists a $\CFLt$ that is large enough
+so that $\imag(\kappa^*(\kappa)) \leq 0, \forall \kappa$ is false.
+Which means for a large enough physical CFL number, the nested
+solving approach is unstable in the sense of continuous $\tau$
+evolution. 
+
+As an example, DITR U2R2 method with $c_2=1/2$ gives
+a specific formulation of $\imag(\kappa^*)$ that only depends on $\kappa$
+and $\CFLt$, which is illustrated in figure \ref{fig:HM3_U2R2050_KappaS}.
+Figure \ref{fig:HM3_U2R2050_KappaS} indicates for DITR U2R2 $c_2=1/2$,
+when using nested solving approach, it is unable to linearly converge
+with small $\inc \tau$ and approximately $\CFLt > 8$. 
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pics/HM3_U2R2050_KappaS.pdf}
+    \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using 
+    nested solving}
+    \label{fig:HM3_U2R2050_KappaS}
+\end{figure}
+
+According to numerical tests with linear convection problem,
+when $\inc \tau \rightarrow \infty$, the nested solving 
+approach is possibly convergent. However, for strongly nonlinear
+flow problems, a small $\inc \tau$ is almost a must, making 
+the nested solving approach inapplicable.
+
+
+\subsection{discard}
 
 HIRK's Butcher tableau in table \ref{tab:HM3Butcher}
 indicates that apart from the first stage,
