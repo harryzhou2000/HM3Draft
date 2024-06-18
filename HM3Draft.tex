@@ -47,6 +47,7 @@
 \usepackage{amsmath}
 %% The amsthm package provides extended theorem environments
 %% \usepackage{amsthm}
+\usepackage{physics}
 
 %% The lineno packages adds line numbers. Start line numbering with
 %% \begin{linenumbers}, end it with \end{linenumbers}. Or switch it on
@@ -61,6 +62,7 @@
     urlcolor=cyan,
     }
 \usepackage{subcaption}
+
 
 \journal{Journal's Name}
 
@@ -78,9 +80,9 @@
     %% use the cortext command for theassociated footnote;
     %% use the ead command for the email address,
     %% and the form \ead[url] for the home page:
-    \title{An Efficient Implicit Runge-Kutta Method
-        Based on Time Interpolation
-        for High-order Finite Volume Method}
+    \title{High order Accurate Implicit Time Marching Scheme for
+        Solving Compressible Navier-Stokes Equations Based on Temporal
+        Reconstruction}
     % \tnotetext[label1]{}
     % \ead{email address}
     % \ead[url]{home page}
@@ -202,7 +204,7 @@ Runge-Kutta (SSPRK) methods
 \cite{gottlieb2001strong_SSPRK}.
 
 Although explicit ODE integrators
-are simple and efficient in a wide range of
+are simple and efficient for a wide range of
 CFD problems,
 the Courant-Friedrichs-Lewy (CFL) constraint
 that limits physical time step in explicit
@@ -215,10 +217,9 @@ applying implicit ODE methods with
 sufficient stability.
 Due to Dahlquist's second barrier
 \cite{dahlquist1963special},
-only second and first order multi-step ODE methods
-could achieve $A$-stability, and
-trapezoid rule not being $L$-stable,
-only the $L$-stable
+only second and first order linear multi-step ODE methods
+could achieve $A$-stability. With the
+trapezoid rule not being $L$-stable, the $L$-stable
 second-order backward differentiation formula (BDF2)
 is extensively adopted in transient CFD problems.
 Different from multi-step methods,
@@ -230,16 +231,16 @@ Among the IRK methods, fully coupled IRK methods
 could achieve optimal order given number of stages,
 but they require the solution of a nonlinear
 system with its dimension multiple times larger
-than the ODE, which could be especially
-troublesome for its implementation in
-CFD schemes.
+than the ODE. The enlarged algebraic system
+could be especially troublesome for its implementation in
+CFD solvers.
 Pazner and Persson
 \cite{pazner2017stage}
 made effort in efficiently solving
 fully IRK methods with DG, and
 Jameson \cite{jameson2017evaluation}
 discussed how to adopt dual time stepping
-into fully IRK.
+into fully IRKs.
 As a result of the difficulties in the solution
 of fully IRK methods,
 singly diagonally implicit Runge-Kutta (SDIRK)
@@ -249,8 +250,8 @@ SDIRK methods have lower-triangular butcher tableau,
 enabling the stage values to be solved in a sequence.
 As a special case of SDIRK,
 ESDIRK methods are SDIRK with an explicit first stage,
-which are constructed to have 
-stage order of 2 and $L$-stable
+which are constructed to have
+stage order of 2 while being $L$-stable
 \cite{kennedy2003additiveARK,kvaerno2004singly}.
 High-order ESDIRK schemes and
 BDF2 have been tested in
@@ -316,7 +317,7 @@ large scale problems.
 However, current literature has seldom explored
 the application of MIRK or NIRK methods in
 PDE solving.
-The fully IRK methods, on the hand,
+The fully IRK methods, on the other hand,
 have been practiced in
 finite volume \cite{jameson2017evaluation} and
 DG \cite{pazner2017stage}
@@ -325,19 +326,25 @@ but their implementations
 in CFD methods are significantly more
 complex compared to DIRK methods.
 
-The current paper develops a single step implicit method HIRK
-based on time interpolation,
-and explores its implementation in high-order finite volume method.
-The present research illustrates that the new time marching
-method HIRK is equivalent with a implicit RK method with 3rd to 4th
-order of accuracy, with high stage order.
-Meanwhile, the current provides practical matrix-free
-solving strategy for the implicit
-algebraic problem
-arising from HIRK time marching of high-order finite volume method.
-In numerical tests with 2D Euler equation and NS equation,
-the current paper demonstrates the potential of HIRK
-to exceed the popular 4th order ESDIRK method in efficiency.
+Different from previous approaches,
+the current paper aims to construct
+time marching schemes based on temporal
+reconstruction.
+By combining polynomial approximation and
+numerical quadrature rules in the direction of time,
+stable, high-order accurate and efficient implicit ODE methods could be
+obtained straightforwardly.
+It will be shown that the new methods can be implemented
+in a matrix-free style, guaranteeing their portability.
+The new implicit methods are further applied to
+high-order compact finite volume method to
+test their capabilities in flow problems. Numerical results
+illustrate that the new methods are high-order accurate
+and competitive with 4th order ESDIRK methods in efficiency.
+
+
+
+
 \#\#\#\#
 
 Paper's structure:...%TODO
@@ -485,10 +492,10 @@ the PDEs \eqref{eq:NS} can therefore become ODEs
 with cell averaging applied
 \begin{equation}
     \label{eq:FVInt}
-    \frac{d\UM_i}{dt}
+    \frac{\dd\UM_i}{\dd t}
     +\sum_{j\in S_i, j\neq i}{\left(
         \int_{f_{i,j}}{
-            [\Fn(\U_i,\U_j) - \Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)] \cdot \n  dA
+            [\Fn(\U_i,\U_j) - \Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)] \cdot \n  \dd A
         }\right)
     }
     = 0
@@ -553,159 +560,263 @@ could depend on $t$ generally speaking.
 \#\#\#
 
 
-\section{Hermite Interpolation Implicit Runge Kutta Method}
+\section{Direct Integration with Temporal Reconstruction (DITR) Methods}
 \label{sec:HIRK}
 
-\subsection{Time Marching Based on Interpolation}
+\subsection{General Construction of DITR Methods}
 
-The acquiring of an NIRK method with
-certain order of accuracy is usually based on
-a certain integration method and
-corresponding taylor expansion analysis,
-as described in \cite{kulikov2006familyNIRKOrig}.
-However, the present paper proposes a single step method
-derived with Hermite interpolation
-(thus called HIRK),
-which simplifies the acquiring of high
-stage order and provides an approach to
-modify the scheme's stability.
-
-Considering the first order ODE arising from high-order finite volume method
+Considering the first order ODE arising
+from high-order finite volume method
 with
 $t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
 \begin{equation*}
-    \frac{d\uu}{dt} = \R(t, \uu)
+    \frac{\dd \uu}{\dd t} = \R(t, \uu)
 \end{equation*}
-which is directly taken from equation \eqref{eq:FVODE}
-With $\uu^n$ as the known numerical solution at $t=t^n$ and
-$t^{n+1} = t^{n} + \inc t$,
-we first consider the construction of implicit second order
-time marching methods as an introduction.
-First, form a linear interpolation for $t\in[t^n, t^{n+1}]$,
-which gives an approximate time-distribution of
-$\uu(t)=\frac{t^{n+1} - t}{\inc t}\uu^n + \frac{t - t^n}{\inc t}\uu^{n+1}$.
-Second, use a second order accurate quadrature rule on
-the linear time distribution. Evidently a trapezoid rule yields
-trapezoid rule method or Crank-Nicolson method, and
-midpoint rule yields the second order midpoint method.
-Inspired by this procedure, now we proceed to construct
-a high-order version.
-
-For a single step implicit method,
-if the implicitness is already solved,
-the endpoint values $\uu^n, \uu^{n+1}$ are
-given. Moreover,  $\R^n, \R^{n+1}$ can be
-directly evaluated, where $\R^n = \R(t^n, \uu^n)$.
-Given the endpoint values and corresponding first derivatives,
-an Hermite interpolation can be given:
-\newcommand{\ttt}{t^*}
+which is equation \eqref{eq:FVODE}.
+A direct integration of equation \eqref{eq:FVODE}
+leads to a time-marching relation
 \begin{equation}
-    \label{eq:Hermite}
-    \begin{aligned}
-        \uu(t) & \approx (1-3{\ttt}^2 - 2 {\ttt}^3)\uu^n
-        + (3{\ttt}^2 - 2 {\ttt}^3)\uu^{n+1}                    \\
-               & + \inc t ({\ttt} - 2 {\ttt}^2 + {\ttt}^3) \R^n
-        + \inc t (- {\ttt}^2 + {\ttt}^3) \R^{n+1}
-    \end{aligned}
+    \uu^{n+1} = \uu^{n} + \int_{t^n}^{t^{n+1}}{
+    \R(t, \uu) \dd t
+    }
+    \label{eq:DI}
 \end{equation}
-where $\ttt = (t - t^n)/\inc t$ and $\ttt \in [0,1]$.
-The Hermite interpolation \eqref{eq:Hermite}
-has $O(\inc t^4)$ truncation error.
-Next, a quadrature rule is applied. 
-To utilize the endpoints and reduce memory requirement, 
-we only insert one middle stage at $\ttt = c_2$. 
-Using polynomial interpolation based 
-numerical integration, with nodes $\ttt = 0,c_2,1$, 
-the numerical integration of some function $r(t)$ would be
+
+In order to acquire the integration result in equation
+\eqref{eq:DI}, a numeric quadrature rule in the interval
+$[t^n, t^{n+1}]$ is used. For example, the current paper
+uses three point polynomial quadrature rule
 \begin{equation}
-    \label{eq:Quad}
+    \label{eq:Quad3}
     \begin{aligned}
-        \int_{t^n}^{t^{n+1}}r(t)dt & \approx \\
-         \left(\frac{1}{2} - \frac{1}{6{c_2}}\right)r(t^n)
-         &+
-        \left(\frac{1}{6{c_2}(1-{c_2})}\right)r(t^n + c_2\inc t )
+        \frac{\uu^{n+1} - \uu^{n}}{\inc t^n} = & \frac{1}{\inc t^n}
+        \int_{t^n}^{t^{n+1}}{
+        \R(t, \uu) \dd t
+        }                                                           \\ \approx &
+        b_1\R(t^n, \uu(t^n))
         +
-        \left(\frac{1}{2} - \frac{1}{6(1-{c_2})}\right)r(t^{n+1})
+        b_2\R(t^{n+c_2}, \uu(t^{n+c_2}))
+        +
+        b_3\R(t^{n+1}, \uu(t^{n+1}))
     \end{aligned}
 \end{equation}
-using the relation $\int_{t^n}^{t^{n+1}}\R dt = \uu^{n+1} -\uu^{n}$,
-there are two algebraic relations and two unknown vectors 
-in total, which is able to form a solvable system.  
-The quadrature rule \eqref{eq:Quad} has truncation error 
-$O(\inc t^3)$ at least,
-for it is based on second degree polynomial interpolation.
-
-
-Summarizing the discussions above, the HIRK method has the form:
-\begin{subequations}
-    \label{eq:HM3}
-    \begin{align}
-        \uu^{n+1} & = \uu^{n} +
-        \inc t
-        \left[
-            b_1\R(t^{n,1}, \uu^n) +
-            b_2\R(t^{n,2}, \uu^*) +
-            b_3\R(t^{n,3}, \uu^{n+1})
-        \right]   \label{eq:HM3-1} \\
-        \uu^{*}   & =
-        a_1\uu^{n} +
-        a_2\uu^{n+1} +
-        \inc t
-        \left[
-            d_1\R(t^{n,1}, \uu^n) +
-            d_2\R(t^{n,3}, \uu^{n+1})
-            \right] \label{eq:HM3-2}
-    \end{align}
-\end{subequations}
-where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1, c_2\in(0,1)$.
-
-The only stage value besides endpoints is $\uu^*$.
-The internal stage $\uu^*$ can be explicitly
-calculated with \eqref{eq:HM3-2}, which is derived
-directly from the cubic Hermite interpolation of $\uu$
-on interval $[t^n,t^{n+1}]$ evaluated at
-$t^{n,2}$, which result in the interpolation relation:
-\begin{equation}
-    \begin{aligned}
-        a_2 & = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3 \\
-        d_1 & = {c_2} - 2 {c_2}^2 + {c_2}^3    \\
-        d_2 & = - {c_2}^2 + {c_2}^3            \\
-    \end{aligned}
-    \label{eq:interp}
-\end{equation}
-The first equation \eqref{eq:HM3-1} is
-a numeric integration on interval $[t^n,t^{n+1}]$ with
-polynomial nodes
-$t^{n,1}=t^n,t^{n,2}=t^n+c_2\inc t,t^{n,3}=t^{n+1}$, which demands:
+where $t^{n+c_2} = t^{n} + c_2 (t^{n+1} - t^n)$ and $c_2\in(0,1)$.
+$\inc t^n=t^{n+1} - t^n$ is
+the time step size.
+The parameter $c_2$ represents the relative place of the second abscissa
+in the quadrature rule, where the first and third fixed at $t^{n}$ and $t^{n + 1}$.
+Using quadratic polynomial interpolation,
+the weights of the quadrature rule will be:
 \begin{equation}
     \begin{aligned}
         b_1 & = \frac{1}{2} - \frac{1}{6{c_2}}     \\
         b_2 & = \frac{1}{6{c_2}(1-{c_2})}          \\
         b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})} \\
     \end{aligned}
-    \label{eq:integ}
+    \label{eq:integ0}
 \end{equation}
-The Hermite interpolation gives \eqref{eq:HM3-2}
-local truncation error $O(\inc t^4)$,
-and the numeric integration gives \eqref{eq:HM3-1}
-local truncation error $O(\inc t^3)$, therefore the
-classic order of accuracy of HIRK \eqref{eq:HM3} is
-3. If $c_2=1/2$, then the numeric integration \eqref{eq:HM3-2}
-becomes a Gauss-Lobatto quadrature rule, which yields
-a local truncation error of $O(\inc t^4)$, making
-the scheme 4th order accurate.
-Also, from the interpolation, no matter
-the choice of $c_2$, HIRK has a stage order of
-3, making it stiffly accurate.
+The quadrature rule defined with
+equations \eqref{eq:Quad3}, \eqref{eq:integ0} has algebraic precision
+of degree 2. When $c_2=1/2$, the quadrature rule has algebraic precision of
+degree 3 and becomes the three point Gauss-Lobatto rule.
+The numeric integration process used in equation \eqref{eq:Quad3}
+is referred to as a direct integration process because it is
+directly derived from the ODE.
+
+The precise value of $\uu(t)$ at each $t\in[t^n, t^{n+1}]$
+is unknown, thus an approximation is required for numeric calculation.
+The current paper proposes to use conditions at
+time steps only, namely $t \in \{t^{n+1}, t^n, t^{n-1}\dots\}$,
+in acquiring the polynomial reconstruction.
+Since the step values $\uu^n, \uu^{n-1}\dots$ and
+their temporal derivatives $\R^n, \R^{n-1}\dots$ are known,
+the addition of the unknown latest step $\uu^{n+1}, \R^{n+1}$
+makes the method implicit.
+The current paper has only considered using a subset of
+$\uu(t), \R(t, \uu(t))$ with $t \in \{t^{n+1}, t^n, t^{n-1}\}$
+as polynomial conditions.
+Generally, the polynomial interpolation
+of $\uu(t)$ could be expressed as
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TR}
+        \uu(t) & \approx
+        A^n_0(t)\uu^{n - 1} +
+        A^n_1(t)\uu^{n} +
+        A^n_2(t)\uu^{n + 1}
+        \\ & +
+        \inc t^n D^n_0(t)\R^{n - 1} +
+        \inc t^n D^n_1(t)\R^{n} +
+        \inc t^n D^n_2(t)\R^{n + 1}
+    \end{aligned}
+\end{equation}
+where $A^n_i(t), D^n_i(t), i=0,1,2$
+are polynomial base functions. Due to the precision of quadrature rule,
+the polynomial reconstruction is only expected to reach 3rd order
+constructing a 4th order accurate scheme. Consequently, at most 4 of the
+6 conditions would be used at the same time.
+The polynomial interpolation in the direction of time in equation \eqref{eq:TR}
+is referred to as temporal reconstruction, for
+a continuous distribution of $\uu$ is reconstructed with point values,
+similar to the finite volume reconstruction.
+
+Combining the direct integration in equation \eqref{eq:Quad3}
+and a  temporal reconstruction in \eqref{eq:TR},
+a Direct Integration with Temporal Reconstruction (DITR) method is
+determined.
+The current paper sticks to the same formula of direct integration
+in equation \eqref{eq:Quad3}, while experimenting on different
+forms of temporal reconstruction in equation \eqref{eq:TR}.
+
+If the quadrature rule in direct integration is replaced with
+midpoint rule, while the temporal reconstruction uses linear
+reconstruction, the implicit midpoint method for ODE can be derived,
+which is 2nd order accurate. A high order accurate DITR method could
+only be obtained with a high order accurate quadrature rule.
+For simplicity, equation \eqref{eq:Quad3} only takes one interpolated
+node besides $t^n, t^{n+1}$, and has an accuracy of 3rd or 4th order
+depending on $c_2$.
+
+Assuming the quadrature rule has algebraic precision is
+of degree $m$, and the polynomial interpolation is of degree $n$,
+a straightforward analysis on local truncation error could be conducted.
+Approximation \eqref{eq:Quad3} yields a
+truncation error of $O((\inc t)^{m+2} )$ expressed in equation \eqref{eq:Quad3Err}
+\begin{equation}
+    \label{eq:Quad3Err}
+    \begin{aligned}
+        \uu^{n+1} - \uu^{n} = & \int_{t^n}^{t^{n+1}}{
+        \R(t, \uu)\dd t}                              \\  = &
+        {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu(t^n))
+            +
+            b_2\R(t^{n+c_2}, \uu(t^{n+c_2}))
+            +
+            b_3\R(t^{n+1}, \uu(t^{n+1}))
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2} )
+    \end{aligned}
+\end{equation}
+due to the precision degree of quadrature rule.
+Approximation
+\eqref{eq:TR} has a truncation error of $O((\inc t)^{n+1})$
+expressed in \eqref{eq:TRErr}
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRErr}
+        \uu(t^{n+c_2}) & =
+        A^n_0(t^{n+c_2})\uu^{n - 1} +
+        A^n_1(t^{n+c_2})\uu^{n} +
+        A^n_2(t^{n+c_2})\uu^{n + 1}
+        \\ & +
+        \inc t^n D^n_0(t^{n+c_2})\R^{n - 1} +
+        \inc t^n D^n_1(t^{n+c_2})\R^{n} +
+        \inc t^n D^n_2(t^{n+c_2})\R^{n + 1}
+        \\ & +
+        O((\inc t^{n})^{n+1} )
+    \end{aligned}
+\end{equation}
+as a result of polynomial degree.
+Substituting \eqref{eq:TRErr} into the $t^{n+c_2}$ stage
+of \eqref{eq:Quad3Err}, the truncation error
+of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
+\begin{equation}
+    \begin{aligned}
+        \uu^{n+1} = & \uu^{n} + {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu^n)
+            +
+            b_2\R(t^{n+c_2}, \uu^{n+c_2} + O((\inc t^{n})^{n+1} ))
+            +
+            b_3\R(t^{n+1}, \uu^{n+1})
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2} )               \\
+        =           &
+        \uu^{n} + {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu^n)
+            +
+            b_2\R(t^{n+c_2}, \uu^{n+c_2})
+            +
+            b_3\R(t^{n+1}, \uu^{n+1})
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2}  + O((\inc t^{n})^{n+2} ))
+    \end{aligned}
+    \label{eq:fullLTE}
+\end{equation}
+where $\uu^{n+1}, \uu^{n}$ are step values assumed to be accurate here, and
+$\uu^{n+c_2}$ is the approximate
+$c_2$ stage value determined with temporal reconstruction.
+Equation \eqref{eq:fullLTE} assumes
+$\R(t, \uu)$ to be sufficiently regular and therefore does not
+change the order of error.
+Therefore, for smooth problems the
+order of accuracy of a DITR
+method is theoretically $\min(m,n) + 1$.
 
 
 
-\subsection{Order of Accuracy}
-To discuss the order of accuracy and stage order 
-formally, HIRK can be considered as a standard IRK.
-Reformulating \eqref{eq:HM3} into
-a standard Runge-Kutta form yields a Butcher
-tableau:
+
+
+
+The following sections will illustrate some
+practical DITR methods based on equation \eqref{eq:Quad3} and \eqref{eq:TR}.
+
+
+\subsection{Variants of DITR Methods}
+
+
+
+\subsubsection{The DITR U2R2 Method}
+
+To make the method single-step and 4th order accurate,
+we choose $\uu^{n},\uu^{n+1}$, $\R^{n},\R^{n+1}$ as
+the interpolation conditions, making the interpolation
+basically cubic Hermite interpolation.
+Therefore, we have the interpolation of $\uu(t^{n+c_2})$
+being:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU2R2}
+        \uu^{n+c_2} & =
+        a_{1,U2R2}\uu^{n} +
+        a_{2,U2R2}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{1,U2R2}\R^{n} +
+        \inc t^n d_{2,U2R2}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{1,U2R2} & = 1 - (3{c_2}^2 - 2 {c_2}^3)  \\
+        a_{2,U2R2} & = 3{c_2}^2 - 2 {c_2}^3        \\
+        d_{1,U2R2} & = {c_2} - 2 {c_2}^2 + {c_2}^3 \\
+        d_{2,U2R2} & = - {c_2}^2 + {c_2}^3         \\
+    \end{aligned}
+    \label{eq:interpU2R2}
+\end{equation}
+
+The temporal reconstruction equation \eqref{eq:TRU2R2}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U2R2 method.
+
+When $c_2=1/2$, quadrature rule in equation \eqref{eq:Quad3} has precision
+of degree 3, making the DITR U2R2 method 4th order accurate,
+and the stage value $\uu^{n+c_2}$ has a precision of degree 3.
+When $c_2\neq1/2$, DITR U2R2 becomes 3rd order accurate.
+
+In order to further examine the accuracy order,
+equations \eqref{eq:interpU2R2}, \eqref{eq:Quad3}
+can be reformulated into a standard IRK method,
+yielding a Butcher tableau shown in Table \ref{tab:U2R2Butcher}.
 \begin{table}[htbp]
     \centering
     \begin{tabular}{c|ccc}
@@ -714,33 +825,499 @@ tableau:
         1     & $b_1$          & $b_2$    & $b_3$          \\ \hline
               & $b_1$          & $b_2$    & $b_3$
     \end{tabular}
-    \caption{Butcher tableau of \eqref{eq:HM3}}
-    \label{tab:HM3Butcher}
+    \caption{Butcher tableau of DITR U2R2}
+    \label{tab:U2R2Butcher}
 \end{table}
 
-From table \ref{tab:HM3Butcher} with the coefficients
-decided with \eqref{eq:interp} and \eqref{eq:integ},
+From table \ref{tab:U2R2Butcher} with the coefficients
+decided with \eqref{eq:interpU2R2} and \eqref{eq:integ0},
 one can find that the 4th order accurate
-HIRK $c_2=1/2$ method is indeed the Lobatto IIIA method
+DITR U2R2 method with $c_2=1/2$
+is actually the Lobatto IIIA method
 of order 4 \cite{wanner1996solving}.
-The classic order and stage order of HIRK could
-also be evaluated from table \ref{tab:HM3Butcher} via
+The classic order and stage order of DITR U2R2 could
+also be verified using Table \ref{tab:U2R2Butcher} via
 the simplifying assumptions, which is a trivial procedure
 given the formulae provided in \cite{wanner1996solving}.
 
-If the quadrature rule in HIRK is
-replaced with Gauss-Legendre rule,
-the method immediately becomes a special case of the
-Gauss type NIRK method of order 4
-described in \cite{kulikov2006familyNIRKOrig}.
-For large scale CFD application,
-using 2 point Gauss-Legendre rule
-would mean deriving the right hand side at
-3 different stages iteratively.
-Thus, the current HIRK method only considers
-a 3 point Gauss-Lobatto type quadrature
-(with the middle abscissa moved and order of accuracy reduced),
-which would provide sufficient accuracy and only require 2 unknown stages.
+Following standard analysis based on Dahlquist's equation
+$\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
+the stability function giving by $y^{1}=R(h\lambda)y^0$
+applied to DITR U2R2 is in the form:
+\begin{equation}
+    \label{eq:stabilityFuncU2R2}
+    R_{U2R2}(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
+\end{equation}
+which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and
+DITR U2R2 becomes Lobatto IIIA. 
+Analysis on equation \eqref{eq:stabilityFuncU2R2} 
+would show that $c_2\in[1/2,1)$ is a sufficient and necessary 
+condition of DITR U2R2 being $A$-stable given $c_2\in(0,1)$. 
+The limit at infinity
+\begin{equation}
+    \lim_{z\rightarrow\infty}R_{U2R2}(z) = \frac{1-c_2}{c_2}
+\end{equation}
+confirm that DITR U2R2 is unable to achieve $L$-stability 
+by adjusting $c_2$.
+
+
+DITR U2R2 ($c_2=1/2$) or Lobatto IIIA method is symmetric,
+which is a preferable property when integrating
+reversible systems including orbital motion and particle 
+systems. 
+However,
+the symmetry in this ODE method could be considered harmful in CFD application.
+Most CFD systems of interest are physically dissipative,
+while for a symmetric method
+$R(z) \rightarrow 1$ when $z \rightarrow \infty$,
+which means the method is more likely to preserve
+spurious modes arising from spacial discretization.
+Although DITR U2R2 cannot achieve $L$-stability, 
+using a value of $c_2 > 1/2$ would still
+produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
+would be a useful property in simulation of dissipative systems.
+With  $c_2 > 1/2$, stiff modes could vanish faster over the time
+steps, while $c_2 = 1/2$ tends to preserve them.
+
+\subsubsection{The DITR U2R1 Method}
+
+Giving up one interpolation condition in DITR U2R2
+forces the scheme to have 3rd order accuracy.
+The current paper removes $\R^{n}$ from U2R2, namely
+using $\uu^{n},\uu^{n+1}$, $\R^{n+1}$ for interpolation,
+which is able to produce an $L$-stable DITR scheme.
+
+Similar with U2R2, DITR U2R1 has the interpolation
+written as:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU2R1}
+        \uu^{n+c_2} & =
+        a_{1,U2R1}\uu^{n} +
+        a_{2,U2R1}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{2,U2R1}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2)\\
+        a_{2,U2R1} & = 2c_2 - {c_2}^2 \\
+        d_{2,U2R1} & = {c_2}^2 - {c_2}                 \\
+    \end{aligned}
+    \label{eq:interpU2R1}
+\end{equation}
+
+The temporal reconstruction equation \eqref{eq:TRU2R1}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U2R1 method.
+
+The interpolation bases shown in \eqref{eq:interpU2R1}
+are quadratic.
+Therefore, the scheme yields 3rd order accuracy
+and the choice of $c_2$ does not affect the order of accuracy.
+Similar to U2R2, DITR U2R1's order of accuracy can
+be examined using
+standard procedures for
+Runge-Kutta methods\cite{wanner1996solving}.
+
+The linear stability function for DITR U2R1 is
+\begin{equation}
+    \label{eq:stabilityFuncU2R1}
+    R_{U2R1}(z) = \frac{2\,z+6}{z^2-4\,z+6}
+\end{equation}
+which is (1,2)-Pad{\'e} approximation and not affected by $c_2$.
+It can be found $|R_{U2R1}(z)| < 1, \forall \real(z) < 0$,
+and obviously $\lim_{z\rightarrow\infty}R_{U2R1}(z) = 0$.
+Therefore, DITR U2R1 method is $L$-stable.
+
+The stability function also
+shows that for a linear $\R$, the solution is not
+affected by $c_2$, but U2R1 treats nonlinear problems
+different when $c_2$ changes.
+
+\subsubsection{The DITR U3R1 Method}
+
+To exploit the information when multiple previous
+steps are available,
+using conditions from $t^{n-1}$ would be
+preferable.
+The current paper chooses $\uu^{n-1},\uu^{n}$, $\uu^{n+1}$
+and $\R^{n+1}$ as U3R1's interpolation conditions,
+as other choices do not produce sufficient linear stability.
+The interpolation at $c_2$ node becomes:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU3R1}
+        \uu^{n+c_2} & =
+        a_{0,U3R1}\uu^{n} +
+        a_{1,U3R1}\uu^{n} +
+        a_{2,U3R1}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{2,U3R1}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{0,U3R1} & = -\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}                                                            \\
+        a_{1,U3R1} & = \frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}                                                                    \\
+        a_{2,U3R1} & =  \frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2} \\
+        d_{2,U3R1} & =   \frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}
+    \end{aligned}
+    \label{eq:interpU3R1}
+\end{equation}
+where $\Theta = \inc t^{n-1}/\inc t^{n}$.
+
+The temporal reconstruction equation \eqref{eq:TRU3R1}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U2R1 method.
+
+The method is 4th order when $c_2=1/2$, when
+both the interpolation and integration has precision
+of degree 3.
+For the special case of $c_2=1/2$, simplified
+coefficients are given:
+\begin{equation}
+    \begin{aligned}
+        a_{0,U3R1} & = -\frac{1}{8\,\Theta\,{\left(\Theta+1\right)}^2}                \\
+        a_{1,U3R1} & = \frac{\Theta+\frac{1}{2}}{4\,\Theta}                           \\
+        a_{2,U3R1} & =  \frac{6\,\Theta^2+11\,\Theta+4}{8\,{\left(\Theta+1\right)}^2} \\
+        d_{2,U3R1} & = -\frac{\Theta+\frac{1}{2}}{4\,\left(\Theta+1\right)}
+    \end{aligned}
+    \label{eq:interpU3R1-S}
+\end{equation}
+
+Linear stability is analyzed when $\Theta =1$ and $c_2 = 1/2$.
+The solution to the test problem
+produces two solutions:
+\begin{equation}
+    \left(
+    \begin{matrix}
+        R_{U3R1}^{(1)}(z) \\
+        R_{U3R1}^{(2)}(z)
+    \end{matrix}
+    \right)=\left(\begin{array}{c} \frac{10\,z-\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48}\\ \frac{10\,z+\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48} \end{array}\right)
+\end{equation}
+It is obvious $R_{U3R1}^{(1)}(z)\rightarrow 0, R_{U3R1}^{(2)}(z)\rightarrow0$ when
+$z\rightarrow\infty$.
+When observed numerically, it is found both $|R_{U3R1}^{(1)}(z)|$
+and $|R_{U3R1}^{(2)}(z)|$ are less than 1 in the left
+half plane of $z$.
+The current paper therefore believes %! not a linear multi-step method
+the DITR U3R1 method is indeed $L$-stable.
+Note that DITR U3R1 is not a linear multistep method,
+and the root locus curve analysis used in those methods
+can not be directly applied here.
+
+With 4th order accuracy and observed $L$-stability, the
+DITR U3R1 method is potentially more favorable than
+U2R2 and U2R1.
+
+\subsubsection{Summary of DITR Methods}
+
+The U2R2, U2R1 and U3R1 variants of the
+DITR method can be written is a unified form.
+The first equation is the direct integration:
+\begin{equation}
+    \uu^{n+1} = \uu^{n} + \inc t\left(
+    b_1 \R(t^n, \uu^n) +
+    b_1 \R(t^{n+c_2}, \uu^{n+c_2}) +
+    b_1 \R(t^{n+1}, \uu^{n+1})
+    \right)
+    \label{eq:DISum}
+\end{equation}
+with weights decided by \eqref{eq:integ0},
+or Table \ref{tab:integ0Tab}
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        $b_1$                            & $b_2$ & $b_3$ \\
+        \hline
+        $\frac{1}{2} - \frac{1}{6{c_2}}$ &
+        $\frac{1}{6{c_2}(1-{c_2})}$      &
+        $\frac{1}{2} - \frac{1}{6(1-{c_2})} $            \\
+        \hline
+    \end{tabular}
+    \caption{Butcher tableau of DITR U2R2}
+    \label{tab:integ0Tab}
+\end{table}
+
+The second equation is the temporal reconstruction:
+\begin{equation}
+    \label{eq:TRSum}
+    \uu^{n+c_2}  =
+    a^n_0\uu^{n} +
+    a^n_1\uu^{n} +
+    a^n_2\uu^{n + 1}
+    +
+    \inc t^n
+    \left(
+    d^n_1\R^{n} +
+    d^n_2\R^{n + 1}
+    \right)
+\end{equation}
+where the coefficients vary in different schemes
+following Table \ref{tab:inter0Tab} where
+$\Theta = \inc t^{n-1} / \inc t^{n}$.
+% \begin{table}[htbp]
+%     \centering
+%     \footnotesize
+%     \begin{tabular}{|c|c|c|c|c|c|}
+%         \hline
+%         DITR Method                                                                                                                            & $a^n_0$ & $a^n_1$ & $a^n_2$ & $d^n_1$ & $d^n_2$ \\
+%         \hline
+%         U2R2                                                                                                                                   &
+%         0                                                                                                                                      &
+%         $1-(3{c_2}^2 - 2 {c_2}^3)$                                                                                                             &
+%         $3{c_2}^2 - 2 {c_2}^3$                                                                                                                 &
+%         ${c_2} - 2 {c_2}^2 + {c_2}^3$                                                                                                          &
+%         $- {c_2}^2 + {c_2}^3$                                                                                                                                                                    \\
+%         \hline
+%         U2R1                                                                                                                                   &
+%         0                                                                                                                                      &
+%         $1-(2c_2 - {c_2}^2)$                                                                                                                   &
+%         $2c_2 - {c_2}^2$                                                                                                                       &
+%         0                                                                                                                                      &
+%         ${c_2}^2 - {c_2} $                                                                                                                                                                       \\
+%         \hline
+%         U3R1                                                                                                                                   &
+%         $-\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}$                                                           &
+%         $\frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}$                                                                   &
+%         $\frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2}$ &
+%         0                                                                                                                                      &
+%         $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                                                                                \\
+%         \hline
+%     \end{tabular}
+%     \caption{Butcher tableau of DITR U2R2}
+%     \label{tab:inter0Tab}
+% \end{table}
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        DITR Method & U2R2                          & U2R1                 & U3R1                                                                                                                                   \\
+        \hline
+        $a^n_0$     & 0                             & 0                    & $-\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}$                                                           \\
+        \hline
+        $a^n_1$     & $1-(3{c_2}^2 - 2 {c_2}^3)$    & $1-(2c_2 - {c_2}^2)$ & $\frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}$                                                                   \\
+        \hline
+        $a^n_2$     & $3{c_2}^2 - 2 {c_2}^3$        & $2c_2 - {c_2}^2$     & $\frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2}$ \\
+        \hline
+        $d^n_1$     & ${c_2} - 2 {c_2}^2 + {c_2}^3$ & 0                    & 0                                                                                                                                      \\
+        \hline
+        $d^n_2$     & $- {c_2}^2 + {c_2}^3$         & ${c_2}^2 - {c_2}$    & $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                              \\
+        \hline
+    \end{tabular}
+    \caption{Interpolation coefficients for different DITR methods}
+    \label{tab:inter0Tab}
+\end{table}
+
+
+
+% \subsection{Time Marching Based on Interpolation}
+
+% The acquiring of an NIRK method with
+% certain order of accuracy is usually based on
+% a certain integration method and
+% corresponding taylor expansion analysis,
+% as described in \cite{kulikov2006familyNIRKOrig}.
+% However, the present paper proposes a single step method
+% derived with Hermite interpolation
+% (thus called HIRK),
+% which simplifies the acquiring of high
+% stage order and provides an approach to
+% modify the scheme's stability.
+
+% Considering the first order ODE arising from high-order finite volume method
+% with
+% $t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
+% \begin{equation*}
+%     \frac{d\uu}{dt} = \R(t, \uu)
+% \end{equation*}
+% which is directly taken from equation \eqref{eq:FVODE}.
+% A direct integration of equation \eqref{eq:FVODE}
+% leads to a time-marching relation
+% \begin{equation}
+%     \uu^{n+1} = \uu^{n} + \int_{t^n}^{t^{n+1}}{
+%     \R(t, \uu)
+%     }
+% \end{equation}
+
+% With $\uu^n$ as the known numerical solution at $t=t^n$ and
+% $t^{n+1} = t^{n} + \inc t$,
+% we first consider the construction of implicit second order
+% time marching methods as an introduction.
+% First, form a linear interpolation for $t\in[t^n, t^{n+1}]$,
+% which gives an approximate time-distribution of
+% $\uu(t)=\frac{t^{n+1} - t}{\inc t}\uu^n + \frac{t - t^n}{\inc t}\uu^{n+1}$.
+% Second, use a second order accurate quadrature rule on
+% the linear time distribution. Evidently a trapezoid rule yields
+% trapezoid rule method or Crank-Nicolson method, and
+% midpoint rule yields the second order midpoint method.
+% Inspired by this procedure, now we proceed to construct
+% a high-order version.
+
+% For a single step implicit method,
+% if the implicitness is already solved,
+% the endpoint values $\uu^n, \uu^{n+1}$ are
+% given. Moreover,  $\R^n, \R^{n+1}$ can be
+% directly evaluated, where $\R^n = \R(t^n, \uu^n)$.
+% Given the endpoint values and corresponding first derivatives,
+% an Hermite interpolation can be given:
+% \newcommand{\ttt}{t^*}
+% \begin{equation}
+%     \label{eq:Hermite}
+%     \begin{aligned}
+%         \uu(t) & \approx (1-3{\ttt}^2 - 2 {\ttt}^3)\uu^n
+%         + (3{\ttt}^2 - 2 {\ttt}^3)\uu^{n+1}                     \\
+%                & + \inc t ({\ttt} - 2 {\ttt}^2 + {\ttt}^3) \R^n
+%         + \inc t (- {\ttt}^2 + {\ttt}^3) \R^{n+1}
+%     \end{aligned}
+% \end{equation}
+% where $\ttt = (t - t^n)/\inc t$ and $\ttt \in [0,1]$.
+% The Hermite interpolation \eqref{eq:Hermite}
+% has $O(\inc t^4)$ truncation error.
+% Next, a quadrature rule is applied.
+% To utilize the endpoints and reduce memory requirement,
+% we only insert one middle stage at $\ttt = c_2$.
+% Using polynomial interpolation based
+% numerical integration, with nodes $\ttt = 0,c_2,1$,
+% the numerical integration of some function $r(t)$ would be
+% \begin{equation}
+%     \label{eq:Quad}
+%     \begin{aligned}
+%         \int_{t^n}^{t^{n+1}}r(t)dt & \approx \\
+%         \left(\frac{1}{2} - \frac{1}{6{c_2}}\right)r(t^n)
+%                                    & +
+%         \left(\frac{1}{6{c_2}(1-{c_2})}\right)r(t^n + c_2\inc t )
+%         +
+%         \left(\frac{1}{2} - \frac{1}{6(1-{c_2})}\right)r(t^{n+1})
+%     \end{aligned}
+% \end{equation}
+% using the relation $\int_{t^n}^{t^{n+1}}\R dt = \uu^{n+1} -\uu^{n}$,
+% there are two algebraic relations and two unknown vectors
+% in total, which is able to form a solvable system.
+% The quadrature rule \eqref{eq:Quad} has truncation error
+% $O(\inc t^3)$ at least,
+% for it is based on second degree polynomial interpolation.
+
+
+% Summarizing the discussions above, the HIRK method has the form:
+% \begin{subequations}
+%     \label{eq:HM3}
+%     \begin{align}
+%         \uu^{n+1} & = \uu^{n} +
+%         \inc t
+%         \left[
+%             b_1\R(t^{n,1}, \uu^n) +
+%             b_2\R(t^{n+c_2}, \uu^*) +
+%             b_3\R(t^{n,3}, \uu^{n+1})
+%         \right]   \label{eq:HM3-1} \\
+%         \uu^{*}   & =
+%         a_1\uu^{n} +
+%         a_2\uu^{n+1} +
+%         \inc t
+%         \left[
+%             d_1\R(t^{n,1}, \uu^n) +
+%             d_2\R(t^{n,3}, \uu^{n+1})
+%             \right] \label{eq:HM3-2}
+%     \end{align}
+% \end{subequations}
+% where $t^{n,i}=t^n+c_i\inc t$, and $c_1 = 0, c_3 = 1, c_2\in(0,1)$.
+
+% The only stage value besides endpoints is $\uu^*$.
+% The internal stage $\uu^*$ can be explicitly
+% calculated with \eqref{eq:HM3-2}, which is derived
+% directly from the cubic Hermite interpolation of $\uu$
+% on interval $[t^n,t^{n+1}]$ evaluated at
+% $t^{n+c_2}$, which result in the interpolation relation:
+% \begin{equation}
+%     \begin{aligned}
+%         a_2 & = 1 - a_1 = 3{c_2}^2 - 2 {c_2}^3 \\
+%         d_1 & = {c_2} - 2 {c_2}^2 + {c_2}^3    \\
+%         d_2 & = - {c_2}^2 + {c_2}^3            \\
+%     \end{aligned}
+%     \label{eq:interp}
+% \end{equation}
+% The first equation \eqref{eq:HM3-1} is
+% a numeric integration on interval $[t^n,t^{n+1}]$ with
+% polynomial nodes
+% $t^{n,1}=t^n,t^{n+c_2}=t^n+c_2\inc t,t^{n,3}=t^{n+1}$, which demands:
+% \begin{equation}
+%     \begin{aligned}
+%         b_1 & = \frac{1}{2} - \frac{1}{6{c_2}}     \\
+%         b_2 & = \frac{1}{6{c_2}(1-{c_2})}          \\
+%         b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})} \\
+%     \end{aligned}
+%     \label{eq:integ}
+% \end{equation}
+% The Hermite interpolation gives \eqref{eq:HM3-2}
+% local truncation error $O(\inc t^4)$,
+% and the numeric integration gives \eqref{eq:HM3-1}
+% local truncation error $O(\inc t^3)$, therefore the
+% classic order of accuracy of HIRK \eqref{eq:HM3} is
+% 3. If $c_2=1/2$, then the numeric integration \eqref{eq:HM3-2}
+% becomes a Gauss-Lobatto quadrature rule, which yields
+% a local truncation error of $O(\inc t^4)$, making
+% the scheme 4th order accurate.
+% Also, from the interpolation, no matter
+% the choice of $c_2$, HIRK has a stage order of
+% 3, making it stiffly accurate.
+
+
+
+% \subsection{Order of Accuracy}
+% To discuss the order of accuracy and stage order
+% formally, HIRK can be considered as a standard IRK.
+% Reformulating \eqref{eq:HM3} into
+% a standard Runge-Kutta form yields a Butcher
+% tableau:
+% \begin{table}[htbp]
+%     \centering
+%     \begin{tabular}{c|ccc}
+%         0     & 0              & 0        & 0              \\
+%         $c_2$ & $d_1 + a_2b_1$ & $a_2b_2$ & $d_2 + a_2b_3$ \\
+%         1     & $b_1$          & $b_2$    & $b_3$          \\ \hline
+%               & $b_1$          & $b_2$    & $b_3$
+%     \end{tabular}
+%     \caption{Butcher tableau of \eqref{eq:HM3}}
+%     \label{tab:HM3Butcher}
+% \end{table}
+
+% From table \ref{tab:HM3Butcher} with the coefficients
+% decided with \eqref{eq:interp} and \eqref{eq:integ},
+% one can find that the 4th order accurate
+% HIRK $c_2=1/2$ method is indeed the Lobatto IIIA method
+% of order 4 \cite{wanner1996solving}.
+% The classic order and stage order of HIRK could
+% also be evaluated from table \ref{tab:HM3Butcher} via
+% the simplifying assumptions, which is a trivial procedure
+% given the formulae provided in \cite{wanner1996solving}.
+
+% If the quadrature rule in HIRK is
+% replaced with Gauss-Legendre rule,
+% the method immediately becomes a special case of the
+% Gauss type NIRK method of order 4
+% described in \cite{kulikov2006familyNIRKOrig}.
+% For large scale CFD application,
+% using 2 point Gauss-Legendre rule
+% would mean deriving the right hand side at
+% 3 different stages iteratively.
+% Thus, the current HIRK method only considers
+% a 3 point Gauss-Lobatto type quadrature
+% (with the middle abscissa moved and order of accuracy reduced),
+% which would provide sufficient accuracy and only require 2 unknown stages.
 
 
 
@@ -751,7 +1328,7 @@ which would provide sufficient accuracy and only require 2 unknown stages.
 %         \inc t
 %         \left(
 %         b_1\R(t^{n,1}, \uu^n) +
-%         b_2\R(t^{n,2}, \uu^*) +
+%         b_2\R(t^{n+c_2}, \uu^*) +
 %         b_3\R(t^{n,3}, \uu^{n+1})
 %         \right) \\
 %         \uu^{*}   & =
@@ -759,56 +1336,56 @@ which would provide sufficient accuracy and only require 2 unknown stages.
 %         \inc t
 %         \left(
 %         (d_1 + a_2b_1)\R(t^{n,1}, \uu^n) +
-%         a_2b_2\R(t^{n,2}, \uu^*) +
+%         a_2b_2\R(t^{n+c_2}, \uu^*) +
 %         (d_2 + a_2b_3)\R(t^{n,3}, \uu^{n+1})
 %         \right)
 %     \end{aligned}
 % \end{equation}
 
-\subsection{Linear Stability}
-\label{ssec:linStab}
+% \subsection{Linear Stability}
+% \label{ssec:linStab}
 
-Following standard analysis based on Dahlquist's equation
-$\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
-the stability function giving $y^{1}=R(h\lambda)y^0$
-when applying HIRK is in the form:
-\begin{equation}
-    \label{eq:stabilityFunc}
-    R(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
-\end{equation}
-which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and HIRK
-becomes Lobatto IIIA. The limit
-\begin{equation}
-    \lim_{z\rightarrow\infty}R(z) = \frac{1-c_2}{c_2}
-\end{equation}
-gives that a necessary condition for $A$-stability of
-HIRK is $c_2 \in [1/2,1)$, and shows that HIRK
-is unable to achieve $L$-stability.
-Further analysis on \eqref{eq:stabilityFunc}
-would confirm $c_2 \in [1/2,1)$ is a sufficient
-condition for $A$-stability.
+% Following standard analysis based on Dahlquist's equation
+% $\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
+% the stability function giving $y^{1}=R(h\lambda)y^0$
+% when applying HIRK is in the form:
+% \begin{equation}
+%     \label{eq:stabilityFunc}
+%     R(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
+% \end{equation}
+% which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and HIRK
+% becomes Lobatto IIIA. The limit
+% \begin{equation}
+%     \lim_{z\rightarrow\infty}R(z) = \frac{1-c_2}{c_2}
+% \end{equation}
+% gives that a necessary condition for $A$-stability of
+% HIRK is $c_2 \in [1/2,1)$, and shows that HIRK
+% is unable to achieve $L$-stability.
+% Further analysis on \eqref{eq:stabilityFunc}
+% would confirm $c_2 \in [1/2,1)$ is a sufficient
+% condition for $A$-stability.
 
-HIRK($1/2$) or Lobatto IIIA method is symmetric,
-which is a preferable property when integrating
-reversible systems,
-but the symmetry could be considered harmful in CFD application.
-Most CFD systems of interest are physically dissipative,
-while for symmetric RK methods
-$R(z) \rightarrow 1$ when $z \rightarrow \infty$,
-which is more likely to preserve
-spurious modes arising from spacial discretization.
-Although HIRK cannot achieve $L$-stability
-by simply adjusting $c_2$,
-using a non-trivial value $c_2 > 1/2$ would still
-produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
-is a useful property in simulation of dissipative systems.
-With  $c_2 > 1/2$, stiff modes could better vanish over the time
-steps, while $c_2 = 1/2$ tends to preserve them.
+% HIRK($1/2$) or Lobatto IIIA method is symmetric,
+% which is a preferable property when integrating
+% reversible systems,
+% but the symmetry could be considered harmful in CFD application.
+% Most CFD systems of interest are physically dissipative,
+% while for symmetric RK methods
+% $R(z) \rightarrow 1$ when $z \rightarrow \infty$,
+% which is more likely to preserve
+% spurious modes arising from spacial discretization.
+% Although HIRK cannot achieve $L$-stability
+% by simply adjusting $c_2$,
+% using a non-trivial value $c_2 > 1/2$ would still
+% produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
+% is a useful property in simulation of dissipative systems.
+% With  $c_2 > 1/2$, stiff modes could better vanish over the time
+% steps, while $c_2 = 1/2$ tends to preserve them.
 
 
 \subsection{Solving Strategy}
 
-\newcommand{\Res}{\mathcal{R}}
+\renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
 \newcommand{\eye}{\mathbf{I}}
 \newcommand{\J}{\mathbf{J}}
@@ -832,7 +1409,7 @@ which solves the equation:
     \left(\uu^{n} + \inc t
     \left[
         b_1\R(t^{n,1}, \uu^n) +
-        b_2\R(t^{n,2}, \uu^*) +
+        b_2\R(t^{n+c_2}, \uu^*) +
         b_3\R(t^{n,3}, \uu^{n+1})
         \right]
     \right)  =  0
@@ -844,7 +1421,7 @@ as:
     \left(\uu^{n} + \inc t
     \left[
         b_1\R(t^{n,1}, \uu^{n}) +
-        b_2\R(t^{n,2}, \uu^{*}) +
+        b_2\R(t^{n+c_2}, \uu^{*}) +
         b_3\R(t^{n,3}, \uu^{n+1})
         \right]
     \right)
@@ -902,15 +1479,15 @@ is
         \frac{\partial \Res(\uu^{n+1})}
         {\uu^{n+1}}
                      & = \eye - \inc t b_3 \J^{n+1} -
-        \inc t b_2\J^*(a_2\eye +\inc t d_2 \J^{n+1})                                \\
+        \inc t b_2\J^*(a_2\eye +\inc t d_2 \J^{n+1})                                  \\
                      & = \frac{d_2 + a_2b_3}{d_2}\eye
         -\frac{a_2b_3}{d_2}\left(
         \eye + \frac{d_2b_2}{b_3}\inc t\J^*
         \right)\left(
         \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
-        \right)                                                                     \\
-        \text{with:} &                                                              \\
-                     & \J^* = \frac{\partial \R(t^{n,2},\uu^*)}{\partial \uu^*},\ \
+        \right)                                                                       \\
+        \text{with:} &                                                                \\
+                     & \J^* = \frac{\partial \R(t^{n+c_2},\uu^*)}{\partial \uu^*},\ \
         \J^{n+1} = \frac{\partial \R(t^{n,3},\uu^{n+1})}{\partial \uu^{n+1}}
     \end{aligned}
 \end{equation}
@@ -1011,12 +1588,12 @@ which is the case for a general IRK scheme.
 The equation to solve would be:
 \begin{equation}
     \begin{aligned}
-                                  & \left\{
+         & \left\{
         \begin{array}[2]{ll}
             \Res(\uu^{n+1},\uu^{*})   & = 0 \\
             \Res^*(\uu^{n+1},\uu^{*}) & = 0 \\
         \end{array}
-        \right.                                               \\
+        \right.    \\
     \end{aligned}
 \end{equation}
 with
@@ -1027,7 +1604,7 @@ with
         \inc t
         \left[
             b_1\R(t^{n,1}, \uu^n) +
-            b_2\R(t^{n,2}, \uu^*) +
+            b_2\R(t^{n+c_2}, \uu^*) +
             b_3\R(t^{n,3}, \uu^{n+1})
             \right]
         \right)                                               \\
@@ -1341,7 +1918,7 @@ and a perturbation at initial time:
     \right.
 \end{equation}
 with ideal gas setting of $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$.
-Initial vortex center is chosen $(x_c,y_c)=(5,5)$, 
+Initial vortex center is chosen $(x_c,y_c)=(5,5)$,
 and vortex strength is $\epsilon = 5$.
 The analytic solution to the isentropic vortex problem is a
 translation of initial field with speed $(1,1)$.
@@ -1395,7 +1972,7 @@ ESDIRK4, while HIRK $c_2=0.55$ gives a flatter density peak.
 Next, precision and efficiency of different ODE methods are
 qualitatively evaluated with isentropic vortex solved on a $160\times160$
 grid until $t=2$.
-The fine mesh makes spacial error negligible compared with 
+The fine mesh makes spacial error negligible compared with
 temporal error.
 The density error is defined as
 \begin{equation}
@@ -1405,21 +1982,21 @@ The density error is defined as
 \end{equation}
 with $[4,9]\times[4,9]=25$ the area of evaluating region, $\rho$ the numeric result
 and $\rho_a$ the analytic result.
-The evaluating region is limited to $[4,9]\times[4,9]=25$ 
-where the vortex center 
-and most numerical error resides. 
+The evaluating region is limited to $[4,9]\times[4,9]=25$
+where the vortex center
+and most numerical error resides.
 
 
 
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.png}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.pdf}
         \caption[]{Density error vs. time step size }
         \label{sfig:IVTests_Conv}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.png}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
         \caption[]{Density error vs. total CPU time consumption}
         \label{sfig:IVTests_Eff}
     \end{subfigure}
@@ -1427,44 +2004,44 @@ and most numerical error resides.
     \label{fig:IVTests}
 \end{figure}
 
-Results of convergence and efficiency study with isentropic vortex is 
-shown in figure \ref{fig:IVTests}. 
-Figure \ref{sfig:IVTests_Conv} indicates that all the ODE methods 
+Results of convergence and efficiency study with isentropic vortex is
+shown in figure \ref{fig:IVTests}.
+Figure \ref{sfig:IVTests_Conv} indicates that all the ODE methods
 could roughly achieve their theoretical order of accuracy.
-With the same time step size, figure \ref{sfig:IVTests_Conv} shows 
-ESDIRK4 has best accuracy, while HIRK $c_2=0.5$ is close to 
-ESDIRK4 when time step is refined. HIRK $c_2=0.55$ is less accurate 
-than HIRK $c_2=0.5$, but it performs almost as well as 
-HIRK $c_2=0.5$ when time step is large. 
+With the same time step size, figure \ref{sfig:IVTests_Conv} shows
+ESDIRK4 has best accuracy, while HIRK $c_2=0.5$ is close to
+ESDIRK4 when time step is refined. HIRK $c_2=0.55$ is less accurate
+than HIRK $c_2=0.5$, but it performs almost as well as
+HIRK $c_2=0.5$ when time step is large.
 Figure \ref{sfig:IVTests_Eff}
 implies that when consuming the same computational resource,
-HIRK methods have best accuracy or efficiency. All the high order 
-time marching methods have better efficiency than BDF2, 
-while HIRK methods have better efficiency than ESDIRK4. 
-The symmetric HIRK $c_2=0.5$ has better efficiency 
+HIRK methods have best accuracy or efficiency. All the high order
+time marching methods have better efficiency than BDF2,
+while HIRK methods have better efficiency than ESDIRK4.
+The symmetric HIRK $c_2=0.5$ has better efficiency
 compared with more stable HIRK $c_2=0.55$.
 
-The convergence and efficiency study with isentropic vortex was 
-conducted on a isolated server with 2 Intel Xeon 6326 processors with 
+The convergence and efficiency study with isentropic vortex was
+conducted on a isolated server with 2 Intel Xeon 6326 processors with
 16 cores each, with measures to ensure the stability of CPU time measurement.
-Further tests with vortex shedding and double mach reflection 
+Further tests with vortex shedding and double mach reflection
 were conducted on a large cluster, which unfortunately produces more
 unstable CPU time due to disturbances of the communication network.
-Therefore, following numerical tests will use the effective iterations 
+Therefore, following numerical tests will use the effective iterations
 to represent total computational consumption.
-Due to the settings of the current research, each updating in 
+Due to the settings of the current research, each updating in
 the implicit solving consumes almost identical time.
-For BDF2, each right-hand-side evaluation, linear solving and updating 
-is counted as $1.0$ effective iteration. 
-For ESDIRK4, as each updating of some stage value is quite similar with 
-BDF2 apart from some extra linear summations, each updating is also 
-counted as $1.0$ effective consumption. 
-For HIRK methods, each updating of $\uu^*,\uu^{n+1}$ 
+For BDF2, each right-hand-side evaluation, linear solving and updating
+is counted as $1.0$ effective iteration.
+For ESDIRK4, as each updating of some stage value is quite similar with
+BDF2 apart from some extra linear summations, each updating is also
+counted as $1.0$ effective consumption.
+For HIRK methods, each updating of $\uu^*,\uu^{n+1}$
 involves two right-hand-side evaluations and linear solver executions.
 Therefore, each HIRK updating is counted as $2.0$ effective iterations.
-Although one could calibrate the coefficients using theoretical analyses or 
-empirical data to get a more precise measurement of consumption, 
-the current simple coefficients for effective iterations are found to 
+Although one could calibrate the coefficients using theoretical analyses or
+empirical data to get a more precise measurement of consumption,
+the current simple coefficients for effective iterations are found to
 be sufficient.
 
 \begin{figure}[htbp]
@@ -1485,23 +2062,23 @@ be sufficient.
 
 Figure \ref{fig:IVTests2} illustrates the impact of using effective iteration
 as total computational work. Qualitatively, figure \ref{sfig:IVTests2_EffIt}
-is identical to figure \ref{sfig:IVTests_Eff}, 
-and figure  \ref{sfig:IVTests2_CPUVEffIt} shows strong linear correlation 
-between CPU time and effective iterations with their 
-$log_{10}$ values having correlation coefficient $r=0.9943$. 
-Therefore, the cases of isentropic vortex which are conducted in 
-a stable environment indicate that the effective iteration is 
+is identical to figure \ref{sfig:IVTests_Eff},
+and figure  \ref{sfig:IVTests2_CPUVEffIt} shows strong linear correlation
+between CPU time and effective iterations with their
+$log_{10}$ values having correlation coefficient $r=0.9943$.
+Therefore, the cases of isentropic vortex which are conducted in
+a stable environment indicate that the effective iteration is
 a reliable measurement of computational consumption.
 
 \subsection{Two Dimensional Vortex Shedding}
 
 Vortex shedding from a circular cylinder and forming a vortex street
-is a classic test problem for transient fluid simulation. Due to the refined 
+is a classic test problem for transient fluid simulation. Due to the refined
 mesh near solid wall, such cases usually prefer implicit time marching
 over explicit ones whose time steps are bounded by CFL condition.
 The current paper studies the 2D laminar case, where
-Reynolds number 
-$Re_d=\rho_\infty u_\infty d / \mu_\infty $ is around $10^3$, 
+Reynolds number
+$Re_d=\rho_\infty u_\infty d / \mu_\infty $ is around $10^3$,
 with Mach number $Ma=0.1$ which makes the flow almost incompressible.
 
 \begin{figure}[htbp]
