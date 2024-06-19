@@ -460,6 +460,9 @@ yields the 2D version of NS and Euler equations.
 \newcommand{\CFLt}{\text{CFL}_t}
 \newcommand{\CFLtau}{\text{CFL}_\tau}
 
+\newcommand{\eeqref}[1]{Eq.\eqref{#1}}
+
+
 This subsection provides a general framework of
 high-order
 finite volume discretization.
@@ -1025,6 +1028,7 @@ DITR U3R1 method is potentially more favorable than
 U2R2 and U2R1.
 
 \subsubsection{Summary of DITR Methods}
+\label{sssec:sumDITRs}
 
 The U2R2, U2R1 and U3R1 variants of the
 DITR method can be written is a unified form.
@@ -1072,40 +1076,9 @@ The second equation is the temporal reconstruction:
     \right)
 \end{equation}
 where the coefficients vary in different schemes
-following Table \ref{tab:inter0Tab} where
+following Table \ref{tab:inter0Tab}. 
+The time step ratio for the two-step U3R1 method is   
 $\Theta = \inc t^{n-1} / \inc t^{n}$.
-% \begin{table}[htbp]
-%     \centering
-%     \footnotesize
-%     \begin{tabular}{|c|c|c|c|c|c|}
-%         \hline
-%         DITR Method                                                                                                                            & $a^n_0$ & $a^n_1$ & $a^n_2$ & $d^n_1$ & $d^n_2$ \\
-%         \hline
-%         U2R2                                                                                                                                   &
-%         0                                                                                                                                      &
-%         $1-(3{c_2}^2 - 2 {c_2}^3)$                                                                                                             &
-%         $3{c_2}^2 - 2 {c_2}^3$                                                                                                                 &
-%         ${c_2} - 2 {c_2}^2 + {c_2}^3$                                                                                                          &
-%         $- {c_2}^2 + {c_2}^3$                                                                                                                                                                    \\
-%         \hline
-%         U2R1                                                                                                                                   &
-%         0                                                                                                                                      &
-%         $1-(2c_2 - {c_2}^2)$                                                                                                                   &
-%         $2c_2 - {c_2}^2$                                                                                                                       &
-%         0                                                                                                                                      &
-%         ${c_2}^2 - {c_2} $                                                                                                                                                                       \\
-%         \hline
-%         U3R1                                                                                                                                   &
-%         $-\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}$                                                           &
-%         $\frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}$                                                                   &
-%         $\frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2}$ &
-%         0                                                                                                                                      &
-%         $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                                                                                \\
-%         \hline
-%     \end{tabular}
-%     \caption{Butcher tableau of DITR U2R2}
-%     \label{tab:inter0Tab}
-% \end{table}
 
 \begin{table}[htbp]
     \centering
@@ -1128,6 +1101,18 @@ $\Theta = \inc t^{n-1} / \inc t^{n}$.
     \caption{Interpolation coefficients for different DITR methods}
     \label{tab:inter0Tab}
 \end{table}
+
+In practical, the current research chooses $c_2=0.5,0.55$ for U2R2.
+U2R2 $c_2=0.5$ has optimal order of accuracy (4th order), but it is symmetric.
+U2R2 $c_2=0.55$ is 3rd order accurate but breaks symmetry and gains some stability.
+
+For U2R1, $c_2$ does not affect order of accuracy and stability. 
+We empirically choose $c_2=0.25$ for U2R1, the reason roots in 
+solving stability and will be explained in \ref{sssec:numScan}.
+
+For U3R1, since any $c_2$ gives $L$-stability, $c_2=0.5$ which 
+offers optimal 4th order of accuracy is always used. 
+
 
 
 
@@ -1389,12 +1374,14 @@ $\Theta = \inc t^{n-1} / \inc t^{n}$.
 % steps, while $c_2 = 1/2$ tends to preserve them.
 
 
-\subsection{Solving Approaches}
+\section{Solving Approaches of DITR}
 \renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
 \newcommand{\eye}{\mathbf{I}}
 \newcommand{\J}{\mathbf{J}}
 \newcommand{\FF}{\mathcal{F}}
+\newcommand{\Pm}{\mathbf{P}}
+\newcommand{\Pe}{\mathrm{P}}
 
 The DITR methods discussed in the current paper
 consist of two implicit equations \eqref{eq:DISum} and
@@ -1408,8 +1395,8 @@ how to solve the equations arising from DITR methods
 when applied to spacial discretized flow problems, and
 describe a recommended solving approach in the end.
 
-\subsubsection{Dual Time Stepping}
-\label{sssec:dualTime}
+\subsection{Dual Time Stepping}
+\label{ssec:dualTime}
 
 Dual time stepping \cite{jameson1991time,jameson2017evaluation}
 is a standard procedure of solving nonlinear
@@ -1431,10 +1418,11 @@ equation \eqref{eq:abstractImplicit} reads
     =0
 \end{equation}
 Generally, $\FF^*$ should be arranged so that
-$\R(\uu^*)$ in $\FF^*$ has coefficient being $O(1)$ and positive.
+$\R(\uu^*)$ in $\FF^*$ has coefficient being $O(1)$ and positive,
+while $\uu^*$ has its coefficient being $O(\inc t^{-1})$ and negative.
 With the idea of dual time stepping, namely
 \begin{equation}
-    \frac{\dd\uu^{*}}{\dd \tau} = \FF^*(\uu^{*,m+1})
+    \frac{\dd\uu^{*}}{\dd \tau} = \FF^*(\uu^{*})
     \label{eq:exactDualTime}
 \end{equation}
 combined with a backward Euler method on the
@@ -1490,6 +1478,67 @@ The residual function $\FF^*$ is therefore a concatenated vector of
 different stage equations' residual vectors.
 Therefore, for methods with $k$ unknown stages, the number of
 unknowns solved concurrently is $k$ times of that in BDF or ESDIRK methods.
+Applied to DITR methods, there is
+\begin{equation}
+    \uu^* = \begin{bmatrix}
+        \uu^{n+c_2} \\
+        \uu^{n+1}
+    \end{bmatrix}
+\end{equation}
+and we denote
+\newcommand{\GG}{\mathcal{G}}
+\begin{equation}
+    \begin{aligned}
+        \FF^* & =\begin{bmatrix}
+                     \FF^{n+c_2} \\
+                     \FF^{n+1}
+                 \end{bmatrix} = \Pm\begin{bmatrix}
+                                        \GG^{n+c_2} \\
+                                        \GG^{n+1}
+                                    \end{bmatrix} \\ & = \Pm\begin{bmatrix}
+            \frac{a^n_0\uu^{n - 1} +
+                a^n_1\uu^{n} +
+                a^n_2\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+            +
+            d^n_1\R^{n} +
+            d^n_2\R^{n + 1}
+            \\
+            \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+            b_1 \R^n +
+            b_2 \R^{n+c_2} +
+            b_3 \R^{n+1}
+        \end{bmatrix}
+        \label{eq:DITRFFDef}
+    \end{aligned}
+\end{equation}
+where $\Pm$ is a preconditioning matrix:
+\begin{equation}
+    \Pm = \begin{bmatrix}
+        \Pe_{11}\eye & \Pe_{12}\eye \\
+        \Pe_{21}\eye & \Pe_{22}\eye \\
+    \end{bmatrix}
+\end{equation}
+Functions $\GG^{n+c_2},\GG^{n+1}$ are the original residuals
+corresponding to temporal reconstruction \eeqref{eq:TRSum} and
+direct integration \eeqref{eq:DISum} respectively. Note that
+$\FF^{n+c_2},\FF^{n+1}$ and $\GG^{n+c_2},\GG^{n+1}$ are all
+dependent on both $\uu^{n+c_2},\uu^{n+1}$.
+And consequently \eeqref{eq:exactDualTime} becomes
+\begin{equation}
+    \begin{bmatrix}
+        \derivative{\uu^{n+c_2}}{\tau} \\
+        \derivative{\uu^{n+1}}{\tau}
+    \end{bmatrix} =
+    \Pm
+    \begin{bmatrix}
+        \FF^{n+c_2} \\
+        \FF^{n+1}
+    \end{bmatrix}
+    \label{eq:DITRNaiveDualTime}
+\end{equation}
+Applying \eeqref{eq:DITRNaiveDualTime} directly to \eeqref{eq:abstractNewton}
+would require the solution of an enlarged sparse linear problem.
+
 For solvers that explicitly implement sparse matrix storage
 and solving methods, such enlargement is trivial at the cost of $k^2$ times
 of matrix storage. But for inherently matrix-free flow solvers,
@@ -1504,7 +1553,7 @@ to solve DITR time stepping.
 
 
 
-\subsubsection{DITR's Nested Solving Approach}
+\subsection{The Nested Solving Approach of DITR}
 
 A characteristic of equation \eqref{eq:TRSum} is that
 $\uu^{n+c_2}$ only exists on the left side, namely the
@@ -1533,7 +1582,7 @@ $\uu^{n+c_2}$ can be eliminated nonlinearly:
         \label{eq:nestedDITR}
     \end{aligned}
 \end{equation}
-which we rewrite into the general form required in section \ref{sssec:dualTime}:
+which we rewrite into the general form required in section \ref{ssec:dualTime}:
 \begin{equation}
     \begin{aligned}
         \FF(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
@@ -1580,10 +1629,17 @@ time stepping methods,
 this divergent result denies the practicality of the
 nested solving approach.
 
+
+
 \newcommand{\imagUnit}{\mathrm{i}}
 
-To explain the failure of the nested solving approach,
-a simple analysis with the linear convection problem
+\subsubsection{Fourier Analysis for Pseudo Time: General Features}
+
+To explain the failure of the nested solving approach
+in the presence of dual time stepping, Fourier
+analysis based on pseudo time is considered.
+
+To start the Fourier analysis, consider the linear convection problem
 solved on an infinitely large 1-D uniform
 grid.
 Suppose the 1-D linear convection problem reads
@@ -1665,8 +1721,10 @@ To summarize, for stage residual function $\FF^*$ in the form of
 equation \eqref{eq:canonicalFF}, it is guaranteed $\imag (\kappa^*) < 0$,
 and the pseudo time evolution is stable in the sense of a continuous $\tau$.
 
-This result confirms the reason behind using dual time stepping,
-that it is automatically stable with certain ODE methods.
+This result offers an aspect of reason behind using dual time stepping,
+that it is automatically stable when applied to common ODE methods.
+
+\subsubsection{Fourier Analysis for Pseudo Time: on Nested Solving Approach}
 
 Back to the current section's subject,
 DITR's nested solving approach,
@@ -1780,32 +1838,575 @@ In equation \eqref{eq:imagKsTauDITR},
 the $\left[\cos(2\kappa) -2\cos(\kappa) + 1\right]$ term
 is negative for $\kappa \in (0, \pi/2)$, and for
 all current DITR methods, $b_2>0$ and $d_2^n < 0$.
-There always exists a $\CFLt$ that is large enough
+Consequently, there always exists a $\CFLt$ that is large enough
 so that $\imag(\kappa^*(\kappa)) \leq 0, \forall \kappa$ is false.
 Which means for a large enough physical CFL number, the nested
 solving approach is unstable in the sense of continuous $\tau$
-evolution. 
+evolution.
 
 As an example, DITR U2R2 method with $c_2=1/2$ gives
 a specific formulation of $\imag(\kappa^*)$ that only depends on $\kappa$
 and $\CFLt$, which is illustrated in figure \ref{fig:HM3_U2R2050_KappaS}.
 Figure \ref{fig:HM3_U2R2050_KappaS} indicates for DITR U2R2 $c_2=1/2$,
 when using nested solving approach, it is unable to linearly converge
-with small $\inc \tau$ and approximately $\CFLt > 8$. 
+with small $\inc \tau$ and approximately $\CFLt > 8$.
+In other words, even with linear convection equation and first order upwind
+scheme,
+the nested solving approach does not converge when physical CFL reaches 8
+and pseudo time step is small.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R2050_KappaS.pdf}
-    \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using 
-    nested solving}
+    \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using
+        nested solving}
     \label{fig:HM3_U2R2050_KappaS}
 \end{figure}
 
+After further analysis,
+apart from the first-order upwind spacial discretization,
+for any linear spacial discretization with modified wave number $\kappa'$,
+the pseudo time wave number $\kappa^*$ is
+\begin{equation}
+    \begin{aligned}
+        \kappa^* =
+        -i\CFLt b_2 d_2^n {\kappa'}^2
+        + (b_2a_2^n + b_3) \kappa' - \frac{i}{\CFLt}
+    \end{aligned}
+    \label{eq:imagKsTauDITR_General}
+\end{equation}
+and for $\kappa'$ with finite non-zero real and imaginary parts,
+it is always easy to find a large enough $\CFLt$ that makes
+$\imag(\kappa^*) > 0$.
+
+
 According to numerical tests with linear convection problem,
-when $\inc \tau \rightarrow \infty$, the nested solving 
+when $\inc \tau \rightarrow \infty$, the nested solving
 approach is possibly convergent. However, for strongly nonlinear
-flow problems, a small $\inc \tau$ is almost a must, making 
+flow problems, a small $\inc \tau$ is almost a must.
+The current research has tested nested solving approach
+with N-S equations discretized using high-order FV method,
+and the nested solving approach is indeed unable to successfully
+converge in many scenarios.
+The failure in both theoretical pseudo time stability and
+real life problems makes
 the nested solving approach inapplicable.
+
+\subsection{The Stage-Decoupled Solving Approach of DITR}
+
+The failure of nested solving approach in dual time stepping
+roots in the nesting of right-hand-side $\R$ terms
+(i.e. spacial discretization operators), which
+causes an $O(\CFLt)$ term in the modified wave number,
+making the wave number unbounded when $\CFLt\rightarrow + \infty$.
+Therefore, the non-nested form of dual time stepping in
+the fully coupled approach \eeqref{eq:DITRFFDef} and \eeqref{eq:DITRNaiveDualTime}
+seems more favorable.
+
+In order to circumvent the complexity encountered in solving the enlarged
+system via the fully coupled approach, the present paper
+proposes a simplified approach to solve the enlarged dual time marching
+\eeqref{eq:DITRNaiveDualTime}:
+\begin{equation}
+    \begin{aligned}
+        \left(\frac{\eye}{\inc\tau} -
+        \partialderivative{\FF^{n+c_2}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+c_2}}  \right)
+        \inc\uu^{n+c_2,m} & = \FF^{n+c_2}(\uu^{n+c_2,m}, \uu^{n+1,m}) \\
+        \left(\frac{\eye}{\inc\tau} -
+        \partialderivative{\FF^{n+1}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+1}}  \right)
+        \inc\uu^{n+1,m}   & = \FF^{n+1}(\uu^{n+c_2,m+1}, \uu^{n+1,m}) \\
+    \end{aligned}
+    \label{eq:DITRSDS}
+\end{equation}
+where $\uu^{n+c_2,m+1} = \uu^{n+c_2,m} + \inc \uu^{n+c_2,m}$ and
+$\uu^{n+1,m+1} = \uu^{n+1,m} + \inc \uu^{n+1,m}$.
+In the first updating formula in \eeqref{eq:DITRSDS},
+$\uu^{n+1}$ is considered static and the linearizing is only
+performed on $\uu^{n+c_2}$. The second updating formula
+then makes $\uu^{n+c_2}$ static, and performs linearizing on
+$\uu^{n+1}$ only. Note that the right side $\FF$ functions
+and Jacobian terms $\partialderivative{\FF}{\uu}$ always
+uses the latest versions of $\uu^{n+c_2}$ and $\uu^{n+1}$.
+Both $\uu^{n+c_2}$ and $\uu^{n+1}$ are updated immediately
+after each increment values are obtained.
+
+Compared to the updating procedure in fully coupled approach,
+where both increment values are solved in a coupled system,
+the current approach decouples the inter-stage linear connections.
+So, this approach is referred to as the stage-decoupled approach.
+
+The convergence of the stage-decoupled approach relies on
+the preconditioning matrix $\Pm$.
+As $\Pm$ is required to be non-singular, and
+$\GG$ terms in \eeqref{eq:DITRFFDef} are already
+well-formed, the current research limits the form
+of $\Pm$ to be:
+\begin{equation}
+    \Pm = \begin{bmatrix}
+        \eye & \beta\eye \\
+        0    & \eye
+    \end{bmatrix}
+    \label{eq:specialP}
+\end{equation}
+where $\beta$ is a real parameter.
+Note that restricting the form of $\Pm$ does not affect the
+generality of the following discussions, where the analyses methods
+are applicable to all forms of $\Pm$.
+
+\subsubsection{Fourier Analysis for Pseudo Time: on Stage-Decoupled Solving Approach}
+\label{sssec:SDSFourier}
+
+When $\inc \tau \rightarrow 0$, the stage-decoupled pseudo time marching
+\eeqref{eq:DITRSDS} is still consistent with the continuous
+pseudo time marching \eeqref{eq:DITRNaiveDualTime}, therefore
+general Fourier analysis on \eeqref{eq:DITRNaiveDualTime} is performed.
+To simplify the analysis, we can rewrite \eeqref{eq:DITRFFDef}
+as a linear form:
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\B}{\mathbf{B}}
+\newcommand{\C}{\mathbf{C}}
+\begin{equation}
+    \begin{bmatrix}
+        \FF^{n+c_2} \\
+        \FF^{n+1}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        \C_1 + \frac{1}{\inc t^n}(A_{11}\uu^{n+c_2} + A_{12}\uu^{n+1})
+        + B_{11}\R^{n+c_2} + B_{12}\R^{n+1} \\
+        \C_2 + \frac{1}{\inc t^n}(A_{21}\uu^{n+c_2} + A_{22}\uu^{n+1})
+        + B_{21}\R^{n+c_2} + B_{22}\R^{n+1}
+    \end{bmatrix}
+    \label{eq:linearDITRFF}
+\end{equation}
+where $A_{ij},B_{ij}$ are constant coefficients
+decided by the DITR method, and $\C_i$ are
+vectors that are constant in the solving process.
+
+Using simple wave modes:
+\begin{equation}
+    \begin{aligned}
+        u^{n+c_2}(\tau,x) & = A^{n+c_2}(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x) \\
+        u^{n+1}(\tau,x)   & = A^{n+1}(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+    \end{aligned}
+\end{equation}
+
+By applying the Fourier analysis mentioned before,
+with some spacial discretization with modified having number
+being $\kappa'$, the evolution of wave strength is:
+\begin{equation}
+    \derivative{ }{\tau}
+    \begin{bmatrix}
+        A^{n+c_2}(\tau) \\
+        A^{n+1}(\tau)
+    \end{bmatrix}
+    =
+    -\imagUnit \frac{a}{\inc x}
+    \left(\frac{\imagUnit}{\CFLt}\begin{bmatrix}
+        A_{11} & A_{12} \\
+        A_{21} & A_{22} \\
+    \end{bmatrix}
+    +\kappa'
+    \begin{bmatrix}
+        B_{11} & B_{12} \\
+        B_{21} & B_{22} \\
+    \end{bmatrix}
+    \right)
+    \begin{bmatrix}
+        A^{n+c_2}(\tau) \\
+        A^{n+1}(\tau)
+    \end{bmatrix}
+    +
+    \begin{bmatrix}
+        C_1 \\C_2
+    \end{bmatrix}
+\end{equation}
+where $C_1,C_2$ are constants during the pseudo time marching.
+Therefore, the modified pseudo time marching wave number is
+the eigenvalues $\kappa^*_1,\kappa^*_2$ of matrix $\mathbf{K}^*$ and
+\begin{equation}
+    \mathbf{K}^* = \frac{\imagUnit}{\CFLt}\begin{bmatrix}
+        A_{11} & A_{12} \\
+        A_{21} & A_{22} \\
+    \end{bmatrix}
+    +\kappa'
+    \begin{bmatrix}
+        B_{11} & B_{12} \\
+        B_{21} & B_{22} \\
+    \end{bmatrix}
+\end{equation}
+
+While preconditioner $\Pm$ is in the form of \eeqref{eq:specialP},
+for the DITR methods discussed in the current paper,
+the coefficient matrices are
+\begin{equation}
+    \begin{bmatrix}
+        A_{11} & A_{12} \\
+        A_{21} & A_{22} \\
+    \end{bmatrix} = \begin{bmatrix}
+        -1 & a_2^n - \beta \\
+        0  & -1            \\
+    \end{bmatrix},\ \
+    \begin{bmatrix}
+        B_{11} & B_{12} \\
+        B_{21} & B_{22} \\
+    \end{bmatrix} = \begin{bmatrix}
+        b_2\beta & b_3\beta + d_2^n \\
+        b_2      & b_3              \\
+    \end{bmatrix}
+    \label{eq:ABBetaForm}
+\end{equation}
+Therefore, $\mathbf{K}^*$ is determined by the DITR coefficients,
+$\beta$, $\kappa'$ and physical CFL number.
+Since $\CFLt > 0$, $\real(\frac{\CFLt\kappa^*_i}{\imagUnit}) \leq 0, i=1,2$
+is equivalent with $\imag(\kappa^*_i) \leq 0, i=1,2$,
+we will investigate the eigenvalues of
+$\frac{\CFLt}{\imagUnit}\mathbf{K}^*$, which is
+determined by DITR coefficients, $\beta$ and the
+combined non-dimensional eigenvalue of spacial discretization $\mu'$
+where
+\begin{equation}
+    \mu' = \frac{\CFLt \kappa'}{\imagUnit}
+\end{equation}
+and
+\begin{equation}
+    \frac{\CFLt}{\imagUnit}\mathbf{K}^* = \begin{bmatrix}
+        A_{11} & A_{12} \\
+        A_{21} & A_{22} \\
+    \end{bmatrix} + \mu \begin{bmatrix}
+        B_{11} & B_{12} \\
+        B_{21} & B_{22} \\
+    \end{bmatrix}
+\end{equation}
+
+Therefore, to ensure the stability of continuous pseudo time
+marching of DITR's stage-decoupled approach, it is
+required
+\begin{equation}
+    \real(\mu^*_i) \leq 0,\  i = 1,2,\  \forall \real(\mu') \leq 0
+\end{equation}
+where
+\begin{equation}
+    \mu^*_i = \frac{\CFLt\kappa^*_i}{\imagUnit},\ i=1,2
+\end{equation}
+
+As an example, $\max(\real(\mu^*_1),\real(\mu^*_2))$ is plotted for
+DITR U2R2 $c_2=1/2$ in Figure \ref{fig:MuU2R2} with varying $\beta$ choices.
+When $\beta = 0$ or the preconditioner is identity, the pseudo time marching is
+unstable. Stability seems to be achieved when $\beta = 1$, because
+the left half plane seems to have $\max(\real(\mu^*_1),\real(\mu^*_2)) < 0$.
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0_TauMu.pdf}
+        \caption[]{$\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0.5_TauMu.pdf}
+        \caption[]{$\beta = 0.5$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_TauMu.pdf}
+        \caption[]{$\beta = 1$}
+    \end{subfigure}
+    \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0}
+    \label{fig:MuU2R2}
+\end{figure}
+
+To determine the choices of the preconditioning parameter  $\beta$
+with Fourier analysis, the
+present paper has performed numerical scanning
+on $\beta$, which will be discussed later.
+
+\subsubsection{Gauss-Seidel Stability of Stage-Decoupled Solving Approach}
+\label{sssec:GSStability}
+
+The previous section has discussed the ideal
+situation of a continuous $\tau$ evolution, where
+$\inc \tau \rightarrow 0$. When $\inc \tau$ is finite
+or $\inc \tau \rightarrow +\infty$,
+the effect of stage-decoupling as described in \eeqref{eq:DITRSDS}
+is non-trivial.
+If $\R$ is linear, and $\inc \tau \rightarrow +\infty$,
+the iterating process of \eeqref{eq:DITRSDS} is
+actually a 2-by-2 block Gauss-Seidel iteration that obtains
+the linear increment if convergent.
+Therefore, the current section is about to discuss the
+near Guass-Seidel behavior of the stage-decoupled solving approach.
+
+Assuming $\R$ to be linear and diagonalizable,
+a linear scalar ODE
+\begin{equation}
+    \derivative{y}{t} = \lambda y
+\end{equation}
+with $\real(\lambda)\leq 0$
+is tested in the stage-decoupled solving approach when
+$\inc \tau \rightarrow +\infty$.
+\eeqref{eq:DITRSDS} therefore becomes
+\begin{equation}
+    \begin{aligned}
+        \inc y^{n+c_2, m} & = -\frac{1}{ E_{11} } (c_1 + E_{11}  y^{n+c_2, m}+ E_{12}  y^{n+1, m})     \\
+        \inc y^{n+1, m} & = -\frac{1}{ E_{22} } (c_2 + E_{21}  y^{n+c_2, m + 1}+ E_{22}  y^{n+1, m})
+    \end{aligned}
+    \label{eq:scalarGS}
+\end{equation}
+where $E_{ij}=A_{ij}+zB_{ij},\ i,j=1,2$, and $A_{ij}, B_{ij}$ are 
+linear coefficients described in the linear form \eeqref{eq:linearDITRFF}
+and can be calculated with \eeqref{eq:ABBetaForm} using the $\beta$ form 
+preconditioning. $z=\lambda\inc t^n$ is the non-dimensional eigenvalue. 
+$c_1,c_2$ are constant values not dependent on $y^{n+1}, y^{n+c_2}$.
+
+Considering $y^{n+c_2,m} + \inc y^{n+c_2,m} = y^{n+c_2,m+1}$ and 
+$y^{n+1,m} + \inc y^{n+1,m} = y^{n+1,m+1}$, 
+\eeqref{eq:scalarGS} has matrix form:
+\begin{equation}
+    \begin{bmatrix}
+        y^{n+c_2, m + 1}\\
+        y^{n+1, m + 1} 
+    \end{bmatrix}
+    =
+    -\begin{bmatrix}
+        E_{11}&0\\
+        E_{21}&E_{22}
+    \end{bmatrix}^{-1} \begin{bmatrix}
+        c_1\\c_2
+    \end{bmatrix}
+    -
+    \begin{bmatrix}
+        E_{11}&0\\
+        E_{21}&E_{22}
+    \end{bmatrix}^{-1}
+    \begin{bmatrix}
+        0&E_{12}\\
+        0&0
+    \end{bmatrix}
+    \begin{bmatrix}
+        y^{n+c_2, m}\\
+        y^{n+1, m} 
+    \end{bmatrix}
+    \label{eq:scalarGSMat}
+\end{equation}
+\eeqref{eq:scalarGSMat} clearly demonstrates that the stage-decoupled
+solving approach reduces to a $2\times2$ linear Gauss-Seidel iteration.
+The recursion transformation
+\begin{equation}
+    \B_{GS} = -\begin{bmatrix}
+        E_{11}&0\\
+        E_{21}&E_{22}
+    \end{bmatrix}^{-1}
+    \begin{bmatrix}
+        0&E_{12}\\
+        0&0
+    \end{bmatrix}
+\end{equation}
+has only one non-zero eigenvalue 
+\begin{equation}
+    G_{GS} = \frac{E_{12}\,E_{21}}{E_{11}\,E_{22}}
+\end{equation}
+To make the Gauss-Seidel recursion \eeqref{eq:scalarGSMat}
+convergent, $|G_{GS}|\leq 1, \forall \real(z) \leq 0$ is required.
+
+As an example, distribution of $|G_{GS}|$ for DITR U2R2 $c_2=1/2$
+is illustrated in Figure \ref{fig:GGSU2R2}. 
+The figure shows when $\beta=0$, the stability region is finite.
+When $\beta>0.5$, the figure shows that the stability region includes 
+the left half plane.  
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0_GGS.pdf}
+        \caption[]{$\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0.5_GGS.pdf}
+        \caption[]{$\beta = 0.5$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_GGS.pdf}
+        \caption[]{$\beta = 1$}
+    \end{subfigure}
+    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1}
+    \label{fig:GGSU2R2}
+\end{figure}
+
+Using the Gauss-Seidel stability of the stage-decoupled solving approach,
+the choice of $\beta$ can be again narrowed down.
+Numerical scanning is also conducted to find optimized $\beta$ value for 
+DITR methods, which will be discussed in the next section.
+
+\subsubsection{Numerical Scanning for the Preconditioning Parameter}
+\label{sssec:numScan}
+
+The preconditioning parameter, $\beta$, as discussed in \ref{sssec:SDSFourier}
+and \ref{sssec:GSStability}, affects convergence properties of the 
+stage-decoupled solving strategy.
+When $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier}, 
+$\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth 
+rate of the $\tau$ evolution. When the DITR method parameters are settled,
+$\mu^*_1=\mu^*_1(\beta, \mu')$, $\mu^*_2=\mu^*_2(\beta, \mu')$ and $G_{GS}=G_{GS}(\beta, z)$.
+When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability} 
+represents the magnifying factor in the Gauss-Seidel updating.
+Similar to $A$-stability of ODE integrators, 
+the relations:
+\begin{equation}
+    \max(\real(\mu^*_1),\real(\mu^*_2)) \leq 0,\ \forall \real(\mu') \leq 0
+\end{equation}
+and 
+\begin{equation}
+    |G_{GS}| \leq 1,\ \forall \real(z) \leq 0
+\end{equation}
+are referred to as the $A(\tau,0)-$stability and 
+$A(\tau,\infty)-$stability 
+of the stage-decoupled solving approach. 
+The current paper hopes to utilize both extremes of $\inc\tau$ to 
+narrow down the choice of an optimized $\beta$.
+
+
+First, $\beta$ is restrained to be no greater than $O(1)$ to make 
+the preconditioning non-singular. 
+Meanwhile, $\beta\leq 0$ leads to a negative coefficient of $\R^{n+c_2}$ 
+in $\FF^{n+c_2}$ according to \eeqref{eq:DITRFFDef}, which almost 
+guarantees the loss of stability. Therefore, empirically, $\beta\in[0,2]$
+is to be the numerical scanning interval.
+
+Next, given a certain $\beta$ value and a certain DITR method, the 
+stability indicators $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
+can be calculated as functions of $\mu'$ and $z$ respectively. 
+To check on the $A(\tau,0)-$ and $A(\tau,\infty)-$stability of this 
+certain $\beta$ choice, $\mu'$ and $z$ are numerically sampled 
+in the left half complex plane. The samples include $101\times101$
+uniform points in $[-10,0]\times[0,10]$. Furthermore, radially distributed 
+points with 101 argument samples in $[\pi/2,\pi]$ and 10 exponentially 
+distributed radius samples in $[10^1, 10^{10}]$ are included. 
+Note that the sample points are all above the real axis, because the 
+distributions of $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
+are symmetric about the real axis with the DITR coefficients being real.
+The numeric sample points form the sample 
+sets $\{\mu'_i\}$ and $\{z_i\}$. Then, the numeric maximums are 
+calculated:
+\begin{equation}
+\begin{aligned}
+        \mu^*_{M}(\beta) & = \max_{i}\{\max(\real(\mu^*_1(\beta,\mu'_i)),\real(\mu^*_2(\beta,\mu'_i)))\}\\
+        G_{GS,M}(\beta) & = \max_{i}\{|G_{GS}(\beta,z_i)|\}
+\end{aligned}
+\end{equation}
+if for some $\beta=\beta_0$, $\mu^*_{M}(\beta_0) \leq 0,G_{GS,M}(\beta_0) \leq 1$,
+it is known for  $\beta=\beta_0$, $A(\tau,0)-$stability and 
+$A(\tau,\infty)-$stability are achieved.
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Methods_SearchMu.pdf}
+        % \caption[]{$\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_Methods_SearchGGS.pdf}
+        % \caption[]{$\beta = 0.5$}
+    \end{subfigure}
+    \caption{Numerical scanning results of $\beta$}
+    \label{fig:MuGGSSearch}
+\end{figure}
+Figure \ref{fig:MuGGSSearch} illustrates the numerical scanning 
+results of maximal values of 
+ $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$ in the left 
+ half plane. Note that U3R1 methods uses $c_2=0.5$ in all cases, and $Theta$ is 
+ the ratio of time step sizes.
+In the sense of satisfying the stability conditions $\mu^*_{M} \leq 0,G_{GS,M} \leq 1$,
+$\mu^*_{M}$ offers a more strict restriction. 
+The approximate results are listed in Table \ref{tab:resrictionBetaSearch}.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Method                            & Restriction from $\mu^*_{M}$& Restriction from $G_{GS,M}$  \\
+        \hline
+         U2R2 $c_2=0.5$  & $\beta > 0.63$& $\beta > 0.38$  \\
+         \hline
+         U2R2 $c_2=0.55$ & $\beta > 0.72$& $\beta > 0.53$  \\
+         \hline
+         U2R1 $c_2=0.25$ & $\beta > 0.63$& $\beta > 0.34$  \\
+         \hline
+         U2R1 $c_2=0.5$ & $\beta > 1$& $\beta > 0.75$  \\
+         \hline
+         U3R1 $\Theta=0.25$ & $\beta > 0.71$& $\beta > 0.45$  \\
+         \hline
+         U3R1 $\Theta=1$ & $\beta > 0.83$& $\beta > 0.57$  \\
+         \hline
+         U3R1 $\Theta=4$ & $\beta > 0.94$& $\beta > 0.68$  \\
+        \hline
+    \end{tabular}
+    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
+    \label{tab:resrictionBetaSearch}
+\end{table}
+
+In practice, the current research observed that 
+when $\beta$ is significantly larger the approximate 
+restriction boundaries in Table \ref{tab:resrictionBetaSearch}, 
+convergence is faster and more reliable. 
+The reason could be that with larger $\beta$, $\mu^*_M$  and $G_{GS,M}$
+are allowed to be significantly smaller than $0$ and $1$ respectively,
+making $A(\tau,0)-$stability and 
+$A(\tau,\infty)-$stability stronger. 
+Meanwhile, it is observed that the shape of the stability region
+ $|G_{GS}|\leq1$ is greatly affected by the choice of $\beta$, 
+ which is indicated in Figure \ref{fig:HM3_U2R205_GGSRegions}.
+In Figure \ref{fig:HM3_U2R205_GGSRegions}, with the 
+increase of $\beta$, the unstable region is more 
+compacted around the real axis, making the iteration with $\inc\tau\rightarrow\infty$
+converge more reliably.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pics/HM3_U2R205_GGSRegions.pdf}
+    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R2 $c_2=0.5$ with different $\beta$}
+    \label{fig:HM3_U2R205_GGSRegions}
+\end{figure}
+
+However, when $\beta>1.5$, in all cases $\mu^*_{M}$ and $G_{GS,M}$ increase 
+with $\beta$, which means some modes in the linear error will
+decay slower. In practice, the current research indeed finds a larger
+$\beta$ causes slow convergence.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{pics/HM3_U2R1_GGSRegions.pdf}
+    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R1 with different $\beta$ and $c_2$}
+    \label{fig:HM3_U2R1_GGSRegions}
+\end{figure}
+Another issue that should be addressed here is the 
+selection of $c_2$ for U2R1 methods. $c_2$ does not 
+affect order of accuracy and ODE stability of U2R1, but 
+has influence on the convergence behavior, as is shown 
+in Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch}.
+From Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch},
+with $c_2=0.25$, U2R1 has less restriction on $\beta$ than with $c_2=0.5$.
+Meanwhile, Figure \ref{fig:HM3_U2R1_GGSRegions} illustrates the 
+impact of $c_2$ on $|G_{GS}|\leq1$ stability regions. 
+With $c_2=0.5$, the unstable region expands far from the real axis,
+while when $c_2=0.25$, the unstable region is 
+more concentrated around the real axis similar with U2R2 $c_2=0.5$
+shown in Figure \ref{fig:HM3_U2R205_GGSRegions}. 
+Consequently, the current research chooses $c_2=0.25$ over $c_2=0.5$
+for U2R1 due to its better convergence behavior in 
+the stage-decoupled solving approach.
+
+
+
+Combining the discussions above,
+for U2R2 $c=0.5$, we empirically choose $\beta = 1$.
+For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
+For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
+For U3R1, we empirically use $\beta = 1$ for all $\Theta$.
+These $\beta$ values are significantly larger than the 
+stability restrictions and guarantees
+$A(\tau,0)-$stability and 
+$A(\tau,\infty)-$stability.
+Also, these  $\beta$ values are large enough to make the stable regions of $|G_{GS}|\leq1$
+crudely larger, which produces better reliability of convergence.
+Meanwhile, $\beta$ values are not so large that $\mu^*_{M}$ and $G_{GS,M}$
+are too close to 1, maintaining sufficient convergence speed.
 
 
 \subsection{discard}
