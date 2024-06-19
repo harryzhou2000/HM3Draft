@@ -2398,7 +2398,7 @@ Combining the discussions above,
 for U2R2 $c=0.5$, we empirically choose $\beta = 1$.
 For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
 For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
-For U3R1, we empirically use $\beta = 1$ for all $\Theta$.
+For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
 These $\beta$ values are significantly larger than the 
 stability restrictions and guarantees
 $A(\tau,0)-$stability and 
@@ -2409,473 +2409,6 @@ Meanwhile, $\beta$ values are not so large that $\mu^*_{M}$ and $G_{GS,M}$
 are too close to 1, maintaining sufficient convergence speed.
 
 
-\subsection{discard}
-
-HIRK's Butcher tableau in table \ref{tab:HM3Butcher}
-indicates that apart from the first stage,
-the other two stages seem fully coupled,
-but following the original formulation
-of HIRK \eqref{eq:HM3} which originates from
-interpolation and integration,
-clearly the internal stage $\uu^*$ can be explicitly
-expressed by $\uu^n, \uu^{n+1}$ with the interpolation
-relation \eqref{eq:HM3-2}, and one only need
-to solve \eqref{eq:HM3-1} implicitly.
-Therefore, the first solving strategy this paper
-considers is identical to the spirit of NIRK,
-which solves the equation:
-\begin{equation}
-    \label{eq:eqFull}
-    \uu^{n+1} -
-    \left(\uu^{n} + \inc t
-    \left[
-        b_1\R(t^{n,1}, \uu^n) +
-        b_2\R(t^{n+c_2}, \uu^*) +
-        b_3\R(t^{n,3}, \uu^{n+1})
-        \right]
-    \right)  =  0
-\end{equation}
-For simplicity, we denote the residual of \eqref{eq:eqFull}
-as:
-\begin{equation}
-    \Res(\uu^{n+1}) \doteq \uu^{n+1} -
-    \left(\uu^{n} + \inc t
-    \left[
-        b_1\R(t^{n,1}, \uu^{n}) +
-        b_2\R(t^{n+c_2}, \uu^{*}) +
-        b_3\R(t^{n,3}, \uu^{n+1})
-        \right]
-    \right)
-\end{equation}
-Considering $\uu^{n}$ is known,
-and $\uu^{*}$ is explicitly expressed,
-$\Res(\uu^{n+1})$ is considered only a
-function of unknown $\uu^{n+1}$.
-The Newton-Raphson method applied to
-\eqref{eq:eqFull}'s solving would be
-\begin{equation}
-    \begin{aligned}
-        \uu^{n+1,m+1}                  & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
-        \frac{\partial \Res(\uu^{n+1,m})}
-        {\uu^{n+1,m}} \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
-    \end{aligned}
-\end{equation}
-and adding the pseudo time continuation
-would be
-\begin{equation}
-    \label{eq:ntDtau}
-    \begin{aligned}
-        \uu^{n+1,m+1}            & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
-        \left(
-        \frac{\partial \Res(\uu^{n+1,m})}
-        {\uu^{n+1,m}} + \inc t \Tau^{-1}
-        \right) \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
-    \end{aligned}
-\end{equation}
-where $\Tau=\mathrm{diag}(\tau_1,...\tau_N)$ is a diagonal matrix with
-local pseudo time steps as its diagonal values.
-The pseudo time continuation of Newton iteration
-could be both understood as a relaxation of original
-method for nonlinear stability,
-or as the result of solving dual time stepping
-method Jameson developed \cite{jameson1991time}.
-In other words, \eqref{eq:ntDtau} is the result
-of solving pseudo time evolution
-$\frac{d\uu^{n+1}}{d\tau} = -\frac{\Res}{\inc t}$
-with linearly implicit backward Euler method and
-a local time stepping.
-Such dual time stepping is prevalent in transient
-flow solution due to the nonlinearity in
-fluid systems.
-However, pseudo time term could
-cause trouble if we try to solve HIRK
-of any MIRK type system with certain approaches, which
-will be illustrated later.
-
-The expanded form of residual's Jacobian
-is
-\begin{equation}
-    \label{eq:fullJCB}
-    \begin{aligned}
-        \frac{\partial \Res(\uu^{n+1})}
-        {\uu^{n+1}}
-                     & = \eye - \inc t b_3 \J^{n+1} -
-        \inc t b_2\J^*(a_2\eye +\inc t d_2 \J^{n+1})                                  \\
-                     & = \frac{d_2 + a_2b_3}{d_2}\eye
-        -\frac{a_2b_3}{d_2}\left(
-        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
-        \right)\left(
-        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
-        \right)                                                                       \\
-        \text{with:} &                                                                \\
-                     & \J^* = \frac{\partial \R(t^{n+c_2},\uu^*)}{\partial \uu^*},\ \
-        \J^{n+1} = \frac{\partial \R(t^{n,3},\uu^{n+1})}{\partial \uu^{n+1}}
-    \end{aligned}
-\end{equation}
-which is a quadratic polynomial of right-hand-sides'
-Jacobian.
-If the Jacobian matrices could be explicitly formed and
-manipulated, solving \eqref{eq:ntDtau} would be straightforward.
-But a lot of high order methods rely on matrix-free
-Jacobian evaluation, thus solving the linear system
-with its matrix in the form of \eqref{eq:fullJCB}
-would be troublesome or impossible.
-Even if one would like to use a matrix-less linear solver
-like Krylov space solvers,
-powerful matrix-free preconditioners like ILU(0) or
-LUSGS would be unavailable.
-
-The solution to the complexity of Jacobian
-by Kulikov and Shindin
-is using an approximate factorization
-\cite{kulikov2006familyNIRKOrig,kulikov2009adaptive}.
-For the forth order
-Gauss type NIRK in \cite{kulikov2006familyNIRKOrig},
-Kulikov and Shindin used $(\eye-\inc t /4 \J)^2$
-as an approximation.
-This paper considers the form
-\begin{equation}
-    \label{eq:factJCB}
-    \begin{aligned}
-        \frac{\partial \Res(\uu^{n+1})}
-        {\uu^{n+1}}
-         & \approx
-        -\frac{a_2b_3}{d_2}\left(
-        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
-        \right)\left(
-        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
-        \right)    \\
-    \end{aligned}
-\end{equation}
-which is directly taken from the last term
-in \eqref{eq:fullJCB}, and the omitted term
-is identity matrix with coefficient $\frac{d_2 + a_2b_3}{d_2}>0$
-for $c_2\in(0,1)$. Note that $d_2<0$ for any possible $c_2$.
-
-Using a factorized form of approximate
-Jacobian like \eqref{eq:factJCB} enables the use of
-two successive matrix-free solvers to obtain
-the increment for Newton iteration.
-
-For practical CFD implementation,
-pseudo time term is now considered.
-In order to preserve the factorized form,
-this paper finds using
-\begin{equation}
-    \label{eq:ntDtau_Fact}
-    \begin{aligned}
-        \uu^{n+1,m+1}    & =  \uu^{n+1,m} + \inc \uu^{n+1,m}, \\
-        -\frac{a_2b_3}{d_2}\left(
-        \eye + \frac{d_2b_2}{b_3}\inc t\J^*
-        + \inc t \Tau^{-1}
-        \right)\left(
-        \eye + \frac{d_2}{a_2}\inc t\J^{n+1}
-        \right)
-        \inc \uu^{n+1,m} & = - \Res(\uu^{n+1,m})
-    \end{aligned}
-\end{equation}
-as the pseudo time continued Newton iteration
-satisfactory.
-In the linear sense, using this this approximate
-Jacobian and pseudo time stepping does not sabotage
-the convergence of Newton iteration, which can
-be shown by applying the iteration \eqref{eq:ntDtau_Fact}
-to solving scalar ODE $\frac{dy}{dt} = \lambda y$.
-For multi-dimensional linear ODEs, using a Jordan decomposition
-would make the proof reduce to scalar equation. \#\#\#\#
-
-
-% Due to the explicit nature of the internal 
-% stage $\uu^*$, when solving nonlinear systems,
-% the un-converged state of $\uu^{n+1}$ at 
-% the beginning of iteration could put $\uu^*$
-% far from the real solution, 
-% causing the right-hand-side to behave bad
-% and possibly make the iteration breakdown. 
-% Therefore, this paper presents another approach of solving 
-% HIRK step which is vital for nonlinear ODEs.
-
-% In order to account for nonlinearity, 
-% we forsake the explicit nature in the 
-% determination of $\uu^*$ as described in \eqref{eq:HM3-2}, 
-% which is an Hermite interpolation linear dependent 
-% on $\uu^{n},\uu^{n+1},\R^n, \R^{n+1}$.
-
-This paper also provides another kind of
-solving strategy,
-which forsakes the explicitness in \eqref{eq:HM3-2},
-thus making $\uu^*$ the dof to be solved,
-which is the case for a general IRK scheme.
-The equation to solve would be:
-\begin{equation}
-    \begin{aligned}
-         & \left\{
-        \begin{array}[2]{ll}
-            \Res(\uu^{n+1},\uu^{*})   & = 0 \\
-            \Res^*(\uu^{n+1},\uu^{*}) & = 0 \\
-        \end{array}
-        \right.    \\
-    \end{aligned}
-\end{equation}
-with
-\begin{equation}
-    \begin{aligned}
-        \Res(\uu^{n+1},\uu^{*})   & \doteq \uu^{n+1} - \left(
-        \uu^{n} +
-        \inc t
-        \left[
-            b_1\R(t^{n,1}, \uu^n) +
-            b_2\R(t^{n+c_2}, \uu^*) +
-            b_3\R(t^{n,3}, \uu^{n+1})
-            \right]
-        \right)                                               \\
-        \Res^*(\uu^{n+1},\uu^{*}) & \doteq\uu^{*} - \left(
-        a_1\uu^{n} +
-        a_2\uu^{n+1} +
-        \inc t
-        \left[
-            d_1\R(t^{n,1}, \uu^n) +
-            d_2\R(t^{n,3}, \uu^{n+1})
-            \right]
-        \right)
-    \end{aligned}
-\end{equation}
-Making $\uu^*$ unknown has two major drawbacks.
-The first drawback is that additional memory
-would be required for $\uu^*$'s storage.
-Considering HIRK saves much space compared to
-DIRK methods, and HIRK also requires some more space
-for intermediate results even using explicit $\uu^*$ evaluation,
-the first drawback would not be significant.
-The second drawback is the increase in the dimension of
-algebraic system.
-Normally, the enlarged system can be solved
-using appropriate blocking strategy,
-for example in \cite{pazner2017stage}.
-However, the current scheme takes a different form of
-iteration which takes two sub-steps:
-\begin{equation}
-    \label{eq:intersolve}
-    \begin{aligned}
-        \uu^{*,m+1}   & = \uu^{*,m} - \left[
-            \eye - \inc t \frac{\partial \Res^{*'}(\uu^{n+1,m},\uu^{*,m})}
-            {\partial \uu^{*,m}}
-            + \inc t \Tau^{-1}
-            \right]
-        \backslash \Res^{*'}(\uu^{n+1,m},\uu^{*,m}) \\
-        \uu^{n+1,m+1} & = \uu^{n+1,m} - \left[
-            \eye - \inc t \frac{\partial \Res^{}(\uu^{n+1,m},\uu^{*,m+1})}
-            {\partial \uu^{n+1,m}}
-            + \inc t \Tau^{-1}
-            \right]
-        \backslash \Res^{}(\uu^{n+1,m},\uu^{*,m+1}) \\
-    \end{aligned}
-\end{equation}
-where the $\mathbf{A}\backslash \mathbf{b}$
-notation means to solve the linear problem $\mathbf{A}\mathbf{x}=\mathbf{b}$ once.
-The residual $\Res^{*'}$ is defined with:
-\begin{equation}
-    \Res^{*'}(\uu^{n+1},\uu^{*}) = \Res^*(\uu^{n+1},\uu^{*}) + \beta\Res(\uu^{n+1},\uu^{*})
-\end{equation}
-which serves as the residual preconditioned with transformation
-\begin{equation*}
-    \begin{bmatrix}
-        \Res^{} \\
-        \Res^{*'}
-    \end{bmatrix} =
-    \begin{bmatrix}
-        \eye & 0 \\ \beta\eye & \eye
-    \end{bmatrix}
-    \begin{bmatrix}
-        \Res^{} \\
-        \Res^{*}
-    \end{bmatrix}
-\end{equation*}
-with $\beta\in\mathbb{R}$.
-In \cite{jameson2017evaluation} Jameson used the inverse of Butcher coefficients
-for preconditioning, which makes off-diagonal blocks of
-the Jacobian scalar.
-That preconditioning could
-be adopted in the current method,
-but is not recommended for
-possible instabilities in the presence of negative pressure fixing in
-numeric tests. \#\#\#\#
-
-The solving procedure \eqref{eq:intersolve} could be regarded as
-successively updating $\uu^*$ with $\Res^{*'}$ and $\uu$
-with $\Res^{}$, by using the latest values of the other DOF.
-Within a linear context,
-this would be a blocks Gauss-Seidel iteration
-over the $2\times2$ blocks of system with each block being $N\times N$.
-In other words,to solve:
-\begin{equation*}
-    \begin{bmatrix}
-        \Res^{}(\uu^{n+1},\uu^{*}) \\
-        \Res^{*'}(\uu^{n+1},\uu^{*})
-    \end{bmatrix} = 0
-\end{equation*}
-the canonical quasi Newton iteration would need to solve
-\begin{equation}
-    \label{eq:fullCoupled}
-    \begin{bmatrix}
-        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}} + \inc t\Tau^{-1} &
-        \frac{\partial\Res^{}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}}                       \\
-        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{n+1,m}}                 &
-        \frac{\partial\Res^{*'}(\uu^{n+1,m},\uu^{*,m})}{\partial\uu^{*,m}} + \inc t\Tau^{-1}   \\
-    \end{bmatrix}
-    \begin{bmatrix}
-        \inc\uu^{n+1,m} \\
-        \inc\uu^{*,m}
-    \end{bmatrix}
-    =
-    -\begin{bmatrix}
-        \Res^{}(\uu^{n+1,m},\uu^{*,m}) \\
-        \Res^{*'}(\uu^{n+1,m},\uu^{*,m})
-    \end{bmatrix}
-\end{equation}
-to update both stage values concurrently.
-The current method \eqref{eq:intersolve}
-first solve the second block row of
-\eqref{eq:fullCoupled} for the increment of $\uu^*$,
-then solve the first block row
-for the increment of $\uu^{n+1}$ using updated $\uu^*$.
-The current solving strategy will
-be referred to as successive solving in the following parts.
-
-The omitting of off-diagonal relations in \eqref{eq:fullCoupled},
-or the block nonlinear Gauss-Seidel handling on the top layer of
-algorithm brings about extra error in iteration,
-causing slow-down of iteration and possible divergence.
-To analyze such behavior, the current research investigates
-the impact of successive solving \eqref{eq:intersolve}
-brought to solution of HIRK applied to linear problems
-using precise linear solvers.
-With a traditional quasi Newton iteration,
-if pseudo time steps approaches infinity,
-the iteration would converge in the first step in such
-situation.
-The introduction of successive solving \eqref{eq:intersolve}
-renders this one-step-convergence impossible, thus
-the convergence with successive solving will represent
-all the deceleration effect caused by it.
-The linear situation discussed could also be a linearization
-of a non-linear ODE when the stage values converge near the
-solution, and the instant convergence of Newton iteration would
-be first order accurate.
-In the linear or linearized scene,
-the residual takes the form:
-\begin{equation}
-    \label{eq:linearized}
-    \begin{aligned}
-        \Res^{}(\uu^{n+1},\uu^{*})   & =
-        \Res^{}_0 - \inc t b_2\J^*\uu^{*} + (\eye - \inc t b_3\J)\uu^{n+1} \\
-        \Res^{*'}(\uu^{n+1},\uu^{*}) & =
-        \Res^{*'}_0 + (\eye - \beta\inc t b_2\J^*)\uu^{*}
-        + ((\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J)\uu^{n+1}
-    \end{aligned}
-\end{equation}
-where $\J^*, \J$ are Jacobian of $\R$
-at the solution of
-$\uu^{*}, \uu^{n+1}$.
-Applying \eqref{eq:intersolve} to
-this linear form and assuming a infinite pseudo
-time step,
-following textbook analysis conducted on
-Gauss-Seidel iteration,
-the successive solving becomes a linear
-fixed point iteration, with fixed point
-mapping's matrix being
-\begin{equation}
-    \mathbf{B}_{SS}=\begin{bmatrix}
-        \eye - \beta\inc t b_2\J^* & 0                   \\
-        - \inc t b_2\J^*           & \eye - \inc t b_3\J \\
-    \end{bmatrix}^{-1}
-    \begin{bmatrix}
-        0 & (\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J \\
-        0 & 0                                            \\
-    \end{bmatrix}
-\end{equation}
-Thus, convergence of the fixed point iteration equals to
-the condition
-\begin{equation}
-    \label{eq:rhoGS}
-    \begin{aligned}
-         & \varUpsilon(\mathbf{B}_{SS}) \\
-         & =\varUpsilon\left(
-        -[\eye - \inc t b_3\J]^{-1}
-        [- \inc t b_2\J^*]
-        [\eye - \beta\inc t b_2\J^*]^{-1}
-        [(\beta-a_2)\eye - \inc t (\beta b_3 - d_2)\J]
-        \right)                         \\
-         & < 1
-    \end{aligned}
-\end{equation}
-where $\varUpsilon$ is spectral radius of matrix.
-For arbitrary $\J,\J^*$, further analysis is difficult,
-so we limit the situation to where $\J = \J^*$ is an acceptable
-approximation, or the ODE is linear itself.
-Using the Jordan form,
-and assuming all the inverse are existent and precisely solved,
-\eqref{eq:rhoGS} would become
-\begin{equation}
-    \label{eq:rhoGS1}
-    \begin{aligned}
-        \varrho_i =
-        \left|
-        -[1 -  b_3z_i]^{-1}
-        [- b_2z_i]
-        [1 - \beta b_2z_i]^{-1}
-        [(\beta-a_2) - (\beta b_3 - d_2)z_i]
-        \right| & < 1,\ \ \forall z_i = \inc t \lambda_i
-    \end{aligned}
-\end{equation}
-where $\lambda_i$ is eigenvalues of $\J$.
-By further assuming $\mathfrak{Re} z_i < 0$
-which is true for stable semi-discretized
-method used on bounded linear problems,
-special cases were analyzed.
-For $c_2=0.5, \beta=0.5$, it is found
-$\varrho_i < 0.5$.
-For $c_2=0.5, \beta=1$, it is found $\varrho_i < 0.42$.
-For $c_2=0.55, \beta=0.5$, $\varrho_i$ could exceed 1.
-For $c_2=0.55, \beta=1$, it is found $\varrho_i < 0.36$.
-These analyses are trivial which involve finding maximal points
-in the left complex plane and on the imaginary axis.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=3in]{pics/numSearchRho.png}
-    \caption{Numerical search result }
-    \label{fig:numSearchRho}
-\end{figure}
-
-Numerical search is conducted to find
-\begin{equation}
-    \varrho_m(\beta) = \max_{\forall i}(\varrho_i)
-\end{equation}
-whose result is shown in figure \ref{fig:numSearchRho}.
-Figure \ref{fig:numSearchRho} indicates
-at least for $c_2\in[0.5,0.6]$, $\varrho_m<1$
-could be satisfied easily by adjusting $\beta$, therefore
-achieving convergence in Gauss-Seidel iteration.
-For optimal Gauss-Seidel convergence rate,
-values of $\beta$ could be found by numeric searching
-as shown in figure \ref{fig:numSearchRho}.
-Figure \ref{fig:numSearchRho} also suggests
-$c_2=0.5$ helps acquiring better convergence rage
-in successive solving.
-
-The current successive solving approach
-differs from previous ones,
-which only requires linear solutions of
-the same dimension as the ODE.
-This property makes HIRK's implementation
-very similar to traditional DIRK or BDF methods,
-thus taking less effort.
-
-
-
-
 
 \section{Numerical Tests}
 
@@ -2884,17 +2417,8 @@ BDF2 and ESDIRK4 methods taken from
 \cite{bijl2002implicitBDFvESDIRK,kennedy2003additiveARK}
 are chosen to be
 baseline time marching methods.
-For HIRK method, instances of
-$c_2 = 0.5$ and $c_2 = 0.55$ are tested.
-For $c_2 = 0.5$, the method is 4th order accurate and
-is essentially the Lobatto IIIA method \cite{wanner1996solving}.
-For $c_2 = 0.55$ which has 3rd order accuracy,
-the symmetry is broken and linear stability is
-improved as clarified in \ref{ssec:linStab}.
-Both HIRK methods employ successive
-solving in the form of \eqref{eq:intersolve},
-with $\beta$ chosen as empirical values $1,4/3$ respectively.
-
+For DITR methods, instances of 
+U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 
 The isentropic vortex, two dimensional vortex shedding
 and  double mach reflection problems use
@@ -2946,7 +2470,7 @@ translation of initial field with speed $(1,1)$.
 The computational domain is $[0,10]\times[0,10]$,
 using periodic boundary conditions.
 
-First, the implicit ODE integrators are tested with large
+First, the implicit ODE integrators are tested with aggressively large
 time steps.
 The mesh is $40\times40$ square grid,
 and solution is calculated until $t=10$ with $\inc t=1$.
@@ -2956,56 +2480,69 @@ simulate.
 
 \begin{figure}[htbp]
     \centering
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.33\textwidth}
         \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3LBT.png}
-        \caption[]{HIRK $c_2=0.5$}
+        \caption[]{DITR U2R2 $c_2=0.5$}
         \label{sfig:IV10Step_HM3LBT}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.33\textwidth}
         \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3.png}
-        \caption[]{HIRK $c_2=0.55$}
+        \caption[]{DITR U2R2 $c_2=0.55$}
         \label{sfig:IV10Step_HM3}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3U2R1.png}
+        \caption[]{DITR U2R1}
+        \label{sfig:IV40_10steps_HM3U2R1}
     \end{subfigure}\\
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3U3R1.png}
+        \caption[]{DITR U3R1}
+        \label{sfig:IV40_10steps_HM3U3R1}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
         \includegraphics[width=\textwidth]{pics/IV40_10steps_ESDIRK4.png}
         \caption[]{ESDIRK4}
         \label{sfig:IV10Step_ESDIRK4}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
+    \begin{subfigure}{0.33\textwidth}
         \includegraphics[width=\textwidth]{pics/IV40_10steps_BDF2.png}
         \caption[]{BDF2}
         \label{sfig:IV10Step_BDF2}
     \end{subfigure}
-    \caption{Density distribution of isentropic vortex problem, with $\inc t = 1$ at $t=10$}
+    \caption{Density of isentropic vortex problem, with aggressively large time step $\inc t = 1$ at $t=10$}
     \label{fig:IV10Step}
 \end{figure}
 
 Results of large time step testing are shown in figure \ref{fig:IV10Step}.
 Clearly, from figure \ref{sfig:IV10Step_BDF2}, BDF2 almost completely
 smears the initial vortex with only 10 steps for one period.
-The higher order methods somehow preserves the characteristics of
-a vortex. HIRK $c_2=0.5$ produces significant numerical oscillation along
+The higher order methods somehow preserve the characteristics of
+a vortex. DITR U2R2 $c_2=0.5$ produces significant numerical oscillation along
 the propagation direction as shown in figure \ref{sfig:IV10Step_HM3LBT},
-while the $c_2=0.55$ HIRK inhibits them better in figure \ref{sfig:IV10Step_HM3}.
-The peak value in the vortex center produced by HIRK $c_2=0.5$ is comparable with
-ESDIRK4, while HIRK $c_2=0.55$ gives a flatter density peak.
+while the DITR U2R2 $c_2=0.55$ inhibits them better in figure \ref{sfig:IV10Step_HM3}.
+The peak value in the vortex center produced by DITR U2R2 $c_2=0.5$ is comparable with
+ESDIRK4, while DITR U2R2 $c_2=0.55$ gives a flatter density peak. 
+Both U2R1 and U3R1 methods are $L$-stable like ESDIRK4, and they 
+are indeed better at suppressing non-physical oscillations. 
+Note that it seems ESDIRK4 outperforms all the DITR methods in 
+this case, but DITR only needs 2 internal stages to be solved while 
+ESDIRK4 needs 5.
 
 Next, precision and efficiency of different ODE methods are
 qualitatively evaluated with isentropic vortex solved on a $160\times160$
 grid until $t=2$.
-The fine mesh makes spacial error negligible compared with
-temporal error.
-The density error is defined as
+The fine mesh makes spacial 
+discretization error negligible compared with
+time marching error.
+The density error is defined as an $L1$ norm in the form of
 \begin{equation}
-    \epsilon_\rho = \frac{\int_{(x,y)\in[4,9]\times[4,9]}{|\rho-\rho_a dxdy}|}{
-    |[4,9]\times[4,9]|
+    \epsilon_\rho = \frac{\int{|\rho-\rho_a| \dd x\dd y}}{
+    100
     }
 \end{equation}
-with $[4,9]\times[4,9]=25$ the area of evaluating region, $\rho$ the numeric result
+with  $\rho$ the numeric result of density
 and $\rho_a$ the analytic result.
-The evaluating region is limited to $[4,9]\times[4,9]=25$
-where the vortex center
-and most numerical error resides.
 
 
 
@@ -3027,69 +2564,31 @@ and most numerical error resides.
 
 Results of convergence and efficiency study with isentropic vortex is
 shown in figure \ref{fig:IVTests}.
-Figure \ref{sfig:IVTests_Conv} indicates that all the ODE methods
-could roughly achieve their theoretical order of accuracy.
-With the same time step size, figure \ref{sfig:IVTests_Conv} shows
-ESDIRK4 has best accuracy, while HIRK $c_2=0.5$ is close to
-ESDIRK4 when time step is refined. HIRK $c_2=0.55$ is less accurate
-than HIRK $c_2=0.5$, but it performs almost as well as
-HIRK $c_2=0.5$ when time step is large.
+
+Figure \ref{sfig:IVTests_Conv} shows that with the same time step size, 
+ESDIRK4 has the best accuracy, while DITR U2R2 $c_2=0.5$ is close to
+ESDIRK4 when time step is refined. DITR U2R2 $c_2=0.55$ is less accurate
+than DITR U2R2 $c_2=0.5$, but it performs almost as well as
+DITR U2R2 $c_2=0.5$ when time step is large.
+DITR U3R1 and U2R1 are less accurate than U2R2 methods with 
+the same time step. 
+
+As of order of error, in Figure \ref{sfig:IVTests_Conv}, 
+error of ESDIRK4 is barely able to reach 4th order of convergence,
+while DITR U2R2 $c_2=0.5$ and U3R1 methods are also able to reach 
+4th order convergence with smaller time steps. U2R1 and U2R2 $c_2=0.55$
+methods are closer to the 3rd order slope, which conforms with 
+their theoretical order. 
+
 Figure \ref{sfig:IVTests_Eff}
 implies that when consuming the same computational resource,
-HIRK methods have best accuracy or efficiency. All the high order
-time marching methods have better efficiency than BDF2,
-while HIRK methods have better efficiency than ESDIRK4.
-The symmetric HIRK $c_2=0.5$ has better efficiency
-compared with more stable HIRK $c_2=0.55$.
+DITR U2R2 methods have the best accuracy and efficiency. 
+All the high-order
+time marching methods have better efficiency than BDF2, 
+while DITR U2R2 methods have better efficiency than ESDIRK4.
+The symmetric DITR U2R2 $c_2=0.5$ has better efficiency
+compared with more stable DITR U2R2 $c_2=0.55$.
 
-The convergence and efficiency study with isentropic vortex was
-conducted on a isolated server with 2 Intel Xeon 6326 processors with
-16 cores each, with measures to ensure the stability of CPU time measurement.
-Further tests with vortex shedding and double mach reflection
-were conducted on a large cluster, which unfortunately produces more
-unstable CPU time due to disturbances of the communication network.
-Therefore, following numerical tests will use the effective iterations
-to represent total computational consumption.
-Due to the settings of the current research, each updating in
-the implicit solving consumes almost identical time.
-For BDF2, each right-hand-side evaluation, linear solving and updating
-is counted as $1.0$ effective iteration.
-For ESDIRK4, as each updating of some stage value is quite similar with
-BDF2 apart from some extra linear summations, each updating is also
-counted as $1.0$ effective consumption.
-For HIRK methods, each updating of $\uu^*,\uu^{n+1}$
-involves two right-hand-side evaluations and linear solver executions.
-Therefore, each HIRK updating is counted as $2.0$ effective iterations.
-Although one could calibrate the coefficients using theoretical analyses or
-empirical data to get a more precise measurement of consumption,
-the current simple coefficients for effective iterations are found to
-be sufficient.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_21.pdf}
-        \caption[]{Density error vs. effective iterations }
-        \label{sfig:IVTests2_EffIt}
-    \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_4.pdf}
-        \caption[]{CPU time vs. effective iterations}
-        \label{sfig:IVTests2_CPUVEffIt}
-    \end{subfigure}
-    \caption[]{The impact of using iteration counting to measure total work}
-    \label{fig:IVTests2}
-\end{figure}
-
-Figure \ref{fig:IVTests2} illustrates the impact of using effective iteration
-as total computational work. Qualitatively, figure \ref{sfig:IVTests2_EffIt}
-is identical to figure \ref{sfig:IVTests_Eff},
-and figure  \ref{sfig:IVTests2_CPUVEffIt} shows strong linear correlation
-between CPU time and effective iterations with their
-$log_{10}$ values having correlation coefficient $r=0.9943$.
-Therefore, the cases of isentropic vortex which are conducted in
-a stable environment indicate that the effective iteration is
-a reliable measurement of computational consumption.
 
 \subsection{Two Dimensional Vortex Shedding}
 
@@ -3099,31 +2598,36 @@ mesh near solid wall, such cases usually prefer implicit time marching
 over explicit ones whose time steps are bounded by CFL condition.
 The current paper studies the 2D laminar case, where
 Reynolds number
-$Re_d=\rho_\infty u_\infty d / \mu_\infty $ is around $10^3$,
-with Mach number $Ma=0.1$ which makes the flow almost incompressible.
+$Re_d=\rho_\infty u_\infty d / \mu_\infty $ is  $1200$,
+with Mach number being $Ma=0.1$. 
+Small Mach number makes the flow more incompressible, and 
+the speed of sound makes time steps in explicit time marching 
+restricted. 
+Implicit time marching schemes can automatically omit the restrictions 
+of the speed of sound, thus being potentially more favorable.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.7\textwidth]{pics/CylinderA1_Re2000_Mesh.png}
-    \caption[]{Part of mesh used in $Re=2000$ vortex shedding problem}
-    \label{fig:CylinderRe2000_Mesh}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.7\textwidth]{pics/CylinderA1_Re2000_Mesh.png}
+%     \caption[]{Part of mesh used in $Re=2000$ vortex shedding problem}
+%     \label{fig:CylinderRe2000_Mesh}
+% \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3LBT.png}
-        \caption[]{HIRK $c_2=0.5$}
-        \label{sfig:CylinderRe2000_HM3LBT}
-    \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3.png}
-        \caption[]{HIRK $c_2=0.55$}
-        \label{sfig:CylinderRe2000_HM3}
-    \end{subfigure}
-    \caption[]{Comparison of pressure distribution in $Re=2000$ vortex shedding problem}
-    \label{fig:CylinderRe2000}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3LBT.png}
+%         \caption[]{HIRK $c_2=0.5$}
+%         \label{sfig:CylinderRe2000_HM3LBT}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3.png}
+%         \caption[]{HIRK $c_2=0.55$}
+%         \label{sfig:CylinderRe2000_HM3}
+%     \end{subfigure}
+%     \caption[]{Comparison of pressure distribution in $Re=2000$ vortex shedding problem}
+%     \label{fig:CylinderRe2000}
+% \end{figure}
 
 \begin{figure}[htbp]
     \centering
@@ -3176,21 +2680,21 @@ with Mach number $Ma=0.1$ which makes the flow almost incompressible.
     \label{fig:CylinderRe1200_Mx}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/Cylinder_fig13.pdf}
-        \caption[]{Error vs. time step size}
-        \label{sfig:CylinderRe1200_St_C}
-    \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/Cylinder_fig3.pdf}
-        \caption[]{Error vs. effective iterations}
-        \label{sfig:CylinderRe1200_St_E}
-    \end{subfigure}
-    \caption[]{Convergence and efficiency analysis with $\epsilon_{St}$ in $Re=1200$ vortex shedding problem}
-    \label{fig:CylinderRe1200_St}
-\end{figure}
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/Cylinder_fig13.pdf}
+%         \caption[]{Error vs. time step size}
+%         \label{sfig:CylinderRe1200_St_C}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/Cylinder_fig3.pdf}
+%         \caption[]{Error vs. effective iterations}
+%         \label{sfig:CylinderRe1200_St_E}
+%     \end{subfigure}
+%     \caption[]{Convergence and efficiency analysis with $\epsilon_{St}$ in $Re=1200$ vortex shedding problem}
+%     \label{fig:CylinderRe1200_St}
+% \end{figure}
 
 
 
@@ -3201,26 +2705,48 @@ with Mach number $Ma=0.1$ which makes the flow almost incompressible.
     \centering
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
-        \caption[]{HIRK $c_2=0.5$}
+        \caption[]{DITR U2R2 $c_2=0.5$}
         \label{sfig:DM480_HM3LBT}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
-        \caption[]{HIRK $c_2=0.55$}
+        \caption[]{DITR U2R2 $c_2=0.55$}
         \label{sfig:DM480_HM3}
-    \end{subfigure}\\
+    \end{subfigure}
+    \caption{Density in double mach reflection problem, DITR U2R2}
+    \label{fig:DM480-1}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480_ESDIRK.png}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U2R1.png}
+        \caption[]{DITR U2R1}
+        \label{sfig:DM480_HM3U2R1}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
+        \caption[]{DITR U3R2}
+        \label{sfig:DM480_HM3U3R1}
+    \end{subfigure}
+    \caption{Density in double mach reflection problem, DITR U2R1 and U3R1}
+    \label{fig:DM480-2}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_ESDIRK4-T2.png}
         \caption[]{ESDIRK4}
         \label{sfig:DM480_ESDIRK4}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480_BDF.png}
+        \includegraphics[width=\textwidth]{pics/DM480-1_BDF-T2.png}
         \caption[]{BDF2}
         \label{sfig:DM480_BDF2}
     \end{subfigure}
-    \caption{Density distribution in double mach reflection problem}
-    \label{fig:DM480}
+    \caption{Density in double mach reflection problem, baseline methods}
+    \label{fig:DM480-3}
 \end{figure}
 
 \section{Conclusion}
