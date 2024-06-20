@@ -1766,7 +1766,7 @@ where $\nabla_i(u_i) = u_i - u_{u_i-1}$ is the $i$ direction
 backward difference operator.
 Since only $n+1$ relevant part of
 the right side is of interest (which is non-constant in
-the time step solving), the equation \cite{eq:nestedDITR_F1} can be reformed into:
+the time step solving), the equation \eeqref{eq:nestedDITR_F1} can be reformed into:
 \begin{equation}
     \begin{aligned}
         \frac{\dd u_i^{n+1}}{\dd \tau}\frac{\inc x}{a} & =
@@ -2600,11 +2600,88 @@ The current paper studies the 2D laminar case, where
 Reynolds number
 $Re_d=\rho_\infty u_\infty d / \mu_\infty $ is  $1200$,
 with Mach number being $Ma=0.1$. 
+Parameters are normalized so that freestream speed, density
+and diameter of the cylinder are unit values. 
 Small Mach number makes the flow more incompressible, and 
 the speed of sound makes time steps in explicit time marching 
 restricted. 
 Implicit time marching schemes can automatically omit the restrictions 
 of the speed of sound, thus being potentially more favorable.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
+        \caption[]{Mesh}
+        \label{sfig:CylinderRe1200Demo_Mesh}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
+        \caption[]{Vorticity distribution}
+        \label{sfig:CylinderRe1200Demo_Vort}
+    \end{subfigure}
+    \caption[]{Mesh and a instance of z-vorticity distribution
+        in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200Demo}
+\end{figure}
+
+Figure \ref{sfig:CylinderRe1200Demo_Mesh} demonstrates
+the unstructured grid used in the $Re=1200$  vortex 
+street calculation, and Figure \ref{sfig:CylinderRe1200Demo_Vort}
+demonstrates z-vorticity distribution in the 2-D vortex street 
+after it is fully developed. 
+
+In order to quantitatively compare different
+time marching schemes, 
+the time marching error is compared.
+Using the same mesh as in Figure \ref{sfig:CylinderRe1200Demo_Mesh}
+and the same compact FV spacial discretization, 
+a numeric reference solution is calculated with ESDIRK4 using 
+very fine time step $\inc t = 0.00125$.
+In the reference solution, restart information at $t=200$
+is stored, in which the vortex street has fully developed.
+Next, starting from the $t=200$ flow field, combined with 
+different time marching schemes and time step sizes 
+varying from $0.04$ to $0.1$, transient flow is simulated until $t=210$.
+CPU consumption and error values are evaluated. 
+The transient errors are defined with 
+\begin{equation}
+    \begin{aligned}
+        \|\epsilon_{My}\|_{t,2}^2
+    =& \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{y,i}-M_{y,ref}(t_i))^2}\\
+    \|\epsilon_{Mx}\|_{t,2}^2
+    =& \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{x,i}-M_{x,ref}(t_i))^2}
+    \end{aligned}
+    \label{eq:vorstreetErr}
+\end{equation}
+where $N_{t}$ is the number of time steps for $t\in(200,210]$, 
+$t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are 
+the norms of time derivatives of $y$ and $x$ momentum:
+\begin{equation}
+    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \ 
+    M_x = \int_{\Omega}{\left|\derivative{\rho u_x}{t}\right| \dd \Omega}
+\end{equation}
+Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values 
+obtained in the reference solution.
+
+This manner of calculating transient error avoids the difficulty
+of preserving all the transient solutions at each time step of 
+the very fine reference solution. 
+As the reference solution uses significantly smaller time step, 
+its temporal error is considered to be negligible. 
+In other words, the reference solution is a good enough
+approximation of the exact solution of the semi-discretized 
+FV equations \eeqref{eq:FVODE}. 
+Compared with the reference 
+solution, the solution using regular time steps
+induces major temporal discretization error, which can 
+be illustrated with the errors constructed in \eeqref{eq:vorstreetErr}.
+
+In order to mitigate the influence of the error induced 
+by implicit dual time stepping in each step,
+each dual time stepping are terminated after 
+the residual is smaller than $10^{-7}$ of the 
+starting value.
 
 % \begin{figure}[htbp]
 %     \centering
@@ -2632,32 +2709,13 @@ of the speed of sound, thus being potentially more favorable.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
-        \caption[]{Mesh}
-        \label{sfig:CylinderRe1200Demo_Mesh}
-    \end{subfigure}\hfill
-    \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
-        \caption[]{Vorticity distribution}
-        \label{sfig:CylinderRe1200Demo_Vort}
-    \end{subfigure}
-    \caption[]{Mesh and a instance of z-vorticity distribution
-        in $Re=1200$ vortex shedding problem}
-    \label{fig:CylinderRe1200Demo}
-\end{figure}
-
-
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/Cylinder_fig14.pdf}
         \caption[]{Error vs. time step size}
         \label{sfig:CylinderRe1200_My_C}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/Cylinder_fig4.pdf}
-        \caption[]{Error vs. effective iterations}
+        \caption[]{Error vs. CPU Time}
         \label{sfig:CylinderRe1200_My_E}
     \end{subfigure}
     \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
@@ -2673,12 +2731,45 @@ of the speed of sound, thus being potentially more favorable.
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/Cylinder_fig5.pdf}
-        \caption[]{Error vs. effective iterations}
+        \caption[]{Error vs. CPU Time}
         \label{sfig:CylinderRe1200_Mx_E}
     \end{subfigure}
     \caption[]{Convergence and efficiency analysis with $\epsilon_{Mx}$ in $Re=1200$ vortex shedding problem}
     \label{fig:CylinderRe1200_Mx}
 \end{figure}
+
+Results of the errors versus time step size and CPU time 
+are illustrated in 
+Figure \ref{fig:CylinderRe1200_My} and \ref{fig:CylinderRe1200_Mx}.
+Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C}
+illustrates the results of convergence analysis, where 
+with the refinement of time step, the temporal 
+discretization error is reduced. 
+The ESDIRK4, DITR U2R2 $c_2=0.5$, DITR U3R1 methods 
+approximately 4th order convergence in 
+Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C},
+while U2R1 and U2R2 $c_2=0.55$ are 3rd order.
+BDF2 is indeed 2nd order accurate, and is only able 
+to be comparable with high-order methods when $\inc t$
+is very small. 
+Among the DITR methods, U2R2 $c_2=0.5$ has the smallest error. 
+U3R1 and U2R2 $c_2=0.55$ are close but U3R1 has higher order of convergence.
+Although better than BDF2, 
+U2R1 has the worst error of vortex street simulation among DITR methods.
+
+Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E}
+use CPU Time as the horizontal axis, therefore comparison of efficiency is illustrated. 
+In Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E},
+in order to achieve an error with magnitude of $10^{-3}$, the 
+high-order methods are significantly more economic than the
+2nd order BDF2. 
+Among the high order methods, DITR U2R2 $c_2=0.55$ is 
+close to ESDIRK4 in efficiency, while 
+U2R2 $c_2=0.5$ and U3R1 are more efficient than ESDIRK4.
+The most efficient U2R2 $c_2=0.5$ takes less than 70\% of 
+the time used in ESDIRK4 when the error is $10^-4$.
+
+
 
 % \begin{figure}[htbp]
 %     \centering
