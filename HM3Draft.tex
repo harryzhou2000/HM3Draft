@@ -115,16 +115,30 @@
     {
         organization=
             { Department of Engineering Mechanices, Tsinghua Universiy},%Department and Organization
-        addressline={},
-        city={},
-        postcode={},
-        state={Beijing},
+        city={Beijing},
+        postcode={100084},
         country={China}}
 
 
 
     \begin{abstract}
-        Text of abstract
+        A series of new implicit time marching schemes based on direct integration of ODEs and temporal 
+        reconstruction (DITR) are developed and tested on compressible flow problems. 
+        The new DITR methods are constructed to reach high order of accuracy
+        in a straightforward manner. 
+        After analysis, the DITR method are found to be 
+        $A$-stable, with two variants of them being $L$-stable. 
+        Combined with dual time stepping, a stage-decoupled solving strategy for DITR is 
+        developed and discussed, making DITR's implementation simple for previous matrix-free 
+        implicit solvers. 
+        With high-order compact finite volume spacial discretization, 
+        the new DITR time marching schemes are numerically tested in flow problems.
+        Numerical results show DITR methods have high order of accuracy and 
+        comparatively lower computational cost. 
+        When reaching the same error, some DITR methods are able to save 
+        significant amount of time compared with the implicit ESDIRK4 method. 
+
+        
 
     \end{abstract}
 
@@ -142,6 +156,8 @@
     \begin{keyword}
         %% keywords here, in the form: keyword \sep keyword
 
+        High-order Methods \sep Time Marching \sep Temporal Reconstruction \sep Unsteady Flows
+
         %% PACS codes here, in the form: \PACS code \sep code
 
         %% MSC codes here, in the form: \MSC code \sep code
@@ -152,6 +168,9 @@
 \end{frontmatter}
 
 %% \linenumbers
+
+
+\newcommand{\trans}{^\mathrm{T}}
 
 %% main text
 \section{Introduction}
@@ -345,7 +364,7 @@ and competitive with the 4th order ESDIRK method in efficiency.
 
 
 
-\#\#\#\#
+\#\#\#\# TODO:
 
 Paper's structure:...%TODO
 
@@ -461,6 +480,7 @@ yields the 2D version of NS and Euler equations.
 \newcommand{\CFLtau}{\text{CFL}_\tau}
 
 \newcommand{\eeqref}[1]{Eq.\eqref{#1}}
+\newcommand{\us}{\mathbf{u}}
 
 
 This subsection provides a general framework of
@@ -473,26 +493,37 @@ An averaging of conservative quantities
 over each cell is
 \begin{equation}
     \label{eq:FVMean}
-    \UM_j = \frac{1}{\overline{\OO}_j}\int_{\OO_j}\U(\x)dV
+    \UM_i = \frac{1}{\overline{\OO}_i}\int_{\OO_i}\U(\x)\dd \Omega
 \end{equation}
-where $\overline{\OO}_j$ is the volume of $\OO_j$.
+where $\overline{\OO}_i$ is the volume of $\OO_i$.
 
-Next, a degree $p$ piecewise polynomial reconstruction is
+Next, a degree $k$ piecewise polynomial reconstruction is
 conducted to approximate the distribution of
 quantities
 \begin{equation}
     \label{eq:FVRec}
-    \U_j(\x) = \UM_j + \sum_{i=1}^{\mathrm{NDOF}(p)}{\U_j^i\varphi_{j,i}(\x) }
+    \U_i(\x) = \UM_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{\U_i^l\varphi_{i,l}(\x) }
 \end{equation}
 in which $\U_j(\x)$ is the local polynomial distribution on cell $j$,
 and
 $\varphi_{j,i}(\x)$ are
 polynomial basis functions.
+\eeqref{eq:FVRec} can also be considered as a scalar field
+\begin{equation}
+    \label{eq:FVRecScalar}
+    u_i(\x) = \overline{u}_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{u_i^l\varphi_{i,l}(\x) }
+\end{equation}
+where $u_i(\x)$ is one of $\rho(\x), \rho u_1(\x)\dots$ and should not
+be confused with the velocity components $u_1, u_2, u_3$ in the context of
+reconstruction.
+
+There are $\mathrm{NDOF}(k)$ polynomial bases for reconstruction on
+each cell.
 The current paper uses zero-mean Taylor basis
 for reconstruction \cite{wang2017compact_VR}.
 Given a specific reconstruction method,
-the reconstruction coefficients $\U_j^i$ can be determined using
-the distribution of mean value $\UM_k, k=1,2...N_{cell}$
+the reconstruction coefficients $\U_i^l$ (or $u_i^l$ for each scalar) can be determined using
+the distribution of mean value $\UM_i, i=1,2...N_{cell}$
 and boundary conditions.
 
 With the piecewise polynomial approximation,
@@ -521,10 +552,13 @@ flux $\Fn(\U_i,\U_j)$ is typically an approximate Riemann solver which
 will be specified for each numerical test in the paper.
 Numerical viscous flux $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
 in this paper follows the practice of Wang \cite{wang2017compact_VR}.
+The integration of flux terms on the cell interfaces
+are conducted using numerical quadrature rules with
+enough algebraic precision.
 
 As the spacial derivatives are approximated in \eqref{eq:FVInt},
 it is referred to as the semi-discretized form of finite volume method.
-The inviscid term has a truncation error of $O(h^{p+1})$ for smooth problems,
+The inviscid term has a truncation error of $O(h^{k+1})$ for smooth problems,
 with $h$ being the size of mesh. As the approximate fields $\U_i$ are functions
 of average values $\UM_i$, \eqref{eq:FVInt} can be rearranged into the
 assembled form
@@ -555,7 +589,7 @@ with
 \end{equation}
 The arguments in the numerical fluxes are omitted.
 The right-hand-side vector $\R$ is also a function of $t$
-as boundary conditions or additional source terms
+because boundary conditions or additional source terms
 could depend on $t$ generally speaking.
 
 
@@ -563,6 +597,188 @@ could depend on $t$ generally speaking.
 
 \subsection{Variational Reconstruction}
 \label{ssec:VR}
+In order to determine the coefficients of polynomial bases $\U_i^l$ (or $u_i^l$ for each scalar) in
+\eeqref{eq:FVRec}, a reconstruction method needs to be specified.
+Traditional 2nd order FV methods for unstructured grid
+needs only to reconstruct a $k=1$ polynomial, namely linear
+distribution on each cell.
+The variational reconstruction \cite{wang2017compact_VR}
+is a compact high-order
+reconstruction scheme, which features high-order
+accuracy achieved on a compact stencil.
+The current section will explain the variational reconstruction
+and specify relevant details.
+
+The current paper uses local zero-mean Taylor basis, similar to
+\cite{wang2017compact_VR}.
+Taking 2 dimensional polynomials as an example:
+\begin{equation}
+    \begin{aligned}
+        \varphi_{i,l} & =
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+        -
+        \overline{
+            \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+            \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+        }
+    \end{aligned}
+\end{equation}
+where $[x_{c,j},y_{c,j}]\trans = \x_{c,j}$ are barycenters of cell $j$,
+$\inc x_i,\inc y_i$ are the cell's length scale, and $p_l,q_l$ are
+powers of the bases. If 2-D $k=3$ basis is used, $p_l=[1,0,2,1,0,3,2,1,0]_l$,
+and $q_l=[0,1,0,1,2,0,1,2,3]_l$.
+The mean value term makes the basis zero-mean, which is calculated with:
+\begin{equation}
+    \overline{
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+    }
+    =
+    \frac{1}{\overline{\OO}_j}\int_{\OO_j}{
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+    }\dd \Omega
+\end{equation}
+
+The length scales are chosen to be the largest distance of nodes from the
+barycenter, which has the from
+\begin{equation}
+    \inc x_j = \inc y_j = \max_k(\|\x_{j,k} - \x_{c,j}\|_2)
+\end{equation}
+where $\x_{j,k}$ are coordinates of nodes belonging to cell $j$.
+In this way the base functions are scaled to be isotropic.
+
+The variational reconstruction defines the solution of reconstruction coefficients
+to be the minimum point of a globally defined functional $I$
+\begin{equation}
+    I = \sum{I_f}
+\end{equation}
+where $I_f$ are interface jump integrations (IJI) defined on each cell interface $f$.
+Hereafter, we use $f=f_{ij}$ to denote the interface of cell $i$ and $j$ by default.
+Using 2-D as an example, the current paper uses IJI in the form of
+\begin{equation}
+    I_f = \omega_f^G\int_{\OO_i \cap \OO_j}{
+        \sum_{p+q=0}^{p + q\leq k}\left[
+            \omega_f^D(p,q)
+            \left(
+            \partialderivative{^{p+q}u_i(x,y)}{x^p\partial y^q}
+            -
+            \partialderivative{^{p+q}u_j(x,y)}{x^p\partial y^q}
+            \right)
+            \right]^2
+        \dd f
+    }
+\end{equation}
+where $\omega_f^G$ is geometric weight and
+$\omega_f^D$ is derivative weight.
+The IJI represents facial discontinuities of reconstruction polynomials using
+function values and their various partial derivatives on the interface.
+For 2-D simulation and 3rd degree (4th order) reconstruction, the current paper uses
+\begin{equation}
+    \begin{aligned}
+        \omega_f^D(0,0) & = 1\times \omega_D(0)                                                                                    \\
+        \omega_f^D(1,0) & = \omega_f^D(0,1) = 1\times \omega_D(1)                                                                  \\
+        \omega_f^D(2,0) & = \omega_f^D(0,2) = 1\times \omega_D(2),\ \omega_f^D(1,1) = \sqrt{2}\times \omega_D(2)                   \\
+        \omega_f^D(3,0) & = \omega_f^D(0,3) = 1\times \omega_D(3),\ \omega_f^D(1,2) = \omega_f^D(2,1) = \sqrt{3}\times \omega_D(3) \\
+    \end{aligned}
+    \label{eq:wdRotRatio}
+\end{equation}
+with
+\begin{equation}
+    \omega_D(0) = 1, \omega_D(1) = 0.5925, \omega_D(2) = \omega_D(3) = 0.2117
+    \label{eq:wdHQMOPT}
+\end{equation}
+as the derivative weight.
+This form of derivative weight in \eeqref{eq:wdRotRatio} is rotational invariant and
+isotropic.
+The coefficients in \eeqref{eq:wdHQMOPT} are taken from \cite{huang2022high}, which were
+obtained via optimization of dissipation and dispersion relations.
+
+The geometric weight uses the form
+\begin{equation}
+    \omega_f^G = \sqrt{S^{\frac{1}{d-1}}D_f^{-1}}
+\end{equation}
+where $d$ is the number of spacial dimension, $S$ is the area of the interface,
+and $D_f$ is the distance between barycenters of the two cells. This form of
+geometric weight is also taken from \cite{huang2022high}.
+
+The minimum problem
+\begin{equation}
+    u_i^l = \mathop{\arg \min}(I)
+\end{equation}
+defines the solution to the variational reconstruction system.
+It is observed that $I$ is a quadratic function of $u_i^l, i = 1...N_{cell}$ and
+$I\geq 0$,
+therefore $I$ is a positive semi-definite quadratic form about the global vector of reconstruction
+coefficients. Consequently, the minimum problem converts to a linear equation
+\begin{equation}
+    \partialderivative{I}{u_i^l} = 0, l=1,2,\dots \mathrm{NDOF}(k),\ \ i=1,2,\dots N_{cell}
+\end{equation}
+This linear equation can be arranged in a cell-block form:
+\begin{equation}
+    \label{eq:vrBlockEq}
+    \sum_{f=f_{ij},j\in S_i, j\neq i}{ \mathbf{A}_{ij} \us_i}
+    =
+    \sum_{f=f_{ij},j\in S_i, j\neq i}{ \mathbf{B}_{ij} \us_j + \mathbf{b}_{ij} (\overline{u}_j - \overline{u}_i)}
+\end{equation}
+where $S_i$ is the compact stencil of $i$ composed of cell $i$ and its face neighbors.
+Local reconstruction coefficient vector is $\us_i = [u_i^1,u_i^2\dots]\trans$. 
+The reconstruction coefficient matrices and vectors in \eeqref{eq:vrBlockEq} 
+are determined by the form of IJI:
+\begin{equation}
+    \label{eq:vrCoeffs}
+    \begin{aligned}
+        \mathbf{A}_{ij} = &
+        \left[
+            \left({
+                \omega_f^G\int_{\OO_i \cap \OO_j}{
+                    \sum_{p+q=0}^{p + q\leq k}
+                    \omega_f^D(p,q)^2
+                    \partialderivative{^{p+q}\varphi_{i,r}}{x^p\partial y^q}
+                    \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
+                    \dd f}
+            }\right)_{lr}
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)} \\
+        \mathbf{B}_{ij}= &
+        \left[
+            \left({
+                \omega_f^G\int_{\OO_i \cap \OO_j}{
+                    \sum_{p+q=0}^{p + q\leq k}
+                    \omega_f^D(p,q)^2
+                    \partialderivative{^{p+q}\varphi_{j,r}}{x^p\partial y^q}
+                    \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
+                    \dd f}
+            }\right)_{lr}
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)} \\
+        \mathbf{b}_{ij}= &
+        \left[
+            \left({
+                \omega_f^G\omega_f^D(0,0)^2
+                \int_{\OO_i \cap \OO_j}{
+                    \varphi_{i,l}
+                    \dd f}
+            }\right)_{l}
+        \right]_{\mathrm{NDOF}(k) \times 1} \\
+    \end{aligned}
+\end{equation}
+
+The local coefficients matrices and vectors \eeqref{eq:vrCoeffs} can be 
+calculated at the start of computation. 
+The linear reconstruction system \eeqref{eq:vrBlockEq} is solved with block-SOR method.
+The details of linear solving of variational reconstruction and the treatments of 
+boundary conditions can be found in \cite{wang2017compact_VR}. 
+The fact to be stressed here is that the reconstruction is implicit, and 
+the reconstruction coefficients must be obtained through a series of 
+iteration. 
+During an implicit solving procedure,
+the updating of mean values and reconstruction coefficients are decoupled 
+and executed alternately. 
+As each block-SOR updating is compact in the sense of data dependency, 
+the variational reconstruction is able to have better data locality and 
+less communication during the process.
+
+
 
 % TODO
 \#\#\#
@@ -1076,8 +1292,8 @@ The second equation is the temporal reconstruction:
     \right)
 \end{equation}
 where the coefficients vary in different schemes
-following Table \ref{tab:inter0Tab}. 
-The time step ratio for the two-step U3R1 method is   
+following Table \ref{tab:inter0Tab}.
+The time step ratio for the two-step U3R1 method is
 $\Theta = \inc t^{n-1} / \inc t^{n}$.
 
 \begin{table}[htbp]
@@ -1106,12 +1322,12 @@ In practical, the current research chooses $c_2=0.5,0.55$ for U2R2.
 U2R2 $c_2=0.5$ has optimal order of accuracy (4th order), but it is symmetric.
 U2R2 $c_2=0.55$ is 3rd order accurate but breaks symmetry and gains some stability.
 
-For U2R1, $c_2$ does not affect order of accuracy and stability. 
-We empirically choose $c_2=0.25$ for U2R1, the reason roots in 
+For U2R1, $c_2$ does not affect order of accuracy and stability.
+We empirically choose $c_2=0.25$ for U2R1, the reason roots in
 solving stability and will be explained in \ref{sssec:numScan}.
 
-For U3R1, since any $c_2$ gives $L$-stability, $c_2=0.5$ which 
-offers optimal 4th order of accuracy is always used. 
+For U3R1, since any $c_2$ gives $L$-stability, $c_2=0.5$ which
+offers optimal 4th order of accuracy is always used.
 
 
 
@@ -2146,43 +2362,43 @@ $\inc \tau \rightarrow +\infty$.
 \begin{equation}
     \begin{aligned}
         \inc y^{n+c_2, m} & = -\frac{1}{ E_{11} } (c_1 + E_{11}  y^{n+c_2, m}+ E_{12}  y^{n+1, m})     \\
-        \inc y^{n+1, m} & = -\frac{1}{ E_{22} } (c_2 + E_{21}  y^{n+c_2, m + 1}+ E_{22}  y^{n+1, m})
+        \inc y^{n+1, m}   & = -\frac{1}{ E_{22} } (c_2 + E_{21}  y^{n+c_2, m + 1}+ E_{22}  y^{n+1, m})
     \end{aligned}
     \label{eq:scalarGS}
 \end{equation}
-where $E_{ij}=A_{ij}+zB_{ij},\ i,j=1,2$, and $A_{ij}, B_{ij}$ are 
+where $E_{ij}=A_{ij}+zB_{ij},\ i,j=1,2$, and $A_{ij}, B_{ij}$ are
 linear coefficients described in the linear form \eeqref{eq:linearDITRFF}
-and can be calculated with \eeqref{eq:ABBetaForm} using the $\beta$ form 
-preconditioning. $z=\lambda\inc t^n$ is the non-dimensional eigenvalue. 
+and can be calculated with \eeqref{eq:ABBetaForm} using the $\beta$ form
+preconditioning. $z=\lambda\inc t^n$ is the non-dimensional eigenvalue.
 $c_1,c_2$ are constant values not dependent on $y^{n+1}, y^{n+c_2}$.
 
-Considering $y^{n+c_2,m} + \inc y^{n+c_2,m} = y^{n+c_2,m+1}$ and 
-$y^{n+1,m} + \inc y^{n+1,m} = y^{n+1,m+1}$, 
+Considering $y^{n+c_2,m} + \inc y^{n+c_2,m} = y^{n+c_2,m+1}$ and
+$y^{n+1,m} + \inc y^{n+1,m} = y^{n+1,m+1}$,
 \eeqref{eq:scalarGS} has matrix form:
 \begin{equation}
     \begin{bmatrix}
-        y^{n+c_2, m + 1}\\
-        y^{n+1, m + 1} 
+        y^{n+c_2, m + 1} \\
+        y^{n+1, m + 1}
     \end{bmatrix}
     =
     -\begin{bmatrix}
-        E_{11}&0\\
-        E_{21}&E_{22}
+        E_{11} & 0      \\
+        E_{21} & E_{22}
     \end{bmatrix}^{-1} \begin{bmatrix}
-        c_1\\c_2
+        c_1 \\c_2
     \end{bmatrix}
     -
     \begin{bmatrix}
-        E_{11}&0\\
-        E_{21}&E_{22}
+        E_{11} & 0      \\
+        E_{21} & E_{22}
     \end{bmatrix}^{-1}
     \begin{bmatrix}
-        0&E_{12}\\
-        0&0
+        0 & E_{12} \\
+        0 & 0
     \end{bmatrix}
     \begin{bmatrix}
-        y^{n+c_2, m}\\
-        y^{n+1, m} 
+        y^{n+c_2, m} \\
+        y^{n+1, m}
     \end{bmatrix}
     \label{eq:scalarGSMat}
 \end{equation}
@@ -2191,15 +2407,15 @@ solving approach reduces to a $2\times2$ linear Gauss-Seidel iteration.
 The recursion transformation
 \begin{equation}
     \B_{GS} = -\begin{bmatrix}
-        E_{11}&0\\
-        E_{21}&E_{22}
+        E_{11} & 0      \\
+        E_{21} & E_{22}
     \end{bmatrix}^{-1}
     \begin{bmatrix}
-        0&E_{12}\\
-        0&0
+        0 & E_{12} \\
+        0 & 0
     \end{bmatrix}
 \end{equation}
-has only one non-zero eigenvalue 
+has only one non-zero eigenvalue
 \begin{equation}
     G_{GS} = \frac{E_{12}\,E_{21}}{E_{11}\,E_{22}}
 \end{equation}
@@ -2207,10 +2423,10 @@ To make the Gauss-Seidel recursion \eeqref{eq:scalarGSMat}
 convergent, $|G_{GS}|\leq 1, \forall \real(z) \leq 0$ is required.
 
 As an example, distribution of $|G_{GS}|$ for DITR U2R2 $c_2=1/2$
-is illustrated in Figure \ref{fig:GGSU2R2}. 
+is illustrated in Figure \ref{fig:GGSU2R2}.
 The figure shows when $\beta=0$, the stability region is finite.
-When $\beta>0.5$, the figure shows that the stability region includes 
-the left half plane.  
+When $\beta>0.5$, the figure shows that the stability region includes
+the left half plane.
 \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.33\textwidth}
@@ -2231,67 +2447,67 @@ the left half plane.
 
 Using the Gauss-Seidel stability of the stage-decoupled solving approach,
 the choice of $\beta$ can be again narrowed down.
-Numerical scanning is also conducted to find optimized $\beta$ value for 
+Numerical scanning is also conducted to find optimized $\beta$ value for
 DITR methods, which will be discussed in the next section.
 
 \subsubsection{Numerical Scanning for the Preconditioning Parameter}
 \label{sssec:numScan}
 
 The preconditioning parameter, $\beta$, as discussed in \ref{sssec:SDSFourier}
-and \ref{sssec:GSStability}, affects convergence properties of the 
+and \ref{sssec:GSStability}, affects convergence properties of the
 stage-decoupled solving strategy.
-When $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier}, 
-$\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth 
+When $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier},
+$\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth
 rate of the $\tau$ evolution. When the DITR method parameters are settled,
 $\mu^*_1=\mu^*_1(\beta, \mu')$, $\mu^*_2=\mu^*_2(\beta, \mu')$ and $G_{GS}=G_{GS}(\beta, z)$.
-When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability} 
+When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability}
 represents the magnifying factor in the Gauss-Seidel updating.
-Similar to $A$-stability of ODE integrators, 
+Similar to $A$-stability of ODE integrators,
 the relations:
 \begin{equation}
     \max(\real(\mu^*_1),\real(\mu^*_2)) \leq 0,\ \forall \real(\mu') \leq 0
 \end{equation}
-and 
+and
 \begin{equation}
     |G_{GS}| \leq 1,\ \forall \real(z) \leq 0
 \end{equation}
-are referred to as the $A(\tau,0)-$stability and 
-$A(\tau,\infty)-$stability 
-of the stage-decoupled solving approach. 
-The current paper hopes to utilize both extremes of $\inc\tau$ to 
+are referred to as the $A(\tau,0)-$stability and
+$A(\tau,\infty)-$stability
+of the stage-decoupled solving approach.
+The current paper hopes to utilize both extremes of $\inc\tau$ to
 narrow down the choice of an optimized $\beta$.
 
 
-First, $\beta$ is restrained to be no greater than $O(1)$ to make 
-the preconditioning non-singular. 
-Meanwhile, $\beta\leq 0$ leads to a negative coefficient of $\R^{n+c_2}$ 
-in $\FF^{n+c_2}$ according to \eeqref{eq:DITRFFDef}, which almost 
+First, $\beta$ is restrained to be no greater than $O(1)$ to make
+the preconditioning non-singular.
+Meanwhile, $\beta\leq 0$ leads to a negative coefficient of $\R^{n+c_2}$
+in $\FF^{n+c_2}$ according to \eeqref{eq:DITRFFDef}, which almost
 guarantees the loss of stability. Therefore, empirically, $\beta\in[0,2]$
 is to be the numerical scanning interval.
 
-Next, given a certain $\beta$ value and a certain DITR method, the 
+Next, given a certain $\beta$ value and a certain DITR method, the
 stability indicators $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
-can be calculated as functions of $\mu'$ and $z$ respectively. 
-To check on the $A(\tau,0)-$ and $A(\tau,\infty)-$stability of this 
-certain $\beta$ choice, $\mu'$ and $z$ are numerically sampled 
+can be calculated as functions of $\mu'$ and $z$ respectively.
+To check on the $A(\tau,0)-$ and $A(\tau,\infty)-$stability of this
+certain $\beta$ choice, $\mu'$ and $z$ are numerically sampled
 in the left half complex plane. The samples include $101\times101$
-uniform points in $[-10,0]\times[0,10]$. Furthermore, radially distributed 
-points with 101 argument samples in $[\pi/2,\pi]$ and 10 exponentially 
-distributed radius samples in $[10^1, 10^{10}]$ are included. 
-Note that the sample points are all above the real axis, because the 
+uniform points in $[-10,0]\times[0,10]$. Furthermore, radially distributed
+points with 101 argument samples in $[\pi/2,\pi]$ and 10 exponentially
+distributed radius samples in $[10^1, 10^{10}]$ are included.
+Note that the sample points are all above the real axis, because the
 distributions of $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
 are symmetric about the real axis with the DITR coefficients being real.
-The numeric sample points form the sample 
-sets $\{\mu'_i\}$ and $\{z_i\}$. Then, the numeric maximums are 
+The numeric sample points form the sample
+sets $\{\mu'_i\}$ and $\{z_i\}$. Then, the numeric maximums are
 calculated:
 \begin{equation}
-\begin{aligned}
-        \mu^*_{M}(\beta) & = \max_{i}\{\max(\real(\mu^*_1(\beta,\mu'_i)),\real(\mu^*_2(\beta,\mu'_i)))\}\\
-        G_{GS,M}(\beta) & = \max_{i}\{|G_{GS}(\beta,z_i)|\}
-\end{aligned}
+    \begin{aligned}
+        \mu^*_{M}(\beta) & = \max_{i}\{\max(\real(\mu^*_1(\beta,\mu'_i)),\real(\mu^*_2(\beta,\mu'_i)))\} \\
+        G_{GS,M}(\beta)  & = \max_{i}\{|G_{GS}(\beta,z_i)|\}
+    \end{aligned}
 \end{equation}
 if for some $\beta=\beta_0$, $\mu^*_{M}(\beta_0) \leq 0,G_{GS,M}(\beta_0) \leq 1$,
-it is known for  $\beta=\beta_0$, $A(\tau,0)-$stability and 
+it is known for  $\beta=\beta_0$, $A(\tau,0)-$stability and
 $A(\tau,\infty)-$stability are achieved.
 
 
@@ -2308,53 +2524,53 @@ $A(\tau,\infty)-$stability are achieved.
     \caption{Numerical scanning results of $\beta$}
     \label{fig:MuGGSSearch}
 \end{figure}
-Figure \ref{fig:MuGGSSearch} illustrates the numerical scanning 
-results of maximal values of 
- $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$ in the left 
- half plane. Note that U3R1 methods uses $c_2=0.5$ in all cases, and $Theta$ is 
- the ratio of time step sizes.
+Figure \ref{fig:MuGGSSearch} illustrates the numerical scanning
+results of maximal values of
+$\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$ in the left
+half plane. Note that U3R1 methods uses $c_2=0.5$ in all cases, and $Theta$ is
+the ratio of time step sizes.
 In the sense of satisfying the stability conditions $\mu^*_{M} \leq 0,G_{GS,M} \leq 1$,
-$\mu^*_{M}$ offers a more strict restriction. 
+$\mu^*_{M}$ offers a more strict restriction.
 The approximate results are listed in Table \ref{tab:resrictionBetaSearch}.
 
 \begin{table}[htbp]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
-        Method                            & Restriction from $\mu^*_{M}$& Restriction from $G_{GS,M}$  \\
+        Method             & Restriction from $\mu^*_{M}$ & Restriction from $G_{GS,M}$ \\
         \hline
-         U2R2 $c_2=0.5$  & $\beta > 0.63$& $\beta > 0.38$  \\
-         \hline
-         U2R2 $c_2=0.55$ & $\beta > 0.72$& $\beta > 0.53$  \\
-         \hline
-         U2R1 $c_2=0.25$ & $\beta > 0.63$& $\beta > 0.34$  \\
-         \hline
-         U2R1 $c_2=0.5$ & $\beta > 1$& $\beta > 0.75$  \\
-         \hline
-         U3R1 $\Theta=0.25$ & $\beta > 0.71$& $\beta > 0.45$  \\
-         \hline
-         U3R1 $\Theta=1$ & $\beta > 0.83$& $\beta > 0.57$  \\
-         \hline
-         U3R1 $\Theta=4$ & $\beta > 0.94$& $\beta > 0.68$  \\
+        U2R2 $c_2=0.5$     & $\beta > 0.63$               & $\beta > 0.38$              \\
+        \hline
+        U2R2 $c_2=0.55$    & $\beta > 0.72$               & $\beta > 0.53$              \\
+        \hline
+        U2R1 $c_2=0.25$    & $\beta > 0.63$               & $\beta > 0.34$              \\
+        \hline
+        U2R1 $c_2=0.5$     & $\beta > 1$                  & $\beta > 0.75$              \\
+        \hline
+        U3R1 $\Theta=0.25$ & $\beta > 0.71$               & $\beta > 0.45$              \\
+        \hline
+        U3R1 $\Theta=1$    & $\beta > 0.83$               & $\beta > 0.57$              \\
+        \hline
+        U3R1 $\Theta=4$    & $\beta > 0.94$               & $\beta > 0.68$              \\
         \hline
     \end{tabular}
     \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
     \label{tab:resrictionBetaSearch}
 \end{table}
 
-In practice, the current research observed that 
-when $\beta$ is significantly larger the approximate 
-restriction boundaries in Table \ref{tab:resrictionBetaSearch}, 
-convergence is faster and more reliable. 
+In practice, the current research observed that
+when $\beta$ is significantly larger the approximate
+restriction boundaries in Table \ref{tab:resrictionBetaSearch},
+convergence is faster and more reliable.
 The reason could be that with larger $\beta$, $\mu^*_M$  and $G_{GS,M}$
 are allowed to be significantly smaller than $0$ and $1$ respectively,
-making $A(\tau,0)-$stability and 
-$A(\tau,\infty)-$stability stronger. 
+making $A(\tau,0)-$stability and
+$A(\tau,\infty)-$stability stronger.
 Meanwhile, it is observed that the shape of the stability region
- $|G_{GS}|\leq1$ is greatly affected by the choice of $\beta$, 
- which is indicated in Figure \ref{fig:HM3_U2R205_GGSRegions}.
-In Figure \ref{fig:HM3_U2R205_GGSRegions}, with the 
-increase of $\beta$, the unstable region is more 
+$|G_{GS}|\leq1$ is greatly affected by the choice of $\beta$,
+which is indicated in Figure \ref{fig:HM3_U2R205_GGSRegions}.
+In Figure \ref{fig:HM3_U2R205_GGSRegions}, with the
+increase of $\beta$, the unstable region is more
 compacted around the real axis, making the iteration with $\inc\tau\rightarrow\infty$
 converge more reliably.
 \begin{figure}[htbp]
@@ -2364,7 +2580,7 @@ converge more reliably.
     \label{fig:HM3_U2R205_GGSRegions}
 \end{figure}
 
-However, when $\beta>1.5$, in all cases $\mu^*_{M}$ and $G_{GS,M}$ increase 
+However, when $\beta>1.5$, in all cases $\mu^*_{M}$ and $G_{GS,M}$ increase
 with $\beta$, which means some modes in the linear error will
 decay slower. In practice, the current research indeed finds a larger
 $\beta$ causes slow convergence.
@@ -2375,21 +2591,21 @@ $\beta$ causes slow convergence.
     \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R1 with different $\beta$ and $c_2$}
     \label{fig:HM3_U2R1_GGSRegions}
 \end{figure}
-Another issue that should be addressed here is the 
-selection of $c_2$ for U2R1 methods. $c_2$ does not 
-affect order of accuracy and ODE stability of U2R1, but 
-has influence on the convergence behavior, as is shown 
+Another issue that should be addressed here is the
+selection of $c_2$ for U2R1 methods. $c_2$ does not
+affect order of accuracy and ODE stability of U2R1, but
+has influence on the convergence behavior, as is shown
 in Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch}.
 From Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch},
 with $c_2=0.25$, U2R1 has less restriction on $\beta$ than with $c_2=0.5$.
-Meanwhile, Figure \ref{fig:HM3_U2R1_GGSRegions} illustrates the 
-impact of $c_2$ on $|G_{GS}|\leq1$ stability regions. 
+Meanwhile, Figure \ref{fig:HM3_U2R1_GGSRegions} illustrates the
+impact of $c_2$ on $|G_{GS}|\leq1$ stability regions.
 With $c_2=0.5$, the unstable region expands far from the real axis,
-while when $c_2=0.25$, the unstable region is 
+while when $c_2=0.25$, the unstable region is
 more concentrated around the real axis similar with U2R2 $c_2=0.5$
-shown in Figure \ref{fig:HM3_U2R205_GGSRegions}. 
+shown in Figure \ref{fig:HM3_U2R205_GGSRegions}.
 Consequently, the current research chooses $c_2=0.25$ over $c_2=0.5$
-for U2R1 due to its better convergence behavior in 
+for U2R1 due to its better convergence behavior in
 the stage-decoupled solving approach.
 
 
@@ -2399,9 +2615,9 @@ for U2R2 $c=0.5$, we empirically choose $\beta = 1$.
 For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
 For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
 For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
-These $\beta$ values are significantly larger than the 
+These $\beta$ values are significantly larger than the
 stability restrictions and guarantees
-$A(\tau,0)-$stability and 
+$A(\tau,0)-$stability and
 $A(\tau,\infty)-$stability.
 Also, these  $\beta$ values are large enough to make the stable regions of $|G_{GS}|\leq1$
 crudely larger, which produces better reliability of convergence.
@@ -2417,7 +2633,7 @@ BDF2 and ESDIRK4 methods taken from
 \cite{bijl2002implicitBDFvESDIRK,kennedy2003additiveARK}
 are chosen to be
 baseline time marching methods.
-For DITR methods, instances of 
+For DITR methods, instances of
 U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 
 The isentropic vortex, two dimensional vortex shedding
@@ -2522,23 +2738,23 @@ a vortex. DITR U2R2 $c_2=0.5$ produces significant numerical oscillation along
 the propagation direction as shown in figure \ref{sfig:IV10Step_HM3LBT},
 while the DITR U2R2 $c_2=0.55$ inhibits them better in figure \ref{sfig:IV10Step_HM3}.
 The peak value in the vortex center produced by DITR U2R2 $c_2=0.5$ is comparable with
-ESDIRK4, while DITR U2R2 $c_2=0.55$ gives a flatter density peak. 
-Both U2R1 and U3R1 methods are $L$-stable like ESDIRK4, and they 
-are indeed better at suppressing non-physical oscillations. 
-Note that it seems ESDIRK4 outperforms all the DITR methods in 
-this case, but DITR only needs 2 internal stages to be solved while 
+ESDIRK4, while DITR U2R2 $c_2=0.55$ gives a flatter density peak.
+Both U2R1 and U3R1 methods are $L$-stable like ESDIRK4, and they
+are indeed better at suppressing non-physical oscillations.
+Note that it seems ESDIRK4 outperforms all the DITR methods in
+this case, but DITR only needs 2 internal stages to be solved while
 ESDIRK4 needs 5.
 
 Next, precision and efficiency of different ODE methods are
 qualitatively evaluated with isentropic vortex solved on a $160\times160$
 grid until $t=2$.
-The fine mesh makes spacial 
+The fine mesh makes spacial
 discretization error negligible compared with
 time marching error.
 The density error is defined as an $L1$ norm in the form of
 \begin{equation}
     \epsilon_\rho = \frac{\int{|\rho-\rho_a| \dd x\dd y}}{
-    100
+        100
     }
 \end{equation}
 with  $\rho$ the numeric result of density
@@ -2565,26 +2781,26 @@ and $\rho_a$ the analytic result.
 Results of convergence and efficiency study with isentropic vortex is
 shown in figure \ref{fig:IVTests}.
 
-Figure \ref{sfig:IVTests_Conv} shows that with the same time step size, 
+Figure \ref{sfig:IVTests_Conv} shows that with the same time step size,
 ESDIRK4 has the best accuracy, while DITR U2R2 $c_2=0.5$ is close to
 ESDIRK4 when time step is refined. DITR U2R2 $c_2=0.55$ is less accurate
 than DITR U2R2 $c_2=0.5$, but it performs almost as well as
 DITR U2R2 $c_2=0.5$ when time step is large.
-DITR U3R1 and U2R1 are less accurate than U2R2 methods with 
-the same time step. 
+DITR U3R1 and U2R1 are less accurate than U2R2 methods with
+the same time step.
 
-As of order of error, in Figure \ref{sfig:IVTests_Conv}, 
+As of order of error, in Figure \ref{sfig:IVTests_Conv},
 error of ESDIRK4 is barely able to reach 4th order of convergence,
-while DITR U2R2 $c_2=0.5$ and U3R1 methods are also able to reach 
+while DITR U2R2 $c_2=0.5$ and U3R1 methods are also able to reach
 4th order convergence with smaller time steps. U2R1 and U2R2 $c_2=0.55$
-methods are closer to the 3rd order slope, which conforms with 
-their theoretical order. 
+methods are closer to the 3rd order slope, which conforms with
+their theoretical order.
 
 Figure \ref{sfig:IVTests_Eff}
 implies that when consuming the same computational resource,
-DITR U2R2 methods have the best accuracy and efficiency. 
+DITR U2R2 methods have the best accuracy and efficiency.
 All the high-order
-time marching methods have better efficiency than BDF2, 
+time marching methods have better efficiency than BDF2,
 while DITR U2R2 methods have better efficiency than ESDIRK4.
 The symmetric DITR U2R2 $c_2=0.5$ has better efficiency
 compared with more stable DITR U2R2 $c_2=0.55$.
@@ -2599,13 +2815,13 @@ over explicit ones whose time steps are bounded by CFL condition.
 The current paper studies the 2D laminar case, where
 Reynolds number
 $Re_d=\rho_\infty u_\infty d / \mu_\infty $ is  $1200$,
-with Mach number being $Ma=0.1$. 
+with Mach number being $Ma=0.1$.
 Parameters are normalized so that freestream speed, density
-and diameter of the cylinder are unit values. 
-Small Mach number makes the flow more incompressible, and 
-the speed of sound makes time steps in explicit time marching 
-restricted. 
-Implicit time marching schemes can automatically omit the restrictions 
+and diameter of the cylinder are unit values.
+Small Mach number makes the flow more incompressible, and
+the speed of sound makes time steps in explicit time marching
+restricted.
+Implicit time marching schemes can automatically omit the restrictions
 of the speed of sound, thus being potentially more favorable.
 
 \begin{figure}[htbp]
@@ -2626,61 +2842,61 @@ of the speed of sound, thus being potentially more favorable.
 \end{figure}
 
 Figure \ref{sfig:CylinderRe1200Demo_Mesh} demonstrates
-the unstructured grid used in the $Re=1200$  vortex 
+the unstructured grid used in the $Re=1200$  vortex
 street calculation, and Figure \ref{sfig:CylinderRe1200Demo_Vort}
-demonstrates z-vorticity distribution in the 2-D vortex street 
-after it is fully developed. 
+demonstrates z-vorticity distribution in the 2-D vortex street
+after it is fully developed.
 
 In order to quantitatively compare different
-time marching schemes, 
+time marching schemes,
 the time marching error is compared.
 Using the same mesh as in Figure \ref{sfig:CylinderRe1200Demo_Mesh}
-and the same compact FV spacial discretization, 
-a numeric reference solution is calculated with ESDIRK4 using 
+and the same compact FV spacial discretization,
+a numeric reference solution is calculated with ESDIRK4 using
 very fine time step $\inc t = 0.00125$.
 In the reference solution, restart information at $t=200$
 is stored, in which the vortex street has fully developed.
-Next, starting from the $t=200$ flow field, combined with 
-different time marching schemes and time step sizes 
+Next, starting from the $t=200$ flow field, combined with
+different time marching schemes and time step sizes
 varying from $0.04$ to $0.1$, transient flow is simulated until $t=210$.
-CPU consumption and error values are evaluated. 
-The transient errors are defined with 
+CPU consumption and error values are evaluated.
+The transient errors are defined with
 \begin{equation}
     \begin{aligned}
         \|\epsilon_{My}\|_{t,2}^2
-    =& \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{y,i}-M_{y,ref}(t_i))^2}\\
-    \|\epsilon_{Mx}\|_{t,2}^2
-    =& \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{x,i}-M_{x,ref}(t_i))^2}
+        = & \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{y,i}-M_{y,ref}(t_i))^2} \\
+        \|\epsilon_{Mx}\|_{t,2}^2
+        = & \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{x,i}-M_{x,ref}(t_i))^2}
     \end{aligned}
     \label{eq:vorstreetErr}
 \end{equation}
-where $N_{t}$ is the number of time steps for $t\in(200,210]$, 
-$t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are 
+where $N_{t}$ is the number of time steps for $t\in(200,210]$,
+$t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are
 the norms of time derivatives of $y$ and $x$ momentum:
 \begin{equation}
-    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \ 
+    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \
     M_x = \int_{\Omega}{\left|\derivative{\rho u_x}{t}\right| \dd \Omega}
 \end{equation}
-Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values 
+Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values
 obtained in the reference solution.
 
 This manner of calculating transient error avoids the difficulty
-of preserving all the transient solutions at each time step of 
-the very fine reference solution. 
-As the reference solution uses significantly smaller time step, 
-its temporal error is considered to be negligible. 
+of preserving all the transient solutions at each time step of
+the very fine reference solution.
+As the reference solution uses significantly smaller time step,
+its temporal error is considered to be negligible.
 In other words, the reference solution is a good enough
-approximation of the exact solution of the semi-discretized 
-FV equations \eeqref{eq:FVODE}. 
-Compared with the reference 
+approximation of the exact solution of the semi-discretized
+FV equations \eeqref{eq:FVODE}.
+Compared with the reference
 solution, the solution using regular time steps
-induces major temporal discretization error, which can 
+induces major temporal discretization error, which can
 be illustrated with the errors constructed in \eeqref{eq:vorstreetErr}.
 
-In order to mitigate the influence of the error induced 
+In order to mitigate the influence of the error induced
 by implicit dual time stepping in each step,
-each dual time stepping are terminated after 
-the residual is smaller than $10^{-7}$ of the 
+each dual time stepping are terminated after
+the residual is smaller than $10^{-7}$ of the
 starting value.
 
 % \begin{figure}[htbp]
@@ -2738,35 +2954,35 @@ starting value.
     \label{fig:CylinderRe1200_Mx}
 \end{figure}
 
-Results of the errors versus time step size and CPU time 
-are illustrated in 
+Results of the errors versus time step size and CPU time
+are illustrated in
 Figure \ref{fig:CylinderRe1200_My} and \ref{fig:CylinderRe1200_Mx}.
 Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C}
-illustrates the results of convergence analysis, where 
-with the refinement of time step, the temporal 
-discretization error is reduced. 
-The ESDIRK4, DITR U2R2 $c_2=0.5$, DITR U3R1 methods 
-approximately 4th order convergence in 
+illustrates the results of convergence analysis, where
+with the refinement of time step, the temporal
+discretization error is reduced.
+The ESDIRK4, DITR U2R2 $c_2=0.5$, DITR U3R1 methods
+approximately 4th order convergence in
 Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C},
 while U2R1 and U2R2 $c_2=0.55$ are 3rd order.
-BDF2 is indeed 2nd order accurate, and is only able 
+BDF2 is indeed 2nd order accurate, and is only able
 to be comparable with high-order methods when $\inc t$
-is very small. 
-Among the DITR methods, U2R2 $c_2=0.5$ has the smallest error. 
+is very small.
+Among the DITR methods, U2R2 $c_2=0.5$ has the smallest error.
 U3R1 and U2R2 $c_2=0.55$ are close but U3R1 has higher order of convergence.
-Although better than BDF2, 
+Although better than BDF2,
 U2R1 has the worst error of vortex street simulation among DITR methods.
 
 Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E}
-use CPU Time as the horizontal axis, therefore comparison of efficiency is illustrated. 
+use CPU Time as the horizontal axis, therefore comparison of efficiency is illustrated.
 In Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E},
-in order to achieve an error with magnitude of $10^{-3}$, the 
+in order to achieve an error with magnitude of $10^{-3}$, the
 high-order methods are significantly more economic than the
-2nd order BDF2. 
-Among the high order methods, DITR U2R2 $c_2=0.55$ is 
-close to ESDIRK4 in efficiency, while 
+2nd order BDF2.
+Among the high order methods, DITR U2R2 $c_2=0.55$ is
+close to ESDIRK4 in efficiency, while
 U2R2 $c_2=0.5$ and U3R1 are more efficient than ESDIRK4.
-The most efficient U2R2 $c_2=0.5$ takes less than 70\% of 
+The most efficient U2R2 $c_2=0.5$ takes less than 70\% of
 the time used in ESDIRK4 when the error is $10^-4$.
 
 
@@ -2787,10 +3003,28 @@ the time used in ESDIRK4 when the error is $10^-4$.
 %     \label{fig:CylinderRe1200_St}
 % \end{figure}
 
-
-
-
 \subsection{Double Mach Reflection}
+
+The double Mach reflection problem \cite{woodward1984dmr} is tested to
+compare the resolution capabilities
+of different time marching schemes.
+The double Mach reflection computes
+inviscid ideal gas in $[0,4]\times[0,1]$,
+initialized by a Ma 10 moving shock located
+at $x = 1/6 + \cot(60^\circ) y$.
+The boundary of $y=0, x\in[1/6,4]$ is
+inviscid wall, and all other boundaries
+conforms with the Ma 10 moving shock.
+Details about the initial and boundary settings may be found in \cite{woodward1984dmr}.
+The compact FV scheme is additionally equipped with
+an accuracy preserving CWBAP limiter \cite{wu2023cwbap},
+which grants the ability to capture spacial discontinuities.
+To handle strong discontinuities, the local Lax-Friedrichs flux
+is used here.
+The computations are conducted on a uniform quadrilateral mesh with
+mesh size $h=1/480$.
+Physical time step is set to a relatively large $\inc t= 2\times10^{-4}$,
+and the solutions at $t=0.25$ are compared.
 
 \begin{figure}[htbp]
     \centering
@@ -2817,7 +3051,7 @@ the time used in ESDIRK4 when the error is $10^-4$.
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
-        \caption[]{DITR U3R2}
+        \caption[]{DITR U3R1}
         \label{sfig:DM480_HM3U3R1}
     \end{subfigure}
     \caption{Density in double mach reflection problem, DITR U2R1 and U3R1}
@@ -2840,7 +3074,79 @@ the time used in ESDIRK4 when the error is $10^-4$.
     \label{fig:DM480-3}
 \end{figure}
 
+Figure \ref{fig:DM480-1}, \ref{fig:DM480-2} and \ref{fig:DM480-3}
+illustrate a zoomed view of density distribution.
+From Figure \ref{fig:DM480-3},
+it is observed BDF2 produces
+a deformed Mach stem, which, according
+to further tests, can be
+corrected by using smaller $\inc t$.
+Using the same $\inc t= 2\times10^{-4}$,
+all high-order methods produce a
+normal Mach stem.
+Meanwhile, the second order BDF2
+completely smears the K-H instability
+in the shear layer, despite that the spacial
+discretization is 4th order accurate.
+All high-order time march methods methods can successfully
+simulate K-H instability and resolve the
+small structures induced.
+The results of DITR U2R2 $c_2=0.5$, U2R2  $c_2=0.55$
+and U3R1 are very similar with ESDIRK4, while U2R1
+appears to produce less vortices in the shear layer.
+
+Like the results from isentropic vortex and vortex shedding simulation,
+using the same time step, DITR methods
+use less time than ESDIRK4 due to the reduction of stage numbers.
+The U2R2 $c_2=0.5$ method consumes around $63\%$ of ESDIRK4's time,
+and U3R1 uses $79\%$.
+
+
+
 \section{Conclusion}
+
+The current paper has described a method of 
+developing time marching schemes using a 
+direct integration and a temporal reconstruction.
+Using one form of quadrature rule and several
+forms of temporal reconstruction, a series of 
+specific DITR methods are discovered and analyzed.
+The DITR U2R2 method is $A$-stable, and with $c_2=0.5$, U2R2 is 4th order accurate.
+The DITR U2R1 method is $L$-stable with 3rd order accuracy, and 
+the DITR U3R1 method is $L$-stable with 4th order accuracy.
+In order to apply these time marching methods to flow problems,
+stability in dual time stepping is analyzed. 
+It is discovered that using the nested solving approach, pseudo time marching is unstable.
+Using the stage-decoupled solving approach with preconditioning,
+the implicit time steps of DITR can steadily converge with proper choices of 
+the preconditioning parameter $\beta$. 
+The stage-decoupled solving approach is easy to be implemented in a 
+matrix-free manner.
+
+After analyzing the results of numerical tests, it is confirmed 
+all the DITR methods can exhibit their theoretical order of accuracy.
+With the same time step, DITR methods are much more accurate than 
+BDF2 and comparable with ESDIRK4. 
+Due to having only 2 stages, DITR methods takes less time than ESDIRK4
+each step.
+When reaching the same accuracy, some DITR methods are 
+distinctively faster than ESDIRK4. 
+In summary, the DITR methods are steady implicit time marching methods 
+that are easy to implement and more efficient.
+
+The solving approaches discussed in the current paper is still crude.
+For the successful stage-decoupled solving approach,
+more variants of the preconditioning matrix and details including 
+the choice of pseudo time step, the influence of approximate
+Jacobian and the influence of linear solvers are not discussed here.
+Meanwhile, more delicate analysis on the choosing of preconditioning parameter 
+$\beta$ could still be conducted. 
+For the unsteady nested solving approach, 
+tricks to stabilize the method including modifying the matrices and 
+using methods other than dual-time stepping are not considered. 
+Therefore, more delicate and efficient solving approaches of DITR could 
+still be found.
+
 
 
 %% The Appendices part is started with the command \appendix;
