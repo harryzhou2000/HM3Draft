@@ -661,6 +661,7 @@ Using 2-D as an example, the current paper uses IJI in the form of
     I_f = \omega_f^G\int_{\OO_i \cap \OO_j}{
         \sum_{p+q=0}^{p + q\leq k}\left[
             \omega_f^D(p,q)
+            d_{ij}^{p+q}
             \left(
             \partialderivative{^{p+q}u_i(x,y)}{x^p\partial y^q}
             -
@@ -671,7 +672,13 @@ Using 2-D as an example, the current paper uses IJI in the form of
     }
 \end{equation}
 where $\omega_f^G$ is geometric weight and
-$\omega_f^D$ is derivative weight.
+$\omega_f^D$ is derivative weight. 
+The facial length scale  $d_{ij}$
+is taken as 
+\begin{equation}
+    d_{ij} = \|\x_{c,i}-\x_{c,j}\|_2
+\end{equation}
+which is the distance between the barycenters of the cells.
 The IJI represents facial discontinuities of reconstruction polynomials using
 function values and their various partial derivatives on the interface.
 For 2-D simulation and 3rd degree (4th order) reconstruction, the current paper uses
@@ -697,10 +704,10 @@ obtained via optimization of dissipation and dispersion relations.
 
 The geometric weight uses the form
 \begin{equation}
-    \omega_f^G = \sqrt{S^{\frac{1}{d-1}}D_f^{-1}}
+    \omega_f^G = \sqrt{S^{\frac{1}{d-1}}d_{ij}^{-1}}
 \end{equation}
-where $d$ is the number of spacial dimension, $S$ is the area of the interface,
-and $D_f$ is the distance between barycenters of the two cells. This form of
+where $d$ is the number of spacial dimension and $S$ is the area of the interface. 
+This form of
 geometric weight is also taken from \cite{huang2022high}.
 
 The minimum problem
@@ -735,22 +742,24 @@ are determined by the form of IJI:
                 \omega_f^G\int_{\OO_i \cap \OO_j}{
                     \sum_{p+q=0}^{p + q\leq k}
                     \omega_f^D(p,q)^2
+                    d_{ij}^{2(p+q)}
                     \partialderivative{^{p+q}\varphi_{i,r}}{x^p\partial y^q}
                     \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
                     \dd f}
             }\right)_{lr}
-        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)} \\
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)}, \\
         \mathbf{B}_{ij}= &
         \left[
             \left({
                 \omega_f^G\int_{\OO_i \cap \OO_j}{
                     \sum_{p+q=0}^{p + q\leq k}
                     \omega_f^D(p,q)^2
+                    d_{ij}^{2(p+q)}
                     \partialderivative{^{p+q}\varphi_{j,r}}{x^p\partial y^q}
                     \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
                     \dd f}
             }\right)_{lr}
-        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)} \\
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)}, \\
         \mathbf{b}_{ij}= &
         \left[
             \left({
@@ -759,7 +768,7 @@ are determined by the form of IJI:
                     \varphi_{i,l}
                     \dd f}
             }\right)_{l}
-        \right]_{\mathrm{NDOF}(k) \times 1} \\
+        \right]_{\mathrm{NDOF}(k) \times 1}. \\
     \end{aligned}
 \end{equation}
 
