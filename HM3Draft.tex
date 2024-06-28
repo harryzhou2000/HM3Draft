@@ -131,7 +131,7 @@
         Combined with dual time stepping, a stage-decoupled solving strategy for DITR is 
         developed and discussed, making DITR's implementation simple for previous matrix-free 
         implicit solvers. 
-        With high-order compact finite volume spacial discretization, 
+        With high-order compact finite volume spatial  discretization, 
         the new DITR time marching schemes are numerically tested in flow problems.
         Numerical results show DITR methods have high order of accuracy and 
         comparatively lower computational cost. 
@@ -210,13 +210,12 @@ and finite volume (FV) methods
     friedrich1998weighted_WENO,
     hu1999weighted_WENO,
     dumbser2007quadrature_WENO},
-generally provides spacial discretization methods
-which produce semi-discretized forms of the original
-partial differential equations (PDEs).
-The semi-discretized PDEs are
-sets of first order ordinary
-differential equations (ODEs),
-which are usually further solved with
+generally adopted the method of line, 
+in which the governing equations 
+are spatial ly discretized firstly 
+resulting in a system of ODEs.
+The system of ODEs is then
+solved with
 ODE integrators such as the
 popular strong stability preserving
 Runge-Kutta (SSPRK) methods
@@ -225,32 +224,35 @@ Runge-Kutta (SSPRK) methods
 Although explicit ODE integrators
 are simple and efficient for a wide range of
 CFD problems,
-the Courant-Friedrichs-Lewy (CFL) constraint
+the Courant-Friedrichs-Lewy (CFL) condition
 that limits physical time step in explicit
 methods could make them inefficient in
 notably inhomogeneous or anisotropic
 transient flows,
 such as wall-bounded turbulence.
 Such inefficiency could be overcome by
-applying implicit ODE methods with
-sufficient stability.
+applying implicit ODE solvers with
+usually better stability attributes.
 Due to Dahlquist's second barrier
 \cite{dahlquist1963special},
 only second and first order linear multi-step ODE methods
-could achieve $A$-stability. With the
-trapezoid rule not being $L$-stable, the $L$-stable
+could achieve $A$-stability. 
+Therefore, 
+the $L$-stable
 second-order backward differentiation formula (BDF2)
-is extensively adopted in transient CFD problems.
+is extensively adopted in solving transient CFD problems.
 Different from multi-step methods,
 the single-step implicit Runge-Kutta (IRK) methods
 with multiple internal stages
 can achieve higher order of accuracy while
 preserving stability \cite{butcher2016ODEBook}.
 Among the IRK methods, fully coupled IRK methods
-could achieve optimal order given number of stages,
+could achieve optimal order
+for given number of stages,
 but they require the solution of a nonlinear
-system with its dimension multiple times larger
-than the ODE. The enlarged algebraic system
+system with its dimension several times larger
+than that of the ODE. 
+The enlarged algebraic system
 could be especially troublesome for its implementation in
 CFD solvers.
 Pazner and Persson
@@ -260,8 +262,8 @@ fully IRK methods with DG, and
 Jameson \cite{jameson2017evaluation}
 discussed how to adopt dual time stepping
 into fully IRKs.
-As a result of the difficulties in the solution
-of fully IRK methods,
+Due to the difficulties in solving
+fully IRK methods,
 singly diagonally implicit Runge-Kutta (SDIRK)
 methods are more commonly used in CFD, for example in
 \cite{wang2017compact_VR}.
@@ -270,7 +272,7 @@ enabling the stage values to be solved in a sequence.
 As a special case of SDIRK,
 ESDIRK methods are SDIRK with an explicit first stage,
 which are constructed to have
-stage order of 2 while being $L$-stable
+second stage order while being $L$-stable
 \cite{kennedy2003additiveARK,kvaerno2004singly}.
 High-order ESDIRK schemes and
 BDF2 have been tested in
@@ -287,10 +289,11 @@ Apart from fully IRK and SDIRK methods,
 another class of implicit RK methods,
 mono implicit RK methods (MIRK)
 \cite{cash1975classMIRKOrig}
-have explicit internal stages and
-puts all the implicitness into the final
-stage, allowing the implicit system to
-remain have the same number of dimensions
+with explicit internal stages and
+an implicit final
+stage, 
+allow the implicit system to
+have the same number of dimensions
 as the original ODE.
 Cash and Signhal derived examples of
 $A$-stable and $L$-stable high-order
@@ -306,12 +309,11 @@ NIRK methods.
 The major drawback of NIRK or MIRK schemes is that
 the Jacobian matrices of the nonlinear algebraic problems
 for each NIRK or MIRK step are
-polynomials of the Jacobian of ODE's right hand side.
+polynomials of the Jacobian of the ODE's right hand side.
 Cash and Singhal proposed to find MIRK methods whose
-Jacobian could be factorized or approximate the Jacobian
-with a factorization,
+Jacobian could be approximately factorized,
 so that the Newton iteration
-step could be solved by solving a series of successive linear
+could be realized approximately by solving a series of successive linear
 problems \cite{cash1982monoMIRK2}.
 Kulikov and Shindin found certain factorization
 approximation could sabotage the stability of
@@ -321,8 +323,8 @@ and analyzed how to choose the approximation of
 Jacobian in
 \cite{kulikov2007asymptotic}.
 MIRK and NIRK methods are more attractive than SDIRK methods
-for they require fewer inner stage solving.
-Typical forth order
+for they require fewer inner stages.
+Typical fourth order
 stiffly accurate ESDIRK requires 5 implicit internal stages to be
 solved,
 while MIRK and NIRK could
@@ -335,7 +337,7 @@ which gives them potential to gain better efficiency in
 large scale problems.
 However, current literature has seldom explored
 the application of MIRK or NIRK methods in
-PDE solving.
+solving PDEs.
 The fully IRK methods, on the other hand,
 have been practiced in
 finite volume \cite{jameson2017evaluation} and
@@ -346,13 +348,56 @@ in CFD methods are significantly more
 complex compared to DIRK methods.
 
 Different from previous approaches,
-the current paper aims to construct
+the current paper aims to construct implicit
 time marching schemes based on temporal
 reconstruction.
 By combining polynomial approximation and
 numerical quadrature rules in the direction of time,
-stable, high-order accurate and efficient implicit ODE methods could be
+stable, 
+high-order accurate and efficient implicit ODE methods
+termed as DITR could be
 obtained straightforwardly.
+The basic idea of the DITR scheme will be presented
+in Section \ref{sec:HIRK}. 
+Briefly speaking, the construction of the DITR
+schemes consists of the following two steps. 
+The first step is the direct integration of the 
+system of first-order ODEs.
+When the right-hand side is integrated using the
+three point Gauss-Lobatto rule, the resulting DITR
+schemes have two stages and are at most temporally fourth-order accurate. 
+The actual order of accuracy is then determined by
+the second step which is the temporal reconstruction. 
+When the temporal reconstruction uses only the information of n
+and n+1 steps, the DITR schemes are single step schemes
+similar to the MIRK or NIRK schemes. 
+When the temporal reconstruction uses the information of n-1, n and n+1 steps,
+the resulting DITR schemes are multi-step methods that are
+different from the common implicit linear multi-step 
+methods such as
+the Adams-Moulton and BDF schemes \cite{wanner1996solving}. 
+%! actually, the method was described as a Multistep Collocation Method 
+%! actually, DITR is a collocation method
+The stability of the DITR
+schemes is mainly determined by the temporal
+reconstruction step. 
+When adopting proper quadrature rules
+and temporal reconstructions in these two steps, single-step
+and multi-step methods with arbitrary orders of temporal
+accuracy can be constructed. Therefore, the DITR approaches
+are new methodologies for designing implicit time marching
+schemes that are different from the IRK and multi-step
+methods. 
+
+When applying DITR schemes to solving compressible Euler and
+Navier-Stokes equations, the approximate factorization
+proposed by Kulikov and Shindin \cite{kulikov2007asymptotic} 
+does not work well. 
+In the present paper, 
+a new iteration scheme called the stage-decoupled iteration 
+is proposed. 
+Stability analysis
+confirm the advantage of the proposed procedure.
 It will be shown that the new methods can be implemented
 in a matrix-free style, guaranteeing their portability.
 The new implicit methods are further applied to
@@ -361,14 +406,22 @@ test their capabilities in flow problems. Numerical results
 illustrate that the new methods are high-order accurate
 and competitive with the 4th order ESDIRK method in efficiency.
 
+% Paper's structure:...%TODO
+
+The rest of the paper is organized as follows.
+High-order compact finite volume spatial  discretization schemes
+are introduced in Section \ref{sec:CFV}. 
+The construction and analyses of DITR methods are presented 
+in Section \ref{sec:HIRK}.
+Section \ref{sec:Solving} introduces the methods 
+of solving DITR and discusses their stability attributes.
+Section \ref{sec:Results} illustrates some numerical results of
+DITR solving the Euler and N-S equations, combined with 
+spatial  discretization from Section \ref{sec:CFV}. 
+Last, Section \ref{sec:Conc} gives the concluding remarks.
 
 
-
-\#\#\#\# TODO:
-
-Paper's structure:...%TODO
-
-\section{High-order Compact Finite Volume Method}
+\section{High-order compact finite volume method}
 \label{sec:CFV}
 
 \newcommand{\U}{\mathbf{U}}
@@ -376,31 +429,35 @@ Paper's structure:...%TODO
 \newcommand{\x}{\mathbf{x}}
 
 The new time-marching method developed in
-the current paper, is aimed to support
-high-order finite volume method.
+the current paper can be applied with 
+any spatial discretizations when solving 
+time-dependent PDEs such as the compressible Euler and Navier-Stokes
+equations. 
+However, their actual performance will be affected by
+the spatial discretizations.
 Therefore,
-this section will provide a description of
-finite volume spacial discretization,
-and specify details
+this section will provide a brief description of
+finite volume spatial  discretization,
+and additional details
 of the high-order finite volume scheme
-used in numerical tests.
+used in numerical tests are specified.
 
-\subsection{Governing Equations}
+\subsection{Governing equations}
 \label{ssec:GovEq}
 
 The compressible Navier-Stokes equations has the conservative form:
 \begin{equation}
     \label{eq:NS}
     \frac{\partial \U}{\partial t} +
-    (\F - \F_v) \cdot \mathbf\nabla = 0
+    \mathbf\nabla \cdot (\F - \F_v)  = 0
 \end{equation}
-where $\U$ is vector of conservative quantities and
+where $\U$ is vector of conservative variables and
 $\F=[\F_1,\F_2,\F_3]$,
 $\F_v=[\F_{v,1},\F_{v,2},\F_{v,3}]$
 are
 inviscid and viscous tensors of
 their flux.
-In cartesian coordinates $x_k, k=1,2,3$, the components are
+In Cartesian coordinates $x_k, k=1,2,3$, the components are
 \begin{equation}
     \U = \begin{bmatrix}
         \rho \\ \rho u_1 \\ \rho u_2 \\ \rho u_3 \\ E
@@ -434,18 +491,18 @@ Newtonian viscosity and Fourier
 heat conduction, additional relations
 \begin{equation}
     \begin{aligned}
-        E         & = \frac{p}{\gamma -1 } + \frac{1}{2}\rho\sum_{k=1}^{3}(u_ku_k)  \\
-        p         & =\rho R_g T                                                     \\
+        E         & = \frac{p}{\gamma -1 } + \frac{1}{2}\rho\sum_{k=1}^{3}(u_ku_k),  \\
+        p         & =\rho R_g T                                              ,       \\
         \tau_{ij} & =
         \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
         -
-        \frac{2}{3}\mu \delta_{ij}\sum_{k=1}^{3}{\frac{\partial u_k}{\partial x_k}} \\
+        \frac{2}{3}\mu \delta_{ij}\sum_{k=1}^{3}{\frac{\partial u_k}{\partial x_k}}, \\
         K_i       & = - \kappa \frac{\partial T}{\partial x_i}
     \end{aligned}
 \end{equation}
 are used to close the equations
 with $T$ being temperature, $\gamma$ being specific heat ratio,
-$R_g$ being  gas constant, $\mu$ being dynamic viscosity,
+$R_g$ being  gas constant, $\mu$ being dynamic viscosity and
 $\kappa$ being thermal conductivity.
 Specific heat ratio $\gamma$ is fixed to $1.4$ in this paper.
 The current paper only
@@ -462,7 +519,7 @@ The equations discussed above are in 3D form, and
 assuming constant distribution of values over $x_3$
 yields the 2D version of NS and Euler equations.
 
-\subsection{High-order Finite Volume Spacial Discretization}
+\subsection{High-order finite volume spatial discretization}
 \label{ssec:FV}
 
 \newcommand{\OO}{\mathbf{\Omega}}
@@ -504,7 +561,7 @@ quantities
     \label{eq:FVRec}
     \U_i(\x) = \UM_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{\U_i^l\varphi_{i,l}(\x) }
 \end{equation}
-in which $\U_j(\x)$ is the local polynomial distribution on cell $j$,
+in which $\U_j(\x)$ is the local polynomial distribution on cell $\OO_{j}$,
 and
 $\varphi_{j,i}(\x)$ are
 polynomial basis functions.
@@ -514,15 +571,16 @@ polynomial basis functions.
     u_i(\x) = \overline{u}_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{u_i^l\varphi_{i,l}(\x) }
 \end{equation}
 where $u_i(\x)$ is one of $\rho(\x), \rho u_1(\x)\dots$ and should not
-be confused with the velocity components $u_1, u_2, u_3$ in the context of
-reconstruction.
+be confused with the velocity components $u_1, u_2, u_3$ 
+which was used in the governing equations.
 
 There are $\mathrm{NDOF}(k)$ polynomial bases for reconstruction on
 each cell.
 The current paper uses zero-mean Taylor basis
 for reconstruction \cite{wang2017compact_VR}.
 Given a specific reconstruction method,
-the reconstruction coefficients $\U_i^l$ (or $u_i^l$ for each scalar) can be determined using
+the reconstruction coefficients $\U_i^l$ (or $u_i^l$ for 
+its components) can be determined using
 the distribution of mean value $\UM_i, i=1,2...N_{cell}$
 and boundary conditions.
 
@@ -542,13 +600,14 @@ with cell averaging applied
 where $\Fn(\U_i,\U_j)$ and $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$ are approximations
 of exact fluxes on the cell interfaces,
 and $f_{i,j}=\OO_i \cap \OO_j$ is the interface between $i,j$ cells.
-Set $S_i$ denotes the compact stencil of cell $i$.
+Set $S_i$ denotes the compact stencil of cell $\OO_{i}$, consisting 
+of cell $\OO_{i}$ and its direct face neighboring cells.
 The piecewise polynomial approximation \eqref{eq:FVRec} does not
 guarantee a continuous distribution on interfaces,
 thus the numerical fluxes
 $\Fn(\U_i,\U_j)$, $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$ are
 functions of the approximate field on both sides. Inviscid numerical
-flux $\Fn(\U_i,\U_j)$ is typically an approximate Riemann solver which
+flux $\Fn(\U_i,\U_j)$ is typically computed with an approximate Riemann solver which
 will be specified for each numerical test in the paper.
 Numerical viscous flux $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
 in this paper follows the practice of Wang \cite{wang2017compact_VR}.
@@ -556,7 +615,7 @@ The integration of flux terms on the cell interfaces
 are conducted using numerical quadrature rules with
 enough algebraic precision.
 
-As the spacial derivatives are approximated in \eqref{eq:FVInt},
+As the spatial derivatives are approximated in \eqref{eq:FVInt},
 it is referred to as the semi-discretized form of finite volume method.
 The inviscid term has a truncation error of $O(h^{k+1})$ for smooth problems,
 with $h$ being the size of mesh. As the approximate fields $\U_i$ are functions
@@ -567,6 +626,7 @@ assembled form
     \frac{d\uu}{dt} = \R(t, \uu)
 \end{equation}
 with
+
 \begin{equation}
     \uu = \begin{bmatrix}
         \UM_1 \\
@@ -585,8 +645,9 @@ with
                 [\Fn - \Fn_v] \cdot \n  dA
             }\right)
         }
-    \end{bmatrix}
+    \end{bmatrix}.
 \end{equation}
+
 The arguments in the numerical fluxes are omitted.
 The right-hand-side vector $\R$ is also a function of $t$
 because boundary conditions or additional source terms
@@ -595,11 +656,12 @@ could depend on $t$ generally speaking.
 
 
 
-\subsection{Variational Reconstruction}
+\subsection{Variational reconstruction}
 \label{ssec:VR}
-In order to determine the coefficients of polynomial bases $\U_i^l$ (or $u_i^l$ for each scalar) in
+In order to determine the coefficients of polynomial bases $\U_i^l$
+ (or $u_i^l$) in
 \eeqref{eq:FVRec}, a reconstruction method needs to be specified.
-Traditional 2nd order FV methods for unstructured grid
+Traditional second-order FV methods for unstructured grid
 needs only to reconstruct a $k=1$ polynomial, namely linear
 distribution on each cell.
 The variational reconstruction \cite{wang2017compact_VR}
@@ -624,11 +686,13 @@ Taking 2 dimensional polynomials as an example:
         }
     \end{aligned}
 \end{equation}
-where $[x_{c,j},y_{c,j}]\trans = \x_{c,j}$ are barycenters of cell $j$,
+where $[x_{c,j},y_{c,j}]\trans = \x_{c,j}$ are barycenters of cell $\OO_{j}$,
 $\inc x_i,\inc y_i$ are the cell's length scale, and $p_l,q_l$ are
-powers of the bases. If 2-D $k=3$ basis is used, $p_l=[1,0,2,1,0,3,2,1,0]_l$,
+powers of the bases. For $k=3$ basis used in two-dimensional cases, 
+$p_l=[1,0,2,1,0,3,2,1,0]_l$,
 and $q_l=[0,1,0,1,2,0,1,2,3]_l$.
-The mean value term makes the basis zero-mean, which is calculated with:
+The mean value term makes the basis have zero mean values, 
+which is calculated with:
 \begin{equation}
     \overline{
         \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
@@ -646,8 +710,7 @@ barycenter, which has the from
 \begin{equation}
     \inc x_j = \inc y_j = \max_k(\|\x_{j,k} - \x_{c,j}\|_2)
 \end{equation}
-where $\x_{j,k}$ are coordinates of nodes belonging to cell $j$.
-In this way the base functions are scaled to be isotropic.
+where $\x_{j,k}$ are coordinates of nodes belonging to cell $\OO_{j}$.
 
 The variational reconstruction defines the solution of reconstruction coefficients
 to be the minimum point of a globally defined functional $I$
@@ -655,8 +718,8 @@ to be the minimum point of a globally defined functional $I$
     I = \sum{I_f}
 \end{equation}
 where $I_f$ are interface jump integrations (IJI) defined on each cell interface $f$.
-Hereafter, we use $f=f_{ij}$ to denote the interface of cell $i$ and $j$ by default.
-Using 2-D as an example, the current paper uses IJI in the form of
+Hereafter, we use $f=f_{ij}$ to denote the interface of cell $\OO_{i}$ and $\OO_{j}$ by default.
+Using the two-dimensional case as an example, the current paper uses IJI in the form of
 \begin{equation}
     I_f = \omega_f^G\int_{\OO_i \cap \OO_j}{
         \sum_{p+q=0}^{p + q\leq k}\left[
@@ -681,7 +744,8 @@ is taken as
 which is the distance between the barycenters of the cells.
 The IJI represents facial discontinuities of reconstruction polynomials using
 function values and their various partial derivatives on the interface.
-For 2-D simulation and 3rd degree (4th order) reconstruction, the current paper uses
+For 2-D simulation and cubic (with $k=3$)
+reconstruction, the current paper uses
 \begin{equation}
     \begin{aligned}
         \omega_f^D(0,0) & = 1\times \omega_D(0)                                                                                    \\
@@ -700,17 +764,18 @@ as the derivative weight.
 This form of derivative weight in \eeqref{eq:wdRotRatio} is rotational invariant and
 isotropic.
 The coefficients in \eeqref{eq:wdHQMOPT} are taken from \cite{huang2022high}, which were
-obtained via optimization of dissipation and dispersion relations.
+obtained through the
+optimization of dissipation and dispersion relations.
 
 The geometric weight uses the form
 \begin{equation}
     \omega_f^G = \sqrt{S^{\frac{1}{d-1}}d_{ij}^{-1}}
 \end{equation}
-where $d$ is the number of spacial dimension and $S$ is the area of the interface. 
+where $d$ is the number of spatial dimension and $S$ is the area of the interface. 
 This form of
 geometric weight is also taken from \cite{huang2022high}.
 
-The minimum problem
+The minimization problem
 \begin{equation}
     u_i^l = \mathop{\arg \min}(I)
 \end{equation}
@@ -718,9 +783,9 @@ defines the solution to the variational reconstruction system.
 It is observed that $I$ is a quadratic function of $u_i^l, i = 1...N_{cell}$ and
 $I\geq 0$,
 therefore $I$ is a positive semi-definite quadratic form about the global vector of reconstruction
-coefficients. Consequently, the minimum problem converts to a linear equation
+coefficients. Consequently, the minimization problem converts to a linear equation
 \begin{equation}
-    \partialderivative{I}{u_i^l} = 0, l=1,2,\dots \mathrm{NDOF}(k),\ \ i=1,2,\dots N_{cell}
+    \partialderivative{I}{u_i^l} = 0, l=1,2,\dots \mathrm{NDOF}(k),\ \ i=1,2,\dots N_{cell} .
 \end{equation}
 This linear equation can be arranged in a cell-block form:
 \begin{equation}
@@ -729,10 +794,10 @@ This linear equation can be arranged in a cell-block form:
     =
     \sum_{f=f_{ij},j\in S_i, j\neq i}{ \mathbf{B}_{ij} \us_j + \mathbf{b}_{ij} (\overline{u}_j - \overline{u}_i)}
 \end{equation}
-where $S_i$ is the compact stencil of $i$ composed of cell $i$ and its face neighbors.
+where $S_i$ is the compact stencil of $i$ composed of cell $\OO_{i}$ and its face neighbors.
 Local reconstruction coefficient vector is $\us_i = [u_i^1,u_i^2\dots]\trans$. 
 The reconstruction coefficient matrices and vectors in \eeqref{eq:vrBlockEq} 
-are determined by the form of IJI:
+are
 \begin{equation}
     \label{eq:vrCoeffs}
     \begin{aligned}
@@ -768,35 +833,46 @@ are determined by the form of IJI:
                     \varphi_{i,l}
                     \dd f}
             }\right)_{l}
-        \right]_{\mathrm{NDOF}(k) \times 1}. \\
+        \right]_{\mathrm{NDOF}(k) \times 1}.\\
     \end{aligned}
 \end{equation}
 
 The local coefficients matrices and vectors \eeqref{eq:vrCoeffs} can be 
 calculated at the start of computation. 
-The linear reconstruction system \eeqref{eq:vrBlockEq} is solved with block-SOR method.
+The linear reconstruction system \eeqref{eq:vrBlockEq} 
+is solved with block-SOR method.
 The details of linear solving of variational reconstruction and the treatments of 
 boundary conditions can be found in \cite{wang2017compact_VR}. 
-The fact to be stressed here is that the reconstruction is implicit, and 
-the reconstruction coefficients must be obtained through a series of 
-iteration. 
+The fact to be emphasized here is that 
+the reconstruction is implicit, and 
+the reconstruction coefficients must be 
+obtained through a series of 
+iterations. 
+To ensure the efficiency of the numerical method,
+the variational reconstruction is used 
+together with temporally implicit discretization 
+of the governing equations.
 During an implicit solving procedure,
-the updating of mean values and reconstruction coefficients are decoupled 
-and executed alternately. 
+the updating of mean values and reconstruction 
+coefficients are decoupled 
+and executed alternately, with the block-SOR 
+iteration carried out only once for every iteration 
+of the implicit marching scheme. 
 As each block-SOR updating is compact in the sense of data dependency, 
 the variational reconstruction is able to have better data locality and 
-less communication during the process.
+less communication during the iteration process.
 
 
 
 % TODO
-\#\#\#
+% \#\#\#
 
 
-\section{Direct Integration with Temporal Reconstruction (DITR) Methods}
+\section{Direct integration with temporal reconstruction (DITR) 
+methods for high order time marching}
 \label{sec:HIRK}
 
-\subsection{General Construction of DITR Methods}
+\subsection{General ideas}
 
 Considering the first order ODE equation \eqref{eq:FVODE} arising
 from high-order finite volume method
@@ -807,8 +883,11 @@ $t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
 \end{equation*}
 which can be
 considered a more general first order ODE with $\uu$ being
-a general vector. For example, in finite difference,
+a general solution vector. 
+For example, in finite difference schemes,
 $\uu$ represents the vector of grid point values.
+And for finite volume schemes, $\uu$ is the vector 
+of all cell averages.
 A direct integration of equation \eqref{eq:FVODE}
 leads to a time-marching relation
 \begin{equation}
@@ -845,36 +924,51 @@ Using quadratic polynomial interpolation,
 the weights of the quadrature rule will be:
 \begin{equation}
     \begin{aligned}
-        b_1 & = \frac{1}{2} - \frac{1}{6{c_2}}     \\
-        b_2 & = \frac{1}{6{c_2}(1-{c_2})}          \\
-        b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})} \\
+        b_1 & = \frac{1}{2} - \frac{1}{6{c_2}},     \\
+        b_2 & = \frac{1}{6{c_2}(1-{c_2})},          \\
+        b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})}. \\
     \end{aligned}
     \label{eq:integ0}
 \end{equation}
 The quadrature rule defined with
-equations \eqref{eq:Quad3}, \eqref{eq:integ0} has algebraic precision
+\eeqref{eq:Quad3} and \eeqref{eq:integ0} has algebraic precision
 of degree 2. When $c_2=1/2$, the quadrature rule has algebraic precision of
 degree 3 and becomes the three point Gauss-Lobatto rule.
 The numeric integration process used in equation \eqref{eq:Quad3}
 is referred to as a direct integration process because it is
 directly derived from the ODE.
 
-The precise value of $\uu(t)$ at each $t\in[t^n, t^{n+1}]$
-is unknown, thus an approximation is required for numeric calculation.
-The current paper proposes to use conditions at
-time steps only, namely $t \in \{t^{n+1}, t^n, t^{n-1}\dots\}$,
-in acquiring the polynomial reconstruction.
-Since the step values $\uu^n, \uu^{n-1}\dots$ and
-their temporal derivatives $\R^n, \R^{n-1}\dots$ are known,
-the addition of the unknown latest step $\uu^{n+1}, \R^{n+1}$
-makes the method implicit.
+
+% The precise value of $\uu(t)$ at each $t\in[t^n, t^{n+1}]$
+% is unknown, thus an approximation is required for numeric calculation.
+% The current paper proposes to use conditions at
+% time steps only, namely $t \in \{t^{n+1}, t^n, t^{n-1}\dots\}$,
+% in acquiring the polynomial reconstruction.
+% Since the step values $\uu^n, \uu^{n-1}\dots$ and
+% their temporal derivatives $\R^n, \R^{n-1}\dots$ are known,
+% the addition of the unknown latest step $\uu^{n+1}, \R^{n+1}$
+% makes the method implicit.
+
+Besides $\uu^{n+1}$, $\uu(t^{n+c_2})$ is also unknown. 
+To make \eeqref{eq:integ0}
+solvable, the temporal reconstruction is introduced in the
+present paper. 
+The temporal reconstruction is to reconstruct $\uu(t)$
+from known $\uu$ at previous time steps and the desired
+solution $\uu^{n+1}$ of the numerical schemes. Since $\frac{\dd\uu}{\dd t}=\R$
+can be computed from  $\uu$, R at previous time steps as well
+as  $\R^{n+1}$ can be also used in the temporal reconstruction. 
+The inclusion of $\uu^{n+1}$ and $\R^{n+1}$ in the reconstruction
+makes the scheme implicit. 
+Using the reconstructed $\uu(t)$, $\uu(t^{n+c_2})$
+can be evaluated, making \eeqref{eq:integ0} solvable.
 The current paper has only considered using a subset of
-$\uu(t), \R(t, \uu(t))$ with $t \in \{t^{n+1}, t^n, t^{n-1}\}$
-as polynomial conditions.
+$\uu(t), \R(t, \uu(t))$ at $t \in \{t^{n+1}, t^n, t^{n-1}\}$
+as conditions of the polynomial reconstruction.
 Generally, the polynomial interpolation
 of $\uu(t)$ could be expressed as
 \begin{equation}
-    \begin{aligned}
+    \begin{aligned} 
         \label{eq:TR}
         \uu(t) & \approx
         A^n_0(t)\uu^{n - 1} +
@@ -889,31 +983,48 @@ of $\uu(t)$ could be expressed as
 where $A^n_i(t), D^n_i(t), i=0,1,2$
 are polynomial base functions. Due to the precision of quadrature rule,
 the polynomial reconstruction is only expected to reach 3rd order
-constructing a 4th order accurate scheme. Consequently, at most 4 of the
+constructing a 4th order accurate scheme. 
+Consequently, at most 4 out of the
 6 conditions would be used at the same time.
-The polynomial interpolation in the direction of time in equation \eqref{eq:TR}
+The polynomial interpolation in the direction of time in \eeqref{eq:TR}
 is referred to as temporal reconstruction, for
 a continuous distribution of $\uu$ is reconstructed with point values,
 similar to the finite volume reconstruction.
 
-Combining the direct integration in equation \eqref{eq:Quad3}
-and a  temporal reconstruction in \eqref{eq:TR},
+Combining the direct integration in \eeqref{eq:Quad3}
+and a  temporal reconstruction in \eeqref{eq:TR},
 a Direct Integration with Temporal Reconstruction (DITR) method is
 determined.
 The current paper sticks to the same formula of direct integration
-in equation \eqref{eq:Quad3}, while experimenting on different
-forms of temporal reconstruction in equation \eqref{eq:TR}.
+in \eeqref{eq:Quad3}, while experimenting on different
+forms of temporal reconstruction in \eeqref{eq:TR}.
+
+As a remark, the Adams-Moulton scheme which is one of the
+implicit linear multi-step method also use the direct
+integration approach. 
+However, it relies on the
+reconstruction of $\R(t)$ to make the numerical quadrature
+similar to the right-hand side of \eeqref{eq:integ0} computable. 
+For the third order scheme, quadratic reconstruction in terms
+of $\R^{n+1},\R^{n},\R^{n-1}$ is used. 
+It is well known that the high-order
+Adams-Moulton schemes have rather poor stability
+property. The present DITR scheme reconstructs U rather
+than R. According to \eeqref{eq:TR}, 
+more information can be used
+in the reconstruction, making the present method more
+compact and flexible. The present approach can achieve
+high-order of accuracy and better stability property when
+the reconstruction is designed properly.
 
 If the quadrature rule in direct integration is replaced with
-midpoint rule, while the temporal reconstruction uses linear
+midpoint rule, and the temporal reconstruction uses linear
 reconstruction, the implicit midpoint method for ODE can be derived,
 which is 2nd order accurate. A high order accurate DITR method could
-only be obtained with a high order accurate quadrature rule.
-For simplicity, equation \eqref{eq:Quad3} only takes one interpolated
-node besides $t^n, t^{n+1}$, and has an accuracy of 3rd or 4th order
-depending on $c_2$.
+only be obtained with a high order accurate quadrature rule and 
+high degree temporal reconstruction.
 
-Assuming the quadrature rule has algebraic precision is
+Assuming the quadrature rule has algebraic precision
 of degree $m$, and the polynomial interpolation is of degree $n$,
 a straightforward analysis on local truncation error could be conducted.
 Approximation \eqref{eq:Quad3} yields a
@@ -937,8 +1048,8 @@ truncation error of $O((\inc t)^{m+2} )$ expressed in equation \eqref{eq:Quad3Er
 \end{equation}
 due to the precision degree of quadrature rule.
 Approximation
-\eqref{eq:TR} has a truncation error of $O((\inc t)^{n+1})$
-expressed in \eqref{eq:TRErr}
+\eeqref{eq:TR} has a truncation error of $O((\inc t)^{n+1})$
+expressed in \eeqref{eq:TRErr}
 \begin{equation}
     \begin{aligned}
         \label{eq:TRErr}
@@ -955,8 +1066,8 @@ expressed in \eqref{eq:TRErr}
     \end{aligned}
 \end{equation}
 as a result of polynomial degree.
-Substituting \eqref{eq:TRErr} into the $t^{n+c_2}$ stage
-of \eqref{eq:Quad3Err}, the truncation error
+Substituting \eeqref{eq:TRErr} into the $t^{n+c_2}$ stage
+of \eeqref{eq:Quad3Err}, the truncation error
 of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
 \begin{equation}
     \begin{aligned}
@@ -986,7 +1097,7 @@ of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
 \end{equation}
 where $\uu^{n+1}, \uu^{n}$ are step values assumed to be accurate here, and
 $\uu^{n+c_2}$ is the approximate
-$c_2$ stage value determined with temporal reconstruction.
+$c_2$ stage value determined by the temporal reconstruction.
 Equation \eqref{eq:fullLTE} assumes
 $\R(t, \uu)$ to be sufficiently regular and therefore does not
 change the order of error.
@@ -1008,8 +1119,8 @@ To make the method single-step and 4th order accurate,
 we choose $\uu^{n},\uu^{n+1}$, $\R^{n},\R^{n+1}$ as
 the interpolation conditions, making the interpolation
 basically cubic Hermite interpolation.
-Therefore, we have the interpolation of $\uu(t^{n+c_2})$
-being:
+Therefore, the interpolation of $\uu(t^{n+c_2})$
+is:
 \begin{equation}
     \begin{aligned}
         \label{eq:TRU2R2}
@@ -1027,17 +1138,26 @@ of $\uu(t^{n+c_2})$
 and the interpolation bases at $c_2$ node being:
 \begin{equation}
     \begin{aligned}
-        a_{1,U2R2} & = 1 - (3{c_2}^2 - 2 {c_2}^3)  \\
-        a_{2,U2R2} & = 3{c_2}^2 - 2 {c_2}^3        \\
-        d_{1,U2R2} & = {c_2} - 2 {c_2}^2 + {c_2}^3 \\
-        d_{2,U2R2} & = - {c_2}^2 + {c_2}^3         \\
+        a_{1,U2R2} & = 1 - (3{c_2}^2 - 2 {c_2}^3) , \\
+        a_{2,U2R2} & = 3{c_2}^2 - 2 {c_2}^3 ,       \\
+        d_{1,U2R2} & = {c_2} - 2 {c_2}^2 + {c_2}^3, \\
+        d_{2,U2R2} & = - {c_2}^2 + {c_2}^3 .        \\
     \end{aligned}
     \label{eq:interpU2R2}
 \end{equation}
 
-The temporal reconstruction equation \eqref{eq:TRU2R2}
+The temporal reconstruction of \eeqref{eq:TRU2R2}
 combined with direct integration equation \eqref{eq:Quad3}
-forms the DITR U2R2 method.
+forms the DITR U2R2 method. 
+Here U2R2 denotes 2 $\uu$ and 2 $\R$
+step values at $n,n+1$ used in the reconstruction.
+Following analyses indicate that using 
+the most recent $\uu$ and $\R$ 
+will yield a scheme with better stability.
+Therefore, the current paper does not include the 
+time step indices in the naming of DITR methods. 
+This naming convention is continued in the following 
+methods.
 
 When $c_2=1/2$, quadrature rule in equation \eqref{eq:Quad3} has precision
 of degree 3, making the DITR U2R2 method 4th order accurate,
@@ -1060,8 +1180,8 @@ yielding a Butcher tableau shown in Table \ref{tab:U2R2Butcher}.
     \label{tab:U2R2Butcher}
 \end{table}
 
-From table \ref{tab:U2R2Butcher} with the coefficients
-decided with \eqref{eq:interpU2R2} and \eqref{eq:integ0},
+According to table \ref{tab:U2R2Butcher} with the coefficients
+determined by \eqref{eq:interpU2R2} and \eqref{eq:integ0},
 one can find that the 4th order accurate
 DITR U2R2 method with $c_2=1/2$
 is actually the Lobatto IIIA method
@@ -1102,7 +1222,7 @@ Most CFD systems of interest are physically dissipative,
 while for a symmetric method
 $R(z) \rightarrow 1$ when $z \rightarrow \infty$,
 which means the method is more likely to preserve
-spurious modes arising from spacial discretization.
+spurious modes arising from spatial discretization.
 Although DITR U2R2 cannot achieve $L$-stability,
 using a value of $c_2 > 1/2$ would still
 produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
@@ -1136,9 +1256,9 @@ of $\uu(t^{n+c_2})$
 and the interpolation bases at $c_2$ node being:
 \begin{equation}
     \begin{aligned}
-        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2) \\
-        a_{2,U2R1} & = 2c_2 - {c_2}^2       \\
-        d_{2,U2R1} & = {c_2}^2 - {c_2}      \\
+        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2), \\
+        a_{2,U2R1} & = 2c_2 - {c_2}^2,       \\
+        d_{2,U2R1} & = {c_2}^2 - {c_2}.      \\
     \end{aligned}
     \label{eq:interpU2R1}
 \end{equation}
@@ -1159,7 +1279,7 @@ Runge-Kutta methods\cite{wanner1996solving}.
 The linear stability function for DITR U2R1 is
 \begin{equation}
     \label{eq:stabilityFuncU2R1}
-    R_{U2R1}(z) = \frac{2\,z+6}{z^2-4\,z+6}
+    R_{U2R1}(z) = \frac{2\,z+6}{z^2-4\,z+6},
 \end{equation}
 which is (1,2)-Pad{\'e} approximation and not affected by $c_2$.
 It can be found $|R_{U2R1}(z)| < 1, \forall \real(z) < 0$,
@@ -1167,9 +1287,11 @@ and obviously $\lim_{z\rightarrow\infty}R_{U2R1}(z) = 0$.
 Therefore, DITR U2R1 method is $L$-stable.
 
 The stability function also
-shows that for a linear $\R$, the solution is not
-affected by $c_2$, but U2R1 treats nonlinear problems
-different when $c_2$ changes.
+shows that when $\R$ is a linear function of $\uu$, 
+the solution is not
+affected by $c_2$. 
+However, for nonlinear $\R$, 
+$c_2$ changes the behavior of U2R1.
 
 \subsubsection{The DITR U3R1 Method}
 
@@ -1198,10 +1320,10 @@ of $\uu(t^{n+c_2})$
 and the interpolation bases at $c_2$ node being:
 \begin{equation}
     \begin{aligned}
-        a_{0,U3R1} & = -\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}                                                            \\
-        a_{1,U3R1} & = \frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}                                                                    \\
-        a_{2,U3R1} & =  \frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2} \\
-        d_{2,U3R1} & =   \frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}
+        a_{0,U3R1} & = -\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}       ,                                                     \\
+        a_{1,U3R1} & = \frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}                     ,                                               \\
+        a_{2,U3R1} & =  \frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2} ,\\
+        d_{2,U3R1} & =   \frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}.
     \end{aligned}
     \label{eq:interpU3R1}
 \end{equation}
@@ -1209,7 +1331,7 @@ where $\Theta = \inc t^{n-1}/\inc t^{n}$.
 
 The temporal reconstruction equation \eqref{eq:TRU3R1}
 combined with direct integration equation \eqref{eq:Quad3}
-forms the DITR U2R1 method.
+forms the DITR U3R1 method.
 
 The method is 4th order when $c_2=1/2$, when
 both the interpolation and integration has precision
@@ -1218,10 +1340,10 @@ For the special case of $c_2=1/2$, simplified
 coefficients are given:
 \begin{equation}
     \begin{aligned}
-        a_{0,U3R1} & = -\frac{1}{8\,\Theta\,{\left(\Theta+1\right)}^2}                \\
-        a_{1,U3R1} & = \frac{\Theta+\frac{1}{2}}{4\,\Theta}                           \\
-        a_{2,U3R1} & =  \frac{6\,\Theta^2+11\,\Theta+4}{8\,{\left(\Theta+1\right)}^2} \\
-        d_{2,U3R1} & = -\frac{\Theta+\frac{1}{2}}{4\,\left(\Theta+1\right)}
+        a_{0,U3R1} & = -\frac{1}{8\,\Theta\,{\left(\Theta+1\right)}^2}  ,              \\
+        a_{1,U3R1} & = \frac{\Theta+\frac{1}{2}}{4\,\Theta}        ,                   \\
+        a_{2,U3R1} & =  \frac{6\,\Theta^2+11\,\Theta+4}{8\,{\left(\Theta+1\right)}^2}, \\
+        d_{2,U3R1} & = -\frac{\Theta+\frac{1}{2}}{4\,\left(\Theta+1\right)}.
     \end{aligned}
     \label{eq:interpU3R1-S}
 \end{equation}
@@ -1236,6 +1358,7 @@ produces two solutions:
         R_{U3R1}^{(2)}(z)
     \end{matrix}
     \right)=\left(\begin{array}{c} \frac{10\,z-\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48}\\ \frac{10\,z+\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48} \end{array}\right)
+    .
 \end{equation}
 It is obvious $R_{U3R1}^{(1)}(z)\rightarrow 0, R_{U3R1}^{(2)}(z)\rightarrow0$ when
 $z\rightarrow\infty$.
@@ -1246,7 +1369,10 @@ The current paper therefore believes %! not a linear multi-step method
 the DITR U3R1 method is indeed $L$-stable.
 Note that DITR U3R1 is not a linear multistep method,
 and the root locus curve analysis used in those methods
-can not be directly applied here.
+can not be directly applied here. 
+To the author's knowledge, no 
+such implicit time marching method 
+has been reported in the literature.
 
 With 4th order accuracy and observed $L$-stability, the
 DITR U3R1 method is potentially more favorable than
@@ -1327,15 +1453,16 @@ $\Theta = \inc t^{n-1} / \inc t^{n}$.
     \label{tab:inter0Tab}
 \end{table}
 
-In practical, the current research chooses $c_2=0.5,0.55$ for U2R2.
+In practice, the current research chooses $c_2=0.5,0.55$ for U2R2.
 U2R2 $c_2=0.5$ has optimal order of accuracy (4th order), but it is symmetric.
 U2R2 $c_2=0.55$ is 3rd order accurate but breaks symmetry and gains some stability.
 
 For U2R1, $c_2$ does not affect order of accuracy and stability.
 We empirically choose $c_2=0.25$ for U2R1, the reason roots in
-solving stability and will be explained in \ref{sssec:numScan}.
+the convergence of solving PDEs using 
+dual time stepping, which will be explained in \ref{sssec:numScan}.
 
-For U3R1, since any $c_2$ gives $L$-stability, $c_2=0.5$ which
+For U3R1, since any $c_2$ gives $L$-stability, so $c_2=0.5$ which
 offers optimal 4th order of accuracy is always used.
 
 
@@ -1589,7 +1716,7 @@ offers optimal 4th order of accuracy is always used.
 % while for symmetric RK methods
 % $R(z) \rightarrow 1$ when $z \rightarrow \infty$,
 % which is more likely to preserve
-% spurious modes arising from spacial discretization.
+% spurious modes arising from spatial  discretization.
 % Although HIRK cannot achieve $L$-stability
 % by simply adjusting $c_2$,
 % using a non-trivial value $c_2 > 1/2$ would still
@@ -1600,6 +1727,7 @@ offers optimal 4th order of accuracy is always used.
 
 
 \section{Solving Approaches of DITR}
+\label{sec:Solving}
 \renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
 \newcommand{\eye}{\mathbf{I}}
@@ -1617,7 +1745,7 @@ In order to numerically conduct time marching with DITR, the equations
 need to be iteratively solved.
 The current section will discuss
 how to solve the equations arising from DITR methods
-when applied to spacial discretized flow problems, and
+when applied to spatial  discretized flow problems, and
 describe a recommended solving approach in the end.
 
 \subsection{Dual Time Stepping}
@@ -1871,7 +1999,7 @@ Suppose the 1-D linear convection problem reads
     \partialderivative{u}{t} = -a \partialderivative{u}{x}
 \end{equation}
 with positive convection speed $a$.
-Some difference scheme on uniform grid is used as spacial discretization:
+Some difference scheme on uniform grid is used as spatial  discretization:
 \begin{equation}
     \derivative{u_i}{t} = -\frac{a}{\inc x} \sum_{j\in S_i}u_j\alpha_j
     \label{eq:fd}
@@ -1896,7 +2024,7 @@ $\kappa'$ can be found as
     \kappa' = \frac{1}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
 \end{equation}
 The modified wave number $\kappa'$ is commonly used to evaluate the performance of
-spacial discretization schemes.
+spatial  discretization schemes.
 A stable discretization would require $\imag(\kappa) \leq 0$ so that
 $A(t)$ does not exponentially increase in magnitude.
 
@@ -2088,8 +2216,8 @@ and pseudo time step is small.
 \end{figure}
 
 After further analysis,
-apart from the first-order upwind spacial discretization,
-for any linear spacial discretization with modified wave number $\kappa'$,
+apart from the first-order upwind spatial  discretization,
+for any linear spatial  discretization with modified wave number $\kappa'$,
 the pseudo time wave number $\kappa^*$ is
 \begin{equation}
     \begin{aligned}
@@ -2120,7 +2248,7 @@ the nested solving approach inapplicable.
 
 The failure of nested solving approach in dual time stepping
 roots in the nesting of right-hand-side $\R$ terms
-(i.e. spacial discretization operators), which
+(i.e. spatial  discretization operators), which
 causes an $O(\CFLt)$ term in the modified wave number,
 making the wave number unbounded when $\CFLt\rightarrow + \infty$.
 Therefore, the non-nested form of dual time stepping in
@@ -2216,7 +2344,7 @@ Using simple wave modes:
 \end{equation}
 
 By applying the Fourier analysis mentioned before,
-with some spacial discretization with modified having number
+with some spatial  discretization with modified having number
 being $\kappa'$, the evolution of wave strength is:
 \begin{equation}
     \derivative{ }{\tau}
@@ -2287,7 +2415,7 @@ is equivalent with $\imag(\kappa^*_i) \leq 0, i=1,2$,
 we will investigate the eigenvalues of
 $\frac{\CFLt}{\imagUnit}\mathbf{K}^*$, which is
 determined by DITR coefficients, $\beta$ and the
-combined non-dimensional eigenvalue of spacial discretization $\mu'$
+combined non-dimensional eigenvalue of spatial  discretization $\mu'$
 where
 \begin{equation}
     \mu' = \frac{\CFLt \kappa'}{\imagUnit}
@@ -2635,6 +2763,7 @@ are too close to 1, maintaining sufficient convergence speed.
 
 
 \section{Numerical Tests}
+\label{sec:Results}
 
 During numerical tests,
 BDF2 and ESDIRK4 methods taken from
@@ -2647,7 +2776,7 @@ U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 The isentropic vortex, two dimensional vortex shedding
 and  double mach reflection problems use
 $P^3$ variational reconstruction finite volume method declared in
-section \ref{sec:CFV} as spacial discretization.
+section \ref{sec:CFV} as spatial  discretization.
 Iterative solution of the implicit reconstruction
 is conducted before each right-hand-side evaluation,
 which consists of 1 block-Jacobi iteration by default.
@@ -2756,7 +2885,7 @@ ESDIRK4 needs 5.
 Next, precision and efficiency of different ODE methods are
 qualitatively evaluated with isentropic vortex solved on a $160\times160$
 grid until $t=2$.
-The fine mesh makes spacial
+The fine mesh makes spatial 
 discretization error negligible compared with
 time marching error.
 The density error is defined as an $L1$ norm in the form of
@@ -2859,7 +2988,7 @@ In order to quantitatively compare different
 time marching schemes,
 the time marching error is compared.
 Using the same mesh as in Figure \ref{sfig:CylinderRe1200Demo_Mesh}
-and the same compact FV spacial discretization,
+and the same compact FV spatial  discretization,
 a numeric reference solution is calculated with ESDIRK4 using
 very fine time step $\inc t = 0.00125$.
 In the reference solution, restart information at $t=200$
@@ -3026,7 +3155,7 @@ conforms with the Ma 10 moving shock.
 Details about the initial and boundary settings may be found in \cite{woodward1984dmr}.
 The compact FV scheme is additionally equipped with
 an accuracy preserving CWBAP limiter \cite{wu2023cwbap},
-which grants the ability to capture spacial discontinuities.
+which grants the ability to capture spatial  discontinuities.
 To handle strong discontinuities, the local Lax-Friedrichs flux
 is used here.
 The computations are conducted on a uniform quadrilateral mesh with
@@ -3094,7 +3223,7 @@ all high-order methods produce a
 normal Mach stem.
 Meanwhile, the second order BDF2
 completely smears the K-H instability
-in the shear layer, despite that the spacial
+in the shear layer, despite that the spatial 
 discretization is 4th order accurate.
 All high-order time march methods methods can successfully
 simulate K-H instability and resolve the
@@ -3112,6 +3241,7 @@ and U3R1 uses $79\%$.
 
 
 \section{Conclusion}
+\label{sec:Conc}
 
 The current paper has described a method of 
 developing time marching schemes using a 
