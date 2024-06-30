@@ -235,13 +235,13 @@ applying implicit ODE solvers with
 usually better stability attributes.
 Due to Dahlquist's second barrier
 \cite{dahlquist1963special},
-only second and first order linear multi-step ODE methods
+only second and first order linear multistep ODE methods
 could achieve $A$-stability. 
 Therefore, 
 the $L$-stable
 second-order backward differentiation formula (BDF2)
 is extensively adopted in solving transient CFD problems.
-Different from multi-step methods,
+Different from multistep methods,
 the single-step implicit Runge-Kutta (IRK) methods
 with multiple internal stages
 can achieve higher order of accuracy while
@@ -372,8 +372,8 @@ When the temporal reconstruction uses only the information of n
 and n+1 steps, the DITR schemes are single step schemes
 similar to the MIRK or NIRK schemes. 
 When the temporal reconstruction uses the information of n-1, n and n+1 steps,
-the resulting DITR schemes are multi-step methods that are
-different from the common implicit linear multi-step 
+the resulting DITR schemes are multistep methods that are
+different from the common implicit linear multistep 
 methods such as
 the Adams-Moulton and BDF schemes \cite{wanner1996solving}. 
 %! actually, the method was described as a Multistep Collocation Method 
@@ -383,10 +383,10 @@ schemes is mainly determined by the temporal
 reconstruction step. 
 When adopting proper quadrature rules
 and temporal reconstructions in these two steps, single-step
-and multi-step methods with arbitrary orders of temporal
+and multistep methods with arbitrary orders of temporal
 accuracy can be constructed. Therefore, the DITR approaches
 are new methodologies for designing implicit time marching
-schemes that are different from the IRK and multi-step
+schemes that are different from the IRK and multistep
 methods. 
 
 When applying DITR schemes to solving compressible Euler and
@@ -702,7 +702,7 @@ which is calculated with:
     \frac{1}{\overline{\OO}_j}\int_{\OO_j}{
         \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
         \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
-    }\dd \Omega
+    }\dd \Omega . 
 \end{equation}
 
 The length scales are chosen to be the largest distance of nodes from the
@@ -1000,7 +1000,7 @@ in \eeqref{eq:Quad3}, while experimenting on different
 forms of temporal reconstruction in \eeqref{eq:TR}.
 
 As a remark, the Adams-Moulton scheme which is one of the
-implicit linear multi-step method also use the direct
+implicit linear multistep method also use the direct
 integration approach. 
 However, it relies on the
 reconstruction of $\R(t)$ to make the numerical quadrature
@@ -1109,11 +1109,11 @@ The following sections will illustrate some
 practical DITR methods based on equations \eqref{eq:Quad3} and \eqref{eq:TR}.
 
 
-\subsection{Variants of DITR Methods}
+\subsection{Variants of DITR methods}
 
 
 
-\subsubsection{The DITR U2R2 Method}
+\subsubsection{The DITR U2R2 method}
 
 To make the method single-step and 4th order accurate,
 we choose $\uu^{n},\uu^{n+1}$, $\R^{n},\R^{n+1}$ as
@@ -1230,7 +1230,7 @@ would be a useful property in simulation of dissipative systems.
 With  $c_2 > 1/2$, stiff modes could vanish faster over the time
 steps, while $c_2 = 1/2$ tends to preserve them.
 
-\subsubsection{The DITR U2R1 Method}
+\subsubsection{The DITR U2R1 method}
 
 Giving up one interpolation condition in DITR U2R2
 forces the scheme to have 3rd order accuracy.
@@ -1293,7 +1293,7 @@ affected by $c_2$.
 However, for nonlinear $\R$, 
 $c_2$ changes the behavior of U2R1.
 
-\subsubsection{The DITR U3R1 Method}
+\subsubsection{The DITR U3R1 method}
 
 To exploit the information when multiple previous
 steps are available,
@@ -1365,7 +1365,7 @@ $z\rightarrow\infty$.
 When observed numerically, it is found both $|R_{U3R1}^{(1)}(z)|$
 and $|R_{U3R1}^{(2)}(z)|$ are less than 1 in the left
 half plane of $z$.
-The current paper therefore believes %! not a linear multi-step method
+The current paper therefore believes %! not a linear multistep method
 the DITR U3R1 method is indeed $L$-stable.
 Note that DITR U3R1 is not a linear multistep method,
 and the root locus curve analysis used in those methods
@@ -1378,7 +1378,7 @@ With 4th order accuracy and observed $L$-stability, the
 DITR U3R1 method is potentially more favorable than
 U2R2 and U2R1.
 
-\subsubsection{Summary of DITR Methods}
+\subsubsection{Summary of DITR methods}
 \label{sssec:sumDITRs}
 
 The U2R2, U2R1 and U3R1 variants of the
@@ -1726,7 +1726,7 @@ offers optimal 4th order of accuracy is always used.
 % steps, while $c_2 = 1/2$ tends to preserve them.
 
 
-\section{Solving Approaches of DITR}
+\section{Iteration methods for solving DITR}
 \label{sec:Solving}
 \renewcommand{\Res}{\mathcal{R}}
 \newcommand{\Jres}{\mathcal{J}}
@@ -1743,15 +1743,17 @@ and temporal reconstruction respectively.
 There are two unknown vectors $\uu^{n+1},\uu^{n+c_2}$ in the equations.
 In order to numerically conduct time marching with DITR, the equations
 need to be iteratively solved.
-The current section will discuss
-how to solve the equations arising from DITR methods
-when applied to spatial  discretized flow problems, and
-describe a recommended solving approach in the end.
+Although the DITR schemes can be used as the ODE integrator
+directly, we are mainly interested in using these schemes 
+as the time marching schemes for solving nonlinear time-dependent
+PDEs, specifically the compressible Euler and Navier-Stokes equations.
+
+
 
 \subsection{Dual Time Stepping}
 \label{ssec:dualTime}
 
-Dual time stepping \cite{jameson1991time,jameson2017evaluation}
+Dual time stepping technique \cite{jameson1991time,jameson2017evaluation}
 is a standard procedure of solving nonlinear
 implicit time stepping equations
 in flow problems.
@@ -1804,9 +1806,139 @@ equation \eqref{eq:exactDualTime}.
 Equation \eqref{eq:abstractNewton} becomes the
 standard Newton-Raphson method when $\inc\tau\rightarrow\infty$.
 
+In this paper, the dual time stepping technique is considered to be crucial
+in helping the numerical system overcome the convergence difficulties 
+arising from strong nonlinearity and discontinuity 
+in certain compressible flows. 
+The pseudo time term in dual time stepping 
+serves as a stabilizing term in the iteration, 
+which is necessary when the flow has strong transient features.
+Therefore, the following sections will focus on different
+methods of applying dual time iteration to DITR.
 
-For DIRK type methods and linear multistep methods, at
-each step or stage, only one $\uu^{*}$ is unknown,
+Dual time stepping \eeqref{eq:exactDualTime} is an artificial 
+pseudo-time-dependent ODE system, and linear stability features with 
+respect to $\tau$ can be performed \cite{jameson1991time}. 
+The current paper considers using Fourier analysis 
+to gain a perception of the stability features in pseudo time 
+when the form of $\FF^*$ varies. 
+Therefore, the current section will introduce the 
+Fourier analysis in pseudo time using standard BDF and DIRK 
+methods as an example. 
+
+
+\subsubsection{Fourier analysis in pseudo time}
+\label{sssec:fourier}
+
+\newcommand{\imagUnit}{\mathrm{i}}
+
+To start the Fourier analysis, consider the linear advection problem
+solved on an infinitely large 1-D uniform
+grid.
+Suppose the 1-D linear advection problem reads
+\begin{equation}
+    \partialderivative{u}{t} = -a \partialderivative{u}{x}
+\end{equation}
+with positive convection speed $a$.
+Some difference scheme on uniform grid is used as spatial  discretization, which 
+yields the ODE system:
+\begin{equation}
+    R_i=\derivative{u_i}{t} = -\frac{a}{\inc x} \sum_{j\in S_i}u_j\alpha_j
+    \label{eq:fd}
+\end{equation}
+where $\alpha_j$ is the coefficients for finite difference approximation
+and $S_i$ is the stencil set. $R_i$ denotes the right-hand-side of the ODE, 
+or components of $\R$ in other words.
+As the problem is linear,
+a simple wave solution
+\begin{equation}
+    u = A(t)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+\end{equation}
+can be substituted in and produces
+a relation of
+\begin{equation}
+    \frac{\dd A(t)}{\dd t} = -\imagUnit a\frac{\kappa'}{\inc x}  A(t)
+\end{equation}
+where $\kappa'$ is the modified non-dimensional wave number,
+and $\imagUnit$ is the imaginary unit.
+For a finite difference scheme in equation \eqref{eq:fd},
+$\kappa'$ can be found as
+\begin{equation}
+    \kappa' = \frac{1}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
+\end{equation}
+The modified wave number $\kappa'$ is commonly used to evaluate the performance of
+spatial  discretization schemes.
+A stable discretization would require $\imag(\kappa) \leq 0$ so that
+$A(t)$ does not exponentially increase in magnitude.
+
+Next, the classic linear analysis on dissipation and dispersion is
+extended to dual time stepping. The dual time
+stepping equation \eqref{eq:exactDualTime} can be
+considered the evolution equation of the solution in pseudo time.
+Thus, for the linear advection problem,
+a simple wave pseudo time solution
+\begin{equation}
+    u^*(\tau,x) = A^*(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+    \label{eq:simpleWaveTestTau}
+\end{equation}
+where $*$ represent a certain unknown stage or step value.
+For standard BDF and ESDIRK methods, the residual $\FF^*$
+can be written as 
+\begin{equation}
+    \FF^*(\uu^*) = \mathbf{C} - \frac{\mathcal{A}}{\inc t} \uu^* + \mathcal{B}\R(t^*, \uu^*)
+    \label{eq:canonicalFF}
+\end{equation}
+where $\mathbf{C}$ is the part of vectors irrelevant with $\uu^*$,
+and $\mathcal{A},\mathcal{B}$ are positive real coefficients. 
+$\mathbf{C}$ contains the transient terms of ODE integrator, 
+and stays constant in the pseudo time iteration and is 
+therefore irrelevant to linear stability. 
+With  spatial discretization \eeqref{eq:fd},
+time integrator \eeqref{eq:canonicalFF}, 
+and 
+the simple wave solution \eeqref{eq:simpleWaveTestTau}
+substituted into the exact pseudo time evolution \eeqref{eq:exactDualTime},
+the wave amplitudes are found to have the form
+\begin{equation}
+    \frac{\dd A^*(\tau)}{\dd \tau} = -\imagUnit a\frac{\kappa^*}{\inc x}  A^*(\tau) + C^*
+    \label{eq:kappaSDefTau}
+\end{equation}
+where $\kappa^*$ represents the modified wave number for pseudo time.
+The $C^*$ term in the above equation is a constant coefficient arising
+from the $\mathbf{C}$ term in the time stepping method. 
+Clearly only the linear term with $\kappa^*$ could induce an exponentially diverging 
+solution, while the constant term only changes the asymptotic solution
+when the pseudo time evolution is stable.
+The pseudo time modified wave number $\kappa^*$ is found to be
+\begin{equation}
+    \begin{aligned}
+        \kappa^* & = -\imagUnit\frac{\mathcal{A}}{\CFLt} +
+        \frac{\mathcal{B}}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j \\
+        & =-\imagUnit\frac{\mathcal{A}}{\CFLt} + \mathcal{B}\kappa'
+    \end{aligned}
+\end{equation}
+where $\CFLt = \frac{a\inc t }{\inc x}$ is the physical CFL number.
+When the finite difference scheme is stable, 
+the physical time modified wave number satisfies $\imag (\kappa') \leq 0$ for 
+all $\kappa$. 
+Consequently, $\imag (\kappa^*) < 0$, and the exact pseudo time marching 
+is stable.
+
+To summarize, for stage residual function $\FF^*$ in the form of
+equation \eqref{eq:canonicalFF}, it is guaranteed $\imag (\kappa^*) < 0$,
+and the pseudo time evolution is stable in the sense of a continuous $\tau$.
+
+This result clearly demonstrates the benefit of using the dual time stepping
+technique,
+that it is automatically stable when applied to common ODE methods including 
+BDF and ESDIRK.
+
+
+\subsection{The fully coupled iteration method for solving DITR}
+
+For linear multistep methods (including BDF) and DIRK type methods (including ESDIRK), 
+at each step or stage, only one $\uu^{*}=\uu^{n,s}$ 
+($s$ is the stage index) or $\uu^{*}=\uu^{n+1}$ is unknown,
 thus equation \eqref{eq:abstractNewton} can be applied directly.
 However, in fully implicit RK methods and the current DITR methods,
 more than one unknown $\uu^{*}$ are present at each stage.
@@ -1828,7 +1960,7 @@ The enlarged system concatenates different $\uu$
 stages as one vector and uses the concatenated vector as
 $\uu^*$ in \eqref{eq:abstractNewton}.
 The residual function $\FF^*$ is therefore a concatenated vector of
-different stage equations' residual vectors.
+the residual vectors at different stages.
 Therefore, for methods with $k$ unknown stages, the number of
 unknowns solved concurrently is $k$ times of that in BDF or ESDIRK methods.
 Applied to DITR methods, there is
@@ -1871,6 +2003,7 @@ where $\Pm$ is a preconditioning matrix:
         \Pe_{21}\eye & \Pe_{22}\eye \\
     \end{bmatrix}
 \end{equation}
+with $\Pe_{11},\Pe_{12} \dots$ being real scalars.
 Functions $\GG^{n+c_2},\GG^{n+1}$ are the original residuals
 corresponding to temporal reconstruction \eeqref{eq:TRSum} and
 direct integration \eeqref{eq:DISum} respectively. Note that
@@ -1891,27 +2024,28 @@ And consequently \eeqref{eq:exactDualTime} becomes
 Applying \eeqref{eq:DITRNaiveDualTime} directly to \eeqref{eq:abstractNewton}
 would require the solution of an enlarged sparse linear problem.
 
-For solvers that explicitly implement sparse matrix storage
-and solving methods, such enlargement is trivial at the cost of $k^2$ times
+For solvers that explicitly implement sparse matrix storage,
+ such enlargement is trivial at the cost of $k^2$ times
 of matrix storage. But for inherently matrix-free flow solvers,
 such enlargement could require drastic modification and addition to
 the original codebase.
 The direct enlargement of the problem is referred to as
-the fully coupled approach in the current paper.
+the fully coupled iteration method in the current paper.
 Due to its complexity of implementation,
-the current research does not consider using fully coupled approach
-to solve DITR time stepping.
+the current research does not consider using the 
+fully coupled iteration method
+to solve DITR time stepping schemes.
 
 
 
 
-\subsection{The Nested Solving Approach of DITR}
+\subsection{The nested iteration method for solving DITR}
 
-A characteristic of equation \eqref{eq:TRSum} is that
+A characteristic of \eeqref{eq:TRSum} is that
 $\uu^{n+c_2}$ only exists on the left side, namely the
-right side of equation \eqref{eq:TRSum} has only $\uu^{n+1}$ as
+right side of \eeqref{eq:TRSum} has only $\uu^{n+1}$ as
 unknown. Consequently, by substitution, equivalent
-with the previous discussions causing equation \eqref{eq:fullLTE},
+to the previous derivations leading to \eeqref{eq:fullLTE},
 $\uu^{n+c_2}$ can be eliminated nonlinearly:
 \begin{equation}
     \begin{aligned}
@@ -1934,10 +2068,10 @@ $\uu^{n+c_2}$ can be eliminated nonlinearly:
         \label{eq:nestedDITR}
     \end{aligned}
 \end{equation}
-which we rewrite into the general form required in section \ref{ssec:dualTime}:
+which we rewrite into the general residual form required in section \ref{ssec:dualTime}:
 \begin{equation}
     \begin{aligned}
-        \FF(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
+        \FF^N(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
                        & +
         b_1 \R^n                                                 \\
                        & +
@@ -1951,146 +2085,89 @@ which we rewrite into the general form required in section \ref{ssec:dualTime}:
         d^n_2\R^{n + 1}
         \right)\right)                                           \\
                        & +
-        b_3 \R(t^{n+1},\uu^{n+1}) = 0
+        b_3 \R(t^{n+1},\uu^{n+1}) = 0.
         \label{eq:nestedDITR_F}
     \end{aligned}
 \end{equation}
 Next, using the linearized implicit backward Euler approximation,
-namely equation \eqref{eq:abstractNewton}, DITR methods can be solved.
+namely equation \eqref{eq:abstractNewton}, DITR methods can be solved:
+\begin{equation}
+    \left(\frac{\eye}{\inc\tau} -
+    \partialderivative{\FF^N}{\uu^{n+1}}  \right)
+    \inc\uu^{n+1,m} = \FF^N(\uu^{n+1,m})
+    \label{eq:abstractNewtonNested}
+\end{equation}
+where $\inc\uu^{n+1,m}=\uu^{n+1,m+1}-\uu^{n+1,m}$.
 
-The huge advantage of this approach is that only one equation is solved,
+The huge advantage of this iteration method is that only one equation is solved,
 with only the next step value as unknown.
-This approach requires $\R$ to be nested in another $\R$ evaluation and
-is referred to as the nested solving approach.
+This iteration method requires $\R$ to be nested in another $\R$ evaluation and
+is referred to as the nested iteration method.
 
-The nested solving approach exploits the
+The nested iteration method exploits the
 local explicitness of DITR's formulation.
-The nested solving approach is similar, and sometimes equivalent with
-the solving approaches used in MIRK \cite{cash1975classMIRKOrig,cash1977clasMIRK1,cash1982monoMIRK2}
+The nested iteration method is similar, and sometimes equivalent with
+the iteration methods used in MIRK \cite{cash1975classMIRKOrig,cash1977clasMIRK1,cash1982monoMIRK2}
 and NIRK \cite{kulikov2006familyNIRKOrig,kulikov2009adaptive,kulikov2007asymptotic}.
-However, previous research on MIRK and NIRK methods have not
-applied such solving approaches to flow problems.
+In these literature, the residual function $\FF^N$ is directly
+solved using a Newton method:
+\begin{equation}
+    -\partialderivative{\FF^N}{\uu^{n+1}}
+    \inc\uu^{n+1,m} = \FF^N(\uu^{n+1,m})
+    \label{eq:abstractNewtonNestedNoTau}
+\end{equation}
+The Jacobian matrix $\partialderivative{\FF^N}{\uu^{n+1}}$
+is a quadratic polynomial of the Jacobian of right-hand-side $\R$.
+Kulikov originally proposed to use an approximate factorization \cite{kulikov2006familyNIRKOrig}
+of $\partialderivative{\FF^N}{\uu^{n+1}}$ to solve \eeqref{eq:abstractNewtonNestedNoTau},
+which allows the direct using of matrix-free solvers.
+However, in previous literature, MIRK and NIRK methods are mainly used on small-scale 
+ODEs rather than as an implicit time marching scheme for compressible flow solvers, 
+and no pseudo time term was involved.
 
-Numerical result indicate that with small $\inc\tau$
+Our numerical experiments indicate that with small $\inc\tau$
 and relatively large $\inc t$,
-the nested solving approach usually fails to converge even in
-linear problems.
-Since dealing with large local CFL number with local
+the nested iteration method \eeqref{eq:abstractNewtonNested} 
+usually fails to converge even in solving linear problems.
+The original iteration methods of NIRK \eeqref{eq:abstractNewtonNestedNoTau}
+which does not involve dual time stepping 
+are found to work on linear problems.  
+However,  when dual time stepping is abandoned, i.e., $\inc \tau=+\infty$,
+for nonlinear flow problems like the isentropic vortex, 
+ when $\inc t$ is relatively large, convergence is almost impossible 
+ to achieve.
+Since dealing with large physical CFL number using local
 pseudo time stepping is an essential ability of implicit
 time stepping methods,
 this divergent result denies the practicality of the
-nested solving approach.
+nested iteration method.
 
 
 
-\newcommand{\imagUnit}{\mathrm{i}}
 
-\subsubsection{Fourier Analysis for Pseudo Time: General Features}
 
-To explain the failure of the nested solving approach
-in the presence of dual time stepping, Fourier
-analysis based on pseudo time is considered.
 
-To start the Fourier analysis, consider the linear convection problem
-solved on an infinitely large 1-D uniform
-grid.
-Suppose the 1-D linear convection problem reads
-\begin{equation}
-    \partialderivative{u}{t} = -a \partialderivative{u}{x}
-\end{equation}
-with positive convection speed $a$.
-Some difference scheme on uniform grid is used as spatial  discretization:
-\begin{equation}
-    \derivative{u_i}{t} = -\frac{a}{\inc x} \sum_{j\in S_i}u_j\alpha_j
-    \label{eq:fd}
-\end{equation}
-where $\alpha_j$ is the coefficients for finite difference approximation
-and $S_i$ is the stencil set.
-As the problem is linear,
-a simple wave solution
-\begin{equation}
-    u = A(t)\exp(\imagUnit \frac{\kappa}{\inc x} x)
-\end{equation}
-can be substituted in and produces
-a relation of
-\begin{equation}
-    \frac{\dd A(t)}{\dd t} = -\imagUnit a\frac{\kappa'}{\inc x}  A(t)
-\end{equation}
-where $\kappa'$ is the modified non-dimensional wave number,
-and $\imagUnit$ is the imaginary unit.
-For a finite difference scheme in equation \eqref{eq:fd},
-$\kappa'$ can be found as
-\begin{equation}
-    \kappa' = \frac{1}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
-\end{equation}
-The modified wave number $\kappa'$ is commonly used to evaluate the performance of
-spatial  discretization schemes.
-A stable discretization would require $\imag(\kappa) \leq 0$ so that
-$A(t)$ does not exponentially increase in magnitude.
+\subsubsection{Fourier analysis in pseudo time: the nested iteration method}
 
-Next, the classic linear analysis on dissipation and dispersion is
-extended to dual time stepping. The dual time
-stepping equation \eqref{eq:exactDualTime} can be
-considered an evolution of the solution.
-Thus, for the linear convection problem,
-a simple wave pseudo time solution
-\begin{equation}
-    u^*(\tau,x) = A^*(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
-    \label{eq:simpleWaveTestTau}
-\end{equation}
-where $*$ represent a certain unknown stage or step value.
-Suppose
-\begin{equation}
-    \frac{\dd A^*(\tau)}{\dd \tau} = -\imagUnit a\frac{\kappa^*}{\inc x}  A^*(\tau) + C^*
-    \label{eq:kappaSDefTau}
-\end{equation}
-then $\kappa^*$ represents the modified wave number for pseudo time.
-The $C$ term in the above equation is a constant coefficient arising
-from the transient terms in the time stepping method.
-In order to find $\kappa^*$, $\FF^*$ need to be specified.
-If we assume $\FF^*$ is in the form of
-\begin{equation}
-    \FF^*(\uu^*) = \mathbf{C} - \frac{\mathcal{A}}{\inc t} \uu^* + \mathcal{B}\R(t^*, \uu^*)
-    \label{eq:canonicalFF}
-\end{equation}
-where $\mathbf{C}$ is the part of vectors irrelevant with $\uu^*$,
-$\mathcal{A},\mathcal{B}$ are positive coefficients.
-Evidently ESDIRK, BDF and trapezoid rule (as in equation \eqref{eq:trapF})
-can satisfy this form.
-Using the finite difference \eqref{eq:fd}, $\R$ is determined, and it is
-shown that for $\FF$ having equation \eqref{eq:canonicalFF}'s form,
-$\kappa^*$ is found to be
-\begin{equation}
-    \kappa^* = -\imagUnit\frac{\mathcal{A}}{\CFLt} +
-    \frac{\mathcal{B}}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
-    =-\imagUnit\frac{\mathcal{A}}{\CFLt} + \mathcal{B}\kappa'
-\end{equation}
-where $\CFLt = \frac{a\inc t }{\inc x}$ is the physical CFL number.
-When the finite difference is stable, $\imag (\kappa') \leq 0$, and consequently
-$\imag (\kappa^*) < 0$.
+To explain the failure of the nested iteration method
+in solving PDEs uisng the dual time stepping technique, Fourier
+analysis based on pseudo time introduced in \ref{sssec:fourier} is considered.
 
-To summarize, for stage residual function $\FF^*$ in the form of
-equation \eqref{eq:canonicalFF}, it is guaranteed $\imag (\kappa^*) < 0$,
-and the pseudo time evolution is stable in the sense of a continuous $\tau$.
-
-This result offers an aspect of reason behind using dual time stepping,
-that it is automatically stable when applied to common ODE methods.
-
-\subsubsection{Fourier Analysis for Pseudo Time: on Nested Solving Approach}
-
-Back to the current section's subject,
-DITR's nested solving approach,
-where $\FF$ is defined with equation \eqref{eq:nestedDITR_F},
-does not satisfy the form of equation \eqref{eq:canonicalFF},
+When DITR is solved using the nested iteration method,
+residual $\FF^N$ in \eeqref{eq:nestedDITR_F}
+cannot be written in the form of  \eeqref{eq:canonicalFF},
 as a result of nested $\R$ terms.
-Continuing with a general finite difference scheme will
-complicate the analysis, so we choose the first-order
+In this case, there is an interaction
+between the temporal and spatial discretization.
+To facilitate the analysis, the spatial discretization 
+could be specified.
+Here we choose the first-order
 upwind difference as an example:
 \begin{equation}
     \derivative{u_i}{t} = -a \frac{u_i - u_{i-1}}{\inc x}
     \label{eq:fdup1}
 \end{equation}
-Therefore from equations \eqref{eq:nestedDITR_F} and \eqref{eq:canonicalFF} we have:
+Therefore from \eeqref{eq:nestedDITR_F} and \eeqref{eq:canonicalFF} we have:
 \begin{equation}
     \begin{aligned}
         \frac{\dd u_i^{n+1}}{\dd \tau} & =
@@ -2116,9 +2193,9 @@ Therefore from equations \eqref{eq:nestedDITR_F} and \eqref{eq:canonicalFF} we h
 \end{equation}
 where $\nabla_i(u_i) = u_i - u_{u_i-1}$ is the $i$ direction
 backward difference operator.
-Since only $n+1$ relevant part of
-the right side is of interest (which is non-constant in
-the time step solving), the equation \eeqref{eq:nestedDITR_F1} can be reformed into:
+Since only $n+1$ related parts on
+the right side is of interest, 
+the \eeqref{eq:nestedDITR_F1} can be reformulated into:
 \begin{equation}
     \begin{aligned}
         \frac{\dd u_i^{n+1}}{\dd \tau}\frac{\inc x}{a} & =
@@ -2151,7 +2228,7 @@ the time step solving), the equation \eeqref{eq:nestedDITR_F1} can be reformed i
         \label{eq:nestedDITR_F2}
     \end{aligned}
 \end{equation}
-where $C_i^m$ are terms irrelevant with $u_i^{n+1}, u_{i-1}^{n+1}\dots$
+where $C_i^m$ are terms unrelated to $u_i^{n+1}, u_{i-1}^{n+1}\dots$
 and remain constant throughout the pseudo time evolution.
 
 Once again simple wave solution from equation \eqref{eq:simpleWaveTestTau}
@@ -2193,18 +2270,18 @@ all current DITR methods, $b_2>0$ and $d_2^n < 0$.
 Consequently, there always exists a $\CFLt$ that is large enough
 so that $\imag(\kappa^*(\kappa)) \leq 0, \forall \kappa$ is false.
 Which means for a large enough physical CFL number, the nested
-solving approach is unstable in the sense of continuous $\tau$
+iteration method is unstable in the sense of continuous $\tau$
 evolution.
 
 As an example, DITR U2R2 method with $c_2=1/2$ gives
 a specific formulation of $\imag(\kappa^*)$ that only depends on $\kappa$
 and $\CFLt$, which is illustrated in figure \ref{fig:HM3_U2R2050_KappaS}.
 Figure \ref{fig:HM3_U2R2050_KappaS} indicates for DITR U2R2 $c_2=1/2$,
-when using nested solving approach, it is unable to linearly converge
+when using nested iteration method, it is unable to linearly converge
 with small $\inc \tau$ and approximately $\CFLt > 8$.
-In other words, even with linear convection equation and first order upwind
+In other words, even with linear advection equation and first order upwind
 scheme,
-the nested solving approach does not converge when physical CFL reaches 8
+the nested iteration method does not converge when physical CFL reaches 8
 and pseudo time step is small.
 
 \begin{figure}[htbp]
@@ -2216,8 +2293,8 @@ and pseudo time step is small.
 \end{figure}
 
 After further analysis,
-apart from the first-order upwind spatial  discretization,
-for any linear spatial  discretization with modified wave number $\kappa'$,
+besides the first-order upwind spatial discretization,
+for any linear spatial discretization with modified wave number $\kappa'$,
 the pseudo time wave number $\kappa^*$ is
 \begin{equation}
     \begin{aligned}
@@ -2232,32 +2309,32 @@ it is always easy to find a large enough $\CFLt$ that makes
 $\imag(\kappa^*) > 0$.
 
 
-According to numerical tests with linear convection problem,
+According to numerical tests with linear advection problem,
 when $\inc \tau \rightarrow \infty$, the nested solving
 approach is possibly convergent. However, for strongly nonlinear
 flow problems, a small $\inc \tau$ is almost a must.
-The current research has tested nested solving approach
+The current research has tested nested iteration method
 with N-S equations discretized using high-order FV method,
-and the nested solving approach is indeed unable to successfully
+and the nested iteration method is indeed unable to successfully
 converge in many scenarios.
 The failure in both theoretical pseudo time stability and
 real life problems makes
-the nested solving approach inapplicable.
+the nested iteration method inapplicable.
 
-\subsection{The Stage-Decoupled Solving Approach of DITR}
+\subsection{The Stage-decoupled iteration method of DITR}
 
-The failure of nested solving approach in dual time stepping
+The failure of nested iteration method in dual time stepping
 roots in the nesting of right-hand-side $\R$ terms
 (i.e. spatial  discretization operators), which
 causes an $O(\CFLt)$ term in the modified wave number,
 making the wave number unbounded when $\CFLt\rightarrow + \infty$.
 Therefore, the non-nested form of dual time stepping in
-the fully coupled approach \eeqref{eq:DITRFFDef} and \eeqref{eq:DITRNaiveDualTime}
+the fully coupled iteration method \eeqref{eq:DITRFFDef} and \eeqref{eq:DITRNaiveDualTime}
 seems more favorable.
 
 In order to circumvent the complexity encountered in solving the enlarged
-system via the fully coupled approach, the present paper
-proposes a simplified approach to solve the enlarged dual time marching
+system via the fully coupled iteration method, the present paper
+proposes a simplified iteration method to solve the enlarged dual time marching
 \eeqref{eq:DITRNaiveDualTime}:
 \begin{equation}
     \begin{aligned}
@@ -2270,8 +2347,8 @@ proposes a simplified approach to solve the enlarged dual time marching
     \end{aligned}
     \label{eq:DITRSDS}
 \end{equation}
-where $\uu^{n+c_2,m+1} = \uu^{n+c_2,m} + \inc \uu^{n+c_2,m}$ and
-$\uu^{n+1,m+1} = \uu^{n+1,m} + \inc \uu^{n+1,m}$.
+where $\inc \uu^{n+c_2,m} = \uu^{n+c_2,m+1} - \uu^{n+c_2,m}$ and
+$\inc \uu^{n+1,m} = \uu^{n+1,m+1} - \uu^{n+1,m}$.
 In the first updating formula in \eeqref{eq:DITRSDS},
 $\uu^{n+1}$ is considered static and the linearizing is only
 performed on $\uu^{n+c_2}$. The second updating formula
@@ -2280,14 +2357,18 @@ $\uu^{n+1}$ only. Note that the right side $\FF$ functions
 and Jacobian terms $\partialderivative{\FF}{\uu}$ always
 uses the latest versions of $\uu^{n+c_2}$ and $\uu^{n+1}$.
 Both $\uu^{n+c_2}$ and $\uu^{n+1}$ are updated immediately
-after each increment values are obtained.
+after each increment values are obtained. 
+The linear systems are in the same form 
+of those in BDF and ESDIRK methods, and they 
+can be solved using matrix-free linear solvers like 
+LU-SGS solvers.
 
-Compared to the updating procedure in fully coupled approach,
+Compared to the updating procedure in fully coupled iteration method,
 where both increment values are solved in a coupled system,
-the current approach decouples the inter-stage linear connections.
-So, this approach is referred to as the stage-decoupled approach.
+the current iteration method decouples the inter-stage linear connections.
+So, this iteration method is referred to as the stage-decoupled iteration method.
 
-The convergence of the stage-decoupled approach relies on
+The convergence of the stage-decoupled iteration method relies on
 the preconditioning matrix $\Pm$.
 As $\Pm$ is required to be non-singular, and
 $\GG$ terms in \eeqref{eq:DITRFFDef} are already
@@ -2302,10 +2383,33 @@ of $\Pm$ to be:
 \end{equation}
 where $\beta$ is a real parameter.
 Note that restricting the form of $\Pm$ does not affect the
-generality of the following discussions, where the analyses methods
+generality of the following discussions, 
+where the analysis methodologies
 are applicable to all forms of $\Pm$.
 
-\subsubsection{Fourier Analysis for Pseudo Time: on Stage-Decoupled Solving Approach}
+With the specified preconditioning \eeqref{eq:specialP}, 
+the residual functions take the form:
+\begin{equation}
+    \begin{aligned}
+        \FF^{n+c_2} & = 
+        \frac{a^n_0\uu^{n - 1} +
+                (a^n_1+\beta)\uu^{n} +
+                (a^n_2-\beta)\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+            \\ & +
+            (d^n_1 + \beta b_1)\R^{n} +
+            \beta b_2 \R^{n+c_2} + 
+            (d^n_2 + \beta b_3)\R^{n + 1}, \\
+        \FF^{n+1} & =    \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+            b_1 \R^n +
+            b_2 \R^{n+c_2} +
+            b_3 \R^{n+1}.
+    \end{aligned}
+\end{equation}
+
+The current paper uses matrix-free approximate LU-SGS
+\cite{luo1998fast,luo2001accurate} to solve the linear problems \eeqref{eq:DITRSDS}.
+
+\subsubsection{Fourier analysis for pseudo time: the stage-decoupled iteration method}
 \label{sssec:SDSFourier}
 
 When $\inc \tau \rightarrow 0$, the stage-decoupled pseudo time marching
@@ -2432,9 +2536,9 @@ and
 \end{equation}
 
 Therefore, to ensure the stability of continuous pseudo time
-marching of DITR's stage-decoupled approach, it is
+marching of DITR's stage-decoupled iteration method, it is
 required
-\begin{equation}
+\begin{equation}iteration method
     \real(\mu^*_i) \leq 0,\  i = 1,2,\  \forall \real(\mu') \leq 0
 \end{equation}
 where
@@ -2470,7 +2574,7 @@ with Fourier analysis, the
 present paper has performed numerical scanning
 on $\beta$, which will be discussed later.
 
-\subsubsection{Gauss-Seidel Stability of Stage-Decoupled Solving Approach}
+\subsubsection{Gauss-Seidel stability of stage-decoupled iteration method}
 \label{sssec:GSStability}
 
 The previous section has discussed the ideal
@@ -2484,7 +2588,7 @@ the iterating process of \eeqref{eq:DITRSDS} is
 actually a 2-by-2 block Gauss-Seidel iteration that obtains
 the linear increment if convergent.
 Therefore, the current section is about to discuss the
-near Guass-Seidel behavior of the stage-decoupled solving approach.
+near Guass-Seidel behavior of the stage-decoupled iteration method.
 
 Assuming $\R$ to be linear and diagonalizable,
 a linear scalar ODE
@@ -2492,7 +2596,7 @@ a linear scalar ODE
     \derivative{y}{t} = \lambda y
 \end{equation}
 with $\real(\lambda)\leq 0$
-is tested in the stage-decoupled solving approach when
+is tested in the stage-decoupled iteration method when
 $\inc \tau \rightarrow +\infty$.
 \eeqref{eq:DITRSDS} therefore becomes
 \begin{equation}
@@ -2539,7 +2643,7 @@ $y^{n+1,m} + \inc y^{n+1,m} = y^{n+1,m+1}$,
     \label{eq:scalarGSMat}
 \end{equation}
 \eeqref{eq:scalarGSMat} clearly demonstrates that the stage-decoupled
-solving approach reduces to a $2\times2$ linear Gauss-Seidel iteration.
+iteration method reduces to a $2\times2$ linear Gauss-Seidel iteration.
 The recursion transformation
 \begin{equation}
     \B_{GS} = -\begin{bmatrix}
@@ -2581,7 +2685,7 @@ the left half plane.
     \label{fig:GGSU2R2}
 \end{figure}
 
-Using the Gauss-Seidel stability of the stage-decoupled solving approach,
+Using the Gauss-Seidel stability of the stage-decoupled iteration method,
 the choice of $\beta$ can be again narrowed down.
 Numerical scanning is also conducted to find optimized $\beta$ value for
 DITR methods, which will be discussed in the next section.
@@ -2609,7 +2713,7 @@ and
 \end{equation}
 are referred to as the $A(\tau,0)-$stability and
 $A(\tau,\infty)-$stability
-of the stage-decoupled solving approach.
+of the stage-decoupled iteration method.
 The current paper hopes to utilize both extremes of $\inc\tau$ to
 narrow down the choice of an optimized $\beta$.
 
@@ -2695,7 +2799,7 @@ The approximate results are listed in Table \ref{tab:resrictionBetaSearch}.
 \end{table}
 
 In practice, the current research observed that
-when $\beta$ is significantly larger the approximate
+when $\beta$ is significantly larger than the approximate
 restriction boundaries in Table \ref{tab:resrictionBetaSearch},
 convergence is faster and more reliable.
 The reason could be that with larger $\beta$, $\mu^*_M$  and $G_{GS,M}$
@@ -2742,7 +2846,7 @@ more concentrated around the real axis similar with U2R2 $c_2=0.5$
 shown in Figure \ref{fig:HM3_U2R205_GGSRegions}.
 Consequently, the current research chooses $c_2=0.25$ over $c_2=0.5$
 for U2R1 due to its better convergence behavior in
-the stage-decoupled solving approach.
+the stage-decoupled iteration method.
 
 
 
@@ -2763,7 +2867,7 @@ are too close to 1, maintaining sufficient convergence speed.
 
 
 \section{Numerical Tests}
-\label{sec:Results}
+\label{sec :Results}
 
 During numerical tests,
 BDF2 and ESDIRK4 methods taken from
@@ -3254,11 +3358,11 @@ The DITR U2R1 method is $L$-stable with 3rd order accuracy, and
 the DITR U3R1 method is $L$-stable with 4th order accuracy.
 In order to apply these time marching methods to flow problems,
 stability in dual time stepping is analyzed. 
-It is discovered that using the nested solving approach, pseudo time marching is unstable.
-Using the stage-decoupled solving approach with preconditioning,
+It is discovered that using the nested iteration method, pseudo time marching is unstable.
+Using the stage-decoupled iteration method with preconditioning,
 the implicit time steps of DITR can steadily converge with proper choices of 
 the preconditioning parameter $\beta$. 
-The stage-decoupled solving approach is easy to be implemented in a 
+The stage-decoupled iteration method is easy to be implemented in a 
 matrix-free manner.
 
 After analyzing the results of numerical tests, it is confirmed 
@@ -3272,17 +3376,17 @@ distinctively faster than ESDIRK4.
 In summary, the DITR methods are steady implicit time marching methods 
 that are easy to implement and more efficient.
 
-The solving approaches discussed in the current paper is still crude.
-For the successful stage-decoupled solving approach,
+The iteration methods discussed in the current paper is still crude.
+For the successful stage-decoupled iteration method,
 more variants of the preconditioning matrix and details including 
 the choice of pseudo time step, the influence of approximate
 Jacobian and the influence of linear solvers are not discussed here.
 Meanwhile, more delicate analysis on the choosing of preconditioning parameter 
 $\beta$ could still be conducted. 
-For the unsteady nested solving approach, 
+For the unsteady nested iteration method, 
 tricks to stabilize the method including modifying the matrices and 
 using methods other than dual-time stepping are not considered. 
-Therefore, more delicate and efficient solving approaches of DITR could 
+Therefore, more delicate and efficient iteration methods of DITR could 
 still be found.
 
 
