@@ -80,12 +80,12 @@ and finite volume (FV) methods
     hu1999weighted_WENO,
     dumbser2007quadrature_WENO},
 generally adopted the method of line,
-in which the governing equations
-are spatial ly discretized firstly
+in which the governing equations 
+are spatially discretized at first
 resulting in a system of ODEs.
-The system of ODEs is then
+The system of ODEs is then 
 solved with
-ODE integrators such as the
+ODE integrators such as the 
 popular strong stability preserving
 Runge-Kutta (SSPRK) methods
 \cite{gottlieb2001strong_SSPRK}.
@@ -100,8 +100,8 @@ notably inhomogeneous or anisotropic
 transient flows,
 such as wall-bounded turbulence.
 Such inefficiency could be overcome by
-applying implicit ODE solvers with
-usually better stability attributes.
+applying implicit ODE solvers which
+usually have better stability attributes.
 Due to Dahlquist's second barrier
 \cite{dahlquist1963special},
 only second and first order linear multistep ODE methods
@@ -178,7 +178,7 @@ NIRK methods.
 The major drawback of NIRK or MIRK schemes is that
 the Jacobian matrices of the nonlinear algebraic problems
 for each NIRK or MIRK step are
-polynomials of the Jacobian of the ODE's right hand side.
+polynomials of the Jacobian of the ODE's right-hand-side.
 Cash and Singhal proposed to find MIRK methods whose
 Jacobian could be approximately factorized,
 so that the Newton iteration

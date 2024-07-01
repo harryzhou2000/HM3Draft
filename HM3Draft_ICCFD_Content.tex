@@ -178,7 +178,7 @@ NIRK methods.
 The major drawback of NIRK or MIRK schemes is that
 the Jacobian matrices of the nonlinear algebraic problems
 for each NIRK or MIRK step are
-polynomials of the Jacobian of the ODE's right hand side.
+polynomials of the Jacobian of the ODE's right-hand-side.
 Cash and Singhal proposed to find MIRK methods whose
 Jacobian could be approximately factorized,
 so that the Newton iteration
@@ -237,10 +237,10 @@ three point Gauss-Lobatto rule, the resulting DITR
 schemes have two stages and are at most temporally fourth-order accurate.
 The actual order of accuracy is then determined by
 the second step which is the temporal reconstruction.
-When the temporal reconstruction uses only the information of n
-and n+1 steps, the DITR schemes are single step schemes
+When the temporal reconstruction uses only the information of $n$
+and $n+1$ steps, the DITR schemes are single step schemes
 similar to the MIRK or NIRK schemes.
-When the temporal reconstruction uses the information of n-1, n and n+1 steps,
+When the temporal reconstruction uses the information of $n-1$, $n$ and $n+1$ steps,
 the resulting DITR schemes are multistep methods that are
 different from the common implicit linear multistep
 methods such as
@@ -532,7 +532,7 @@ $\inc x_i,\inc y_i$ are the cell's length scale, and $p_l,q_l$ are
 powers of the bases. For $k=3$ basis used in two-dimensional cases,
 $p_l=[1,0,2,1,0,3,2,1,0]_l$,
 and $q_l=[0,1,0,1,2,0,1,2,3]_l$.
-The mean value term makes the basis have zero mean values,
+The mean value term lets the basis have zero mean values,
 which is calculated with:
 \begin{equation}
     \overline{
