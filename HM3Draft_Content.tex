@@ -2219,7 +2219,14 @@ $\GG$ terms in \eeqref{eq:DITRFFDef} are already
 well-formed, the current research limits the form
 of $\Pm$ to be:
 
-
+The current paper chooses preconditioning to be 
+\begin{equation}
+    \Pm = \begin{bmatrix}
+        \eye & \beta\eye \\
+        0    & \eye
+    \end{bmatrix}
+    \label{eq:specialP}
+\end{equation} 
 where $\beta$ is a real parameter.
 Note that restricting the form of $\Pm$ does not affect the
 generality of the following discussions,
@@ -2703,7 +2710,7 @@ are too close to 1, maintaining sufficient convergence speed.
 
 
 \section{Numerical tests}
-\label{sec :Results}
+\label{sec:Results}
 
 During numerical tests,
 BDF2 and ESDIRK4 methods taken from
@@ -2714,7 +2721,7 @@ For DITR methods, instances of
 U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 
 The isentropic vortex, two dimensional vortex shedding
-and  double mach reflection problems use
+and  double Mach reflection problems use
 $P^3$ variational reconstruction finite volume method declared in
 section \ref{sec:CFV} as spatial  discretization.
 Iterative solution of the implicit reconstruction
@@ -3080,7 +3087,7 @@ the time used in ESDIRK4 when the error is $10^-4$.
 %     \label{fig:CylinderRe1200_St}
 % \end{figure}
 
-\subsection{Double mach reflection}
+\subsection{Double Mach reflection}
 
 The double Mach reflection problem \cite{woodward1984dmr} is tested to
 compare the resolution capabilities
@@ -3115,7 +3122,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U2R2 $c_2=0.55$}
         \label{sfig:DM480_HM3}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, DITR U2R2}
+    \caption{Density in double Mach reflection problem, DITR U2R2}
     \label{fig:DM480-1}
 \end{figure}
 
@@ -3131,7 +3138,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U3R1}
         \label{sfig:DM480_HM3U3R1}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, DITR U2R1 and U3R1}
+    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1}
     \label{fig:DM480-2}
 \end{figure}
 
@@ -3147,7 +3154,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{BDF2}
         \label{sfig:DM480_BDF2}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, baseline methods}
+    \caption{Density in double Mach reflection problem, baseline methods}
     \label{fig:DM480-3}
 \end{figure}
 

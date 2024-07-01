@@ -2537,36 +2537,29 @@ For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
 
 During numerical tests,
 BDF2 and ESDIRK4 methods taken from
-\cite{bijl2002implicitBDFvESDIRK,kennedy2003additiveARK}
+\cite{kennedy2003additiveARK,bijl2002implicitBDFvESDIRK}
 are chosen to be
 baseline time marching methods.
 For DITR methods, instances of
 U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 
 The isentropic vortex, two dimensional vortex shedding
-and  double mach reflection problems use
+and  double Mach reflection problems use
 $P^3$ variational reconstruction finite volume method declared in
 section \ref{sec:CFV} as spatial  discretization.
 Iterative solution of the implicit reconstruction
 is conducted before each right-hand-side evaluation,
 which consists of 1 block-Jacobi iteration by default.
-Pseudo time continued Newton iteration on mean values are
+Pseudo time iteration on mean values are
 solved using 5 times of block-Jacobi iteration by default,
 which is found both stable and efficient enough for VFV solving
 transient problems.
-It should be noted that, in other words,
-both the reconstruction system and
-the time stepping implicit system use linear solvers that
-runs for a fixed number of steps without monitoring convergence.
-Only the magnitude of the nonlinear time stepping residual
-is monitored to ensure convergence.
-This linear solving method simplifies the control flow of
-the program,
-while providing a simple yet reliable way of
-comparing total calculation consumption between ODE solvers,
-which will be explained in section \ref{ssec:resultIV}.
-
-
+The inviscid numerical flux for the 
+isentropic vortex and vortex shedding 
+problems are approximate Riemann solvers 
+of Roe \cite{roe1981approximate}.  
+For the double Mach reflection problem, 
+the local Lax-Friedrichs flux is used.
 
 \subsection{Isentropic vortex}
 \label{ssec:resultIV}
@@ -2910,7 +2903,7 @@ the time used in ESDIRK4 when the error is $10^-4$.
 %     \label{fig:CylinderRe1200_St}
 % \end{figure}
 
-\subsection{Double mach reflection}
+\subsection{Double Mach reflection}
 
 The double Mach reflection problem \cite{woodward1984dmr} is tested to
 compare the resolution capabilities
@@ -2945,7 +2938,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U2R2 $c_2=0.55$}
         \label{sfig:DM480_HM3}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, DITR U2R2}
+    \caption{Density in double Mach reflection problem, DITR U2R2}
     \label{fig:DM480-1}
 \end{figure}
 
@@ -2961,7 +2954,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U3R1}
         \label{sfig:DM480_HM3U3R1}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, DITR U2R1 and U3R1}
+    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1}
     \label{fig:DM480-2}
 \end{figure}
 
@@ -2977,7 +2970,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{BDF2}
         \label{sfig:DM480_BDF2}
     \end{subfigure}
-    \caption{Density in double mach reflection problem, baseline methods}
+    \caption{Density in double Mach reflection problem, baseline methods}
     \label{fig:DM480-3}
 \end{figure}
 
