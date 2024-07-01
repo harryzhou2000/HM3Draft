@@ -1,15 +1,17 @@
 
 
-targets=HM3Draft
+targets=HM3Draft HM3Draft_ICCFD
+
+flags=-synctex=1 -interaction=nonstopmode -file-line-error -recorder
 
 all: $(addsuffix .pdf, $(targets))
 
 
 %.pdf: %.tex
-	pdflatex $< -draftmode
+	pdflatex $< -draftmode $(flags)
 	bibtex $*
-	pdflatex $< -draftmode
-	pdflatex $<
+	pdflatex $< -draftmode $(flags)
+	pdflatex $< $(flags)
 
 .PHONY:clean
 

@@ -1,0 +1,117 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,left=2.54cm,top=2.54cm,right=2.54cm,bottom=2.54cm]{geometry}
+\usepackage{fancyhdr}
+\setlength{\headsep}{1.40cm} % Adjust the space after the header
+\usepackage{afterpage}
+\usepackage{setspace}
+\usepackage{ICCFD/bibspacing}
+\singlespacing
+
+%%%% YOU CAN PUT YOUR OWN DEFINITIONS HERE
+\newfont{\toto}{msbm10 at 12 pt}
+\newfont{\ithd}{cmr9}
+%%%% END OF YOUR DEFINITIONS 
+ 
+\pagestyle{fancyplain}
+\renewcommand{\headrulewidth}{0pt}
+
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage[pdftex]{graphicx} 
+\usepackage[T1]{fontenc}
+
+%%%% additional packages
+\usepackage{physics}
+\usepackage{float}
+\usepackage{hyperref} 
+% \hypersetup{
+%     colorlinks=true,
+%     linkcolor=blue,
+%     filecolor=magenta,       
+%     urlcolor=cyan, 
+%     } 
+\usepackage{subcaption}
+
+%%%% CONFERENCE HEADER. REPLACE xxxx WITH 4-DIGIT PAPER NUMBER ASSIGNED BY CONFERENCE COMMITTEE.
+
+\rhead{\ithd{\bf ICCFD12-2024-xxxx\\  \   \\}}
+\lhead{\ithd{\bf Twelfth International Conference on \\      
+Computational Fluid Dynamics (ICCFD12), \\
+Kobe, Japan, July 14-19, 2024
+}}
+% Define the left and center headers to be empty or contain fixed content
+\rhead{} 
+\chead{}
+
+\usepackage{titling}
+\setlength{\droptitle}{0em}  
+\pretitle{\vspace{-4em}\begin{center}\LARGE}
+\posttitle{\end{center}\vspace{-1em}}
+\preauthor{\begin{center}\large}
+\postauthor{\end{center}\vspace{-3em}}
+
+
+\title{
+    \bf 
+    High-order Accurate Implicit Scheme Based on 
+    Temporal Reconstruction for Solving Compressible 
+    Navier-Stokes Equations 
+}
+\author{
+Hanyu Zhou$^{*}$, Yu-Xin Ren$^{*,**}$ \\
+$^{*}$ Department of Engineering Mechanics, Tsinghua University, Beijing, China.
+$^{**}$Corresponding author: ryx@tsinghua.edu.cn
+}
+\date{}
+
+\begin{document}
+
+%%%% TITLE
+\maketitle
+\afterpage{\fancyhead{}}
+
+%%%% ABSTRACT AND KEYWORDS
+%\vskip0.5cm
+\centerline{
+    \begin{minipage}[t]{150mm}
+        {\bf Abstract:}
+        A family of new implicit time marching schemes based on 
+        Direct Integration and Temporal 
+        Reconstruction (DITR) is developed and tested in this paper.
+        These schemes can be used to solve ordinary differential equations (ODEs)
+        directly or solve ODEs arising from semi-discrete schemes
+        solving partial differential equations (PDEs),
+        including the compressible Navier-Stokes equations.
+        The most significant advantages of these methods are that temporally third- and fourth-order
+        schemes can be constructed straightforwardly, 
+        and require fewer stages than some popular implicit Runge-Kutta schemes. 
+        As an ODE solver, the DITR method are found to be 
+        $A$-stable, with two variants of them being $L$-stable. 
+        A matrix-free iteration method for solving the DITR equations
+        is described for practical implementation of DITR. 
+        Numerical results show that 
+        DITR methods achieve high order of accuracy 
+        with comparatively 
+        lower computational cost.
+        When reaching the same error, 
+        some DITR methods are able to 
+        save significant amount of time
+        compared with the implicit ESDIRK4 method. 
+        \vskip0.2cm 
+        {\it Keywords:} High-order Methods, Time Marching, Temporal Reconstruction, Unsteady Flows. \\
+    \end{minipage}
+}
+
+
+
+\vskip0.5cm
+
+%%%% MAIN PART
+
+\input{HM3Draft_ICCFD_Content.tex}
+
+%%%% BIBLIOGRAPHY
+\bibspacing=\dimen 100
+\bibliographystyle{unsrt}
+\bibliography{HM3DraftRefs}
+
+\end{document}

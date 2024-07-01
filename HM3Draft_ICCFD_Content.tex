@@ -1,0 +1,3035 @@
+% !TeX root = ./HM3Draft_ICCFD.tex
+
+\newcommand{\trans}{^\mathrm{T}}
+
+\newcommand{\U}{\mathbf{U}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\x}{\mathbf{x}}
+
+\newcommand{\OO}{\mathbf{\Omega}}
+\newcommand{\UM}{\overline{\U}}
+\newcommand{\Fn}{\tilde{\F}}
+\newcommand{\n}{\mathbf{n}}
+\newcommand{\uu}{\overline{\mathbf{U}}}
+\newcommand{\R}{\mathbf{R}}
+\newcommand{\inc}{\mathrm\Delta}
+\newcommand{\Tau}{\mathrm{T}}
+\renewcommand{\real}{\mathrm{Re}}
+\newcommand{\imag}{\mathrm{Im}}
+
+\newcommand{\CFLt}{\text{CFL}_t}
+\newcommand{\CFLtau}{\text{CFL}_\tau}
+
+\newcommand{\eeqref}[1]{Eq.\eqref{#1}}
+\newcommand{\us}{\mathbf{u}}
+
+
+\renewcommand{\Res}{\mathcal{R}}
+\newcommand{\Jres}{\mathcal{J}}
+\newcommand{\eye}{\mathbf{I}}
+\newcommand{\J}{\mathbf{J}}
+\newcommand{\FF}{\mathcal{F}}
+\newcommand{\Pm}{\mathbf{P}}
+\newcommand{\Pe}{\mathrm{P}}
+
+\newcommand{\imagUnit}{\mathrm{i}}
+
+\newcommand{\GG}{\mathcal{G}}
+
+
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\B}{\mathbf{B}}
+\newcommand{\C}{\mathbf{C}}
+
+%% main text
+\section{Introduction}
+\label{sec:intro}
+
+In computational fluid dynamics (CFD),
+high-order numerical methods have the capability of
+resolving complex flows effectively and efficiently,
+which have been attracting great attention recently.
+Popular high-order CFD methods, including discontinuous
+Galerkin (DG) methods
+\cite{reed1973triangularDG,
+    BASSI1997251DG,
+    BASSI1997267DG,
+    cockburn1989DGII,
+    cockburn2001rungeDG},
+spectral volume
+\cite{WANG2002210_SV}
+and spectral difference
+\cite{LIU2006780_SD} methods,
+PnPm procedures
+\cite{DUMBSER20088209_PNPM},
+FR/CPR methods
+\cite{huynh2007flux_FR,
+    huynh2009reconstruction_FR,
+    vincent2011new_FR,
+    wang2009unifying_CPR},
+and finite volume (FV) methods
+\cite{wang2016compact_VR,
+    wang2016compact1_VR,
+    wang2017compact_VR,
+    pan2018high_VR,
+    zhang2019compact_VR,
+    barth1990higher_FV,
+    delanaye1999quadratic_FV,
+    ollivier1997quasi_ENO,
+    friedrich1998weighted_WENO,
+    hu1999weighted_WENO,
+    dumbser2007quadrature_WENO},
+generally adopted the method of line,
+in which the governing equations 
+are spatially discretized at first
+resulting in a system of ODEs.
+The system of ODEs is then 
+solved with
+ODE integrators such as the 
+popular strong stability preserving
+Runge-Kutta (SSPRK) methods
+\cite{gottlieb2001strong_SSPRK}.
+
+Although explicit ODE integrators
+are simple and efficient for a wide range of
+CFD problems,
+the Courant-Friedrichs-Lewy (CFL) condition
+that limits physical time step in explicit
+methods could make them inefficient in
+notably inhomogeneous or anisotropic
+transient flows,
+such as wall-bounded turbulence.
+Such inefficiency could be overcome by
+applying implicit ODE solvers which
+usually have better stability attributes.
+Due to Dahlquist's second barrier
+\cite{dahlquist1963special},
+only second and first order linear multistep ODE methods
+could achieve $A$-stability.
+Therefore,
+the $L$-stable
+second-order backward differentiation formula (BDF2)
+is extensively adopted in solving transient CFD problems.
+Different from multistep methods,
+the single-step implicit Runge-Kutta (IRK) methods
+with multiple internal stages
+can achieve higher order of accuracy while
+preserving stability \cite{butcher2016ODEBook}.
+Among the IRK methods, fully coupled IRK methods
+could achieve optimal order
+for given number of stages,
+but they require the solution of a nonlinear
+system with its dimension several times larger
+than that of the ODE.
+The enlarged algebraic system
+could be especially troublesome for its implementation in
+CFD solvers.
+Pazner and Persson
+\cite{pazner2017stage}
+made effort in efficiently solving
+fully IRK methods with DG, and
+Jameson \cite{jameson2017evaluation}
+discussed how to adopt dual time stepping
+into fully IRKs.
+Due to the difficulties in solving
+fully IRK methods,
+singly diagonally implicit Runge-Kutta (SDIRK)
+methods are more commonly used in CFD, for example in
+\cite{wang2017compact_VR}.
+SDIRK methods have lower-triangular butcher tableau,
+enabling the stage values to be solved in a sequence.
+As a special case of SDIRK,
+ESDIRK methods are SDIRK with an explicit first stage,
+which are constructed to have
+second stage order while being $L$-stable
+\cite{kennedy2003additiveARK,kvaerno2004singly}.
+High-order ESDIRK schemes and
+BDF2 have been tested in
+\cite{
+    bijl2002implicitBDFvESDIRK,
+    wang2007implicitDGTests}
+to solve flow problems,
+whose results illustrate
+better accuracy and higher efficiency
+of high-order ESDIRK methods
+compared to second order BDF2.
+
+Apart from fully IRK and SDIRK methods,
+another class of implicit RK methods,
+mono implicit RK methods (MIRK)
+\cite{cash1975classMIRKOrig}
+with explicit internal stages and
+an implicit final
+stage,
+allow the implicit system to
+have the same number of dimensions
+as the original ODE.
+Cash and Signhal derived examples of
+$A$-stable and $L$-stable high-order
+MIRK methods in
+\cite{cash1977clasMIRK1,cash1982monoMIRK2}.
+Kulikov and Shindin presented a similar type
+of method called nested implicit RK (NIRK)
+\cite{kulikov2006familyNIRKOrig}.
+Discussion was made on symmetry, stiff accuracy and
+other advantageous properties of a series of Gauss type
+NIRK methods.
+\cite{kulikov2009adaptive}.
+The major drawback of NIRK or MIRK schemes is that
+the Jacobian matrices of the nonlinear algebraic problems
+for each NIRK or MIRK step are
+polynomials of the Jacobian of the ODE's right hand side.
+Cash and Singhal proposed to find MIRK methods whose
+Jacobian could be approximately factorized,
+so that the Newton iteration
+could be realized approximately by solving a series of successive linear
+problems \cite{cash1982monoMIRK2}.
+Kulikov and Shindin found certain factorization
+approximation could sabotage the stability of
+the method in
+\cite{kulikov2009adaptive},
+and analyzed how to choose the approximation of
+Jacobian in
+\cite{kulikov2007asymptotic}.
+MIRK and NIRK methods are more attractive than SDIRK methods
+for they require fewer inner stages.
+Typical fourth order
+stiffly accurate ESDIRK requires 5 implicit internal stages to be
+solved,
+while MIRK and NIRK could
+solve only one implicit stage.
+
+
+MIRK and NIRK methods have less
+implicit stages than SDIRK methods,
+which gives them potential to gain better efficiency in
+large scale problems.
+However, current literature has seldom explored
+the application of MIRK or NIRK methods in
+solving PDEs.
+The fully IRK methods, on the other hand,
+have been practiced in
+finite volume \cite{jameson2017evaluation} and
+DG \cite{pazner2017stage}
+as mentioned before,
+but their implementations
+in CFD methods are significantly more
+complex compared to DIRK methods.
+
+Different from previous approaches,
+the current paper aims to construct implicit
+time marching schemes based on temporal
+reconstruction.
+By combining polynomial approximation and
+numerical quadrature rules in the direction of time,
+stable,
+high-order accurate and efficient implicit ODE methods
+termed as DITR could be
+obtained straightforwardly.
+The basic idea of the DITR scheme will be presented
+in Section \ref{sec:HIRK}.
+Briefly speaking, the construction of the DITR
+schemes consists of the following two steps.
+The first step is the direct integration of the
+system of first-order ODEs.
+When the right-hand side is integrated using the
+three point Gauss-Lobatto rule, the resulting DITR
+schemes have two stages and are at most temporally fourth-order accurate.
+The actual order of accuracy is then determined by
+the second step which is the temporal reconstruction.
+When the temporal reconstruction uses only the information of n
+and n+1 steps, the DITR schemes are single step schemes
+similar to the MIRK or NIRK schemes.
+When the temporal reconstruction uses the information of n-1, n and n+1 steps,
+the resulting DITR schemes are multistep methods that are
+different from the common implicit linear multistep
+methods such as
+the Adams-Moulton and BDF schemes \cite{wanner1996solving}.
+%! actually, the method was described as a Multistep Collocation Method 
+%! actually, DITR is a collocation method
+The stability of the DITR
+schemes is mainly determined by the temporal
+reconstruction step.
+When adopting proper quadrature rules
+and temporal reconstructions in these two steps, single-step
+and multistep methods with arbitrary orders of temporal
+accuracy can be constructed. Therefore, the DITR approaches
+are new methodologies for designing implicit time marching
+schemes that are different from the IRK and multistep
+methods.
+It will be shown that the new DITR schemes can be implemented
+in a matrix-free style, guaranteeing their portability.
+The new implicit time marching schemes are further applied to
+high-order compact finite volume method to
+test their capabilities in flow problems. 
+Numerical results
+illustrate that the DITR schemes are high-order accurate
+and competitive with the 4th order ESDIRK method in efficiency.
+
+% Paper's structure:...%TODO
+
+The rest of the paper is organized as follows.
+High-order compact finite volume schemes
+are introduced in Section \ref{sec:CFV} as the spatial discretization.
+The construction and analyses of DITR methods are presented
+in Section \ref{sec:HIRK}.
+% Section \ref{sec:Solving} introduces the methods
+% of solving DITR and discusses their stability attributes.
+Section \ref{sec:Results} illustrates some numerical results of
+DITR solving the Euler and N-S equations, combined with
+spatial  discretization from Section \ref{sec:CFV}.
+Last, Section \ref{sec:Conc} gives the concluding remarks.
+
+
+\section{High-order compact finite volume method}
+\label{sec:CFV}
+
+The new time-marching method developed in
+the current paper can be applied to
+any spatial discretizations when solving
+time-dependent PDEs such as the compressible Euler and Navier-Stokes
+equations.
+However, the time marching schemes' actual performance will be affected by
+the spatial discretizations.
+Therefore,
+this section will provide a brief description of
+finite volume spatial  discretization,
+and additional details
+of the high-order finite volume scheme
+used in numerical tests are specified.
+
+\subsection{Governing equations}
+\label{ssec:GovEq}
+
+The compressible Navier-Stokes equations has the conservative form:
+\begin{equation}
+    \label{eq:NS}
+    \frac{\partial \U}{\partial t} +
+    \mathbf\nabla \cdot (\F - \F_v)  = 0
+\end{equation}
+where $\U$ is vector of conservative variables and
+$\F=[\F_1,\F_2,\F_3]$,
+$\F_v=[\F_{v,1},\F_{v,2},\F_{v,3}]$
+are
+inviscid and viscous tensors of
+their flux.
+In Cartesian coordinates $x_k, k=1,2,3$, the components are
+\begin{equation}
+    \U = \begin{bmatrix}
+        \rho \\ \rho u_1 \\ \rho u_2 \\ \rho u_3 \\ E
+    \end{bmatrix},\ \
+    \F_j = \begin{bmatrix}
+        \rho u_j                   \\
+        \rho u_1u_j + p\delta_{1j} \\
+        \rho u_2u_j + p\delta_{2j} \\
+        \rho u_3u_j + p\delta_{3j} \\
+        (E+p)u_j                   \\
+    \end{bmatrix},\ \
+    \F_{v,j} = \begin{bmatrix}
+        0                                \\
+        \tau_{1j}                        \\
+        \tau_{2j}                        \\
+        \tau_{3j}                        \\
+        \sum_{k=1}^3{u_k\tau_{kj}} - K_j \\
+    \end{bmatrix}
+\end{equation}
+where $\rho$ is density,
+$u_i, i=1,2,3$ are velocity components,
+$p$ is pressure,
+$E$ is total energy per unit volume,
+$\tau_{ij}, i,j=1,2,3$ are viscous stress tensor components
+and
+$K_i, i=1,2,3$ are heat flux components.
+$\delta_{ij}$ is
+Kronecker delta.
+With ideal gas equation of state,
+Newtonian viscosity and Fourier
+heat conduction, additional relations
+\begin{equation}
+    \begin{aligned}
+        E         & = \frac{p}{\gamma -1 } + \frac{1}{2}\rho\sum_{k=1}^{3}(u_ku_k),  \\
+        p         & =\rho R_g T                                              ,       \\
+        \tau_{ij} & =
+        \mu\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+        -
+        \frac{2}{3}\mu \delta_{ij}\sum_{k=1}^{3}{\frac{\partial u_k}{\partial x_k}}, \\
+        K_i       & = - \kappa \frac{\partial T}{\partial x_i}
+    \end{aligned}
+\end{equation}
+are used to close the equations
+with $T$ being temperature, $\gamma$ being specific heat ratio,
+$R_g$ being  gas constant, $\mu$ being dynamic viscosity and
+$\kappa$ being thermal conductivity.
+Specific heat ratio $\gamma$ is fixed to $1.4$ in this paper.
+The current paper only
+considers using simple gas property
+with $\kappa = \mu c_p / Pr$,
+and $\mu=\mu_{\infty}$ being a constant,
+while $c_p$ is special heat capacity
+at constant pressure and
+Prandtl number $Pr$ is fixed to 0.71 in this paper.
+When $\mu=0$,
+$\F_v=0$ and
+equation \eqref{eq:NS} becomes Euler equation.
+The equations discussed above are in 3D form, and
+assuming constant distribution of values over $x_3$
+yields the 2D version of NS and Euler equations.
+
+\subsection{High-order finite volume spatial discretization}
+\label{ssec:FV}
+
+
+
+
+This subsection provides a general framework of
+high-order
+finite volume discretization.
+The computational domain $\OO$ is divided
+into $N_{cell}$ cells $\OO_i, i=1,2,...N_{cell}$ which
+are non-overlapping, forming a mesh.
+An averaging of conservative quantities
+over each cell is
+\begin{equation}
+    \label{eq:FVMean}
+    \UM_i = \frac{1}{\overline{\OO}_i}\int_{\OO_i}\U(\x)\dd \Omega
+\end{equation}
+where $\overline{\OO}_i$ is the volume of $\OO_i$.
+
+Next, a degree $k$ piecewise polynomial reconstruction is
+conducted to approximate the distribution of
+quantities
+\begin{equation}
+    \label{eq:FVRec}
+    \U_i(\x) = \UM_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{\U_i^l\varphi_{i,l}(\x) }
+\end{equation}
+in which $\U_j(\x)$ is the local polynomial distribution on cell $\OO_{j}$,
+and
+$\varphi_{j,i}(\x)$ are
+polynomial basis functions.
+\eeqref{eq:FVRec} can also be considered as a scalar field
+\begin{equation}
+    \label{eq:FVRecScalar}
+    u_i(\x) = \overline{u}_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{u_i^l\varphi_{i,l}(\x) }
+\end{equation}
+where $u_i(\x)$ is one of $\rho(\x), \rho u_1(\x)\dots$ and should not
+be confused with the velocity components $u_1, u_2, u_3$
+which was used in the governing equations.
+
+There are $\mathrm{NDOF}(k)$ polynomial bases for reconstruction on
+each cell.
+The current paper uses zero-mean Taylor basis
+for reconstruction \cite{wang2017compact_VR}.
+Given a specific reconstruction method,
+the reconstruction coefficients $\U_i^l$ (or $u_i^l$ for
+its components) can be determined using
+the distribution of mean value $\UM_i, i=1,2...N_{cell}$
+and boundary conditions.
+
+With the piecewise polynomial approximation,
+the PDEs \eqref{eq:NS} can therefore become ODEs
+with cell averaging applied
+\begin{equation}
+    \label{eq:FVInt}
+    \frac{\dd\UM_i}{\dd t}
+    +\sum_{j\in S_i, j\neq i}{\left(
+        \int_{f_{i,j}}{
+            [\Fn(\U_i,\U_j) - \Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)] \cdot \n  \dd A
+        }\right)
+    }
+    = 0
+\end{equation}
+where $\Fn(\U_i,\U_j)$ and $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$ are approximations
+of exact fluxes on the cell interfaces,
+and $f_{i,j}=\OO_i \cap \OO_j$ is the interface between $i,j$ cells.
+Set $S_i$ denotes the compact stencil of cell $\OO_{i}$, consisting
+of cell $\OO_{i}$ and its direct face neighboring cells.
+The piecewise polynomial approximation \eqref{eq:FVRec} does not
+guarantee a continuous distribution on interfaces,
+thus the numerical fluxes
+$\Fn(\U_i,\U_j)$, $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$ are
+functions of the approximate field on both sides. Inviscid numerical
+flux $\Fn(\U_i,\U_j)$ is typically computed with an approximate Riemann solver which
+will be specified for each numerical test in the paper.
+Numerical viscous flux $\Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)$
+in this paper follows the practice of Wang \cite{wang2017compact_VR}.
+The integration of flux terms on the cell interfaces
+are conducted using numerical quadrature rules with
+enough algebraic precision.
+
+As the spatial derivatives are approximated in \eqref{eq:FVInt},
+it is referred to as the semi-discretized form of finite volume method.
+The inviscid term has a truncation error of $O(h^{k+1})$ for smooth problems,
+with $h$ being the size of mesh. As the approximate fields $\U_i$ are functions
+of average values $\UM_i$, \eqref{eq:FVInt} can be rearranged into the
+assembled form
+\begin{equation}
+    \label{eq:FVODE}
+    \frac{d\uu}{dt} = \R(t, \uu)
+\end{equation}
+with
+
+\begin{equation}
+    \uu = \begin{bmatrix}
+        \UM_1 \\
+        \dots \\
+        \UM_{N_{cell}}
+    \end{bmatrix},\ \
+    \R = \begin{bmatrix}
+        -\sum_{j\in S_1, j\neq 1}{\left(
+            \int_{f_{1,j}}{
+                [\Fn - \Fn_v] \cdot \n  dA
+            }\right)
+        }     \\
+        \dots \\
+        -\sum_{j\in S_{N_{cell}}, j\neq N_{cell}}{\left(
+            \int_{f_{N_{cell},j}}{
+                [\Fn - \Fn_v] \cdot \n  dA
+            }\right)
+        }
+    \end{bmatrix}.
+\end{equation}
+
+The arguments in the numerical fluxes are omitted.
+The right-hand-side vector $\R$ is also a function of $t$
+because boundary conditions or additional source terms
+could depend on $t$ generally speaking.
+
+
+
+
+\subsection{Variational reconstruction}
+\label{ssec:VR}
+In order to determine the coefficients of polynomial bases $\U_i^l$
+(or $u_i^l$) in
+\eeqref{eq:FVRec}, a reconstruction method needs to be specified.
+Traditional second-order FV methods for unstructured grid
+needs only to reconstruct a $k=1$ polynomial, namely linear
+distribution on each cell.
+The variational reconstruction \cite{wang2017compact_VR}
+is a compact high-order
+reconstruction scheme, which features high-order
+accuracy achieved on a compact stencil.
+The current section will explain the variational reconstruction
+and specify relevant details.
+
+The current paper uses local zero-mean Taylor basis, similar to
+\cite{wang2017compact_VR}.
+Taking 2 dimensional polynomials as an example:
+\begin{equation}
+    \begin{aligned}
+        \varphi_{i,l} & =
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+        -
+        \overline{
+            \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+            \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+        }
+    \end{aligned}
+\end{equation}
+where $[x_{c,j},y_{c,j}]\trans = \x_{c,j}$ are barycenters of cell $\OO_{j}$,
+$\inc x_i,\inc y_i$ are the cell's length scale, and $p_l,q_l$ are
+powers of the bases. For $k=3$ basis used in two-dimensional cases,
+$p_l=[1,0,2,1,0,3,2,1,0]_l$,
+and $q_l=[0,1,0,1,2,0,1,2,3]_l$.
+The mean value term makes the basis have zero mean values,
+which is calculated with:
+\begin{equation}
+    \overline{
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+    }
+    =
+    \frac{1}{\overline{\OO}_j}\int_{\OO_j}{
+        \left(\frac{x - x_{c,i}}{\inc x_i}\right)^{p_l}
+        \left(\frac{y - y_{c,i}}{\inc y_i}\right)^{q_l}
+    }\dd \Omega .
+\end{equation}
+
+The length scales are chosen to be the largest distance of nodes from the
+barycenter, which has the from
+\begin{equation}
+    \inc x_j = \inc y_j = \max_k(\|\x_{j,k} - \x_{c,j}\|_2)
+\end{equation}
+where $\x_{j,k}$ are coordinates of nodes belonging to cell $\OO_{j}$.
+
+The variational reconstruction defines the solution of reconstruction coefficients
+to be the minimum point of a globally defined functional $I$
+\begin{equation}
+    I = \sum{I_f}
+\end{equation}
+where $I_f$ are interface jump integrations (IJI) defined on each cell interface $f$.
+Hereafter, we use $f=f_{ij}$ to denote the interface of cell $\OO_{i}$ and $\OO_{j}$ by default.
+Using the two-dimensional case as an example, the current paper uses IJI in the form of
+\begin{equation}
+    I_f = \omega_f^G\int_{\OO_i \cap \OO_j}{
+        \sum_{p+q=0}^{p + q\leq k}\left[
+            \omega_f^D(p,q)
+            d_{ij}^{p+q}
+            \left(
+            \partialderivative{^{p+q}u_i(x,y)}{x^p\partial y^q}
+            -
+            \partialderivative{^{p+q}u_j(x,y)}{x^p\partial y^q}
+            \right)
+            \right]^2
+        \dd f
+    }
+\end{equation}
+where $\omega_f^G$ is geometric weight and
+$\omega_f^D$ is derivative weight.
+The facial length scale  $d_{ij}$
+is taken as
+\begin{equation}
+    d_{ij} = \|\x_{c,i}-\x_{c,j}\|_2
+\end{equation}
+which is the distance between the barycenters of the cells.
+The IJI represents facial discontinuities of reconstruction polynomials using
+function values and their various partial derivatives on the interface.
+For 2-D simulation and cubic (with $k=3$)
+reconstruction, the current paper uses
+\begin{equation}
+    \begin{aligned}
+        \omega_f^D(0,0) & = 1\times \omega_D(0)                                                                                    \\
+        \omega_f^D(1,0) & = \omega_f^D(0,1) = 1\times \omega_D(1)                                                                  \\
+        \omega_f^D(2,0) & = \omega_f^D(0,2) = 1\times \omega_D(2),\ \omega_f^D(1,1) = \sqrt{2}\times \omega_D(2)                   \\
+        \omega_f^D(3,0) & = \omega_f^D(0,3) = 1\times \omega_D(3),\ \omega_f^D(1,2) = \omega_f^D(2,1) = \sqrt{3}\times \omega_D(3) \\
+    \end{aligned}
+    \label{eq:wdRotRatio}
+\end{equation}
+with
+\begin{equation}
+    \omega_D(0) = 1, \omega_D(1) = 0.5925, \omega_D(2) = \omega_D(3) = 0.2117
+    \label{eq:wdHQMOPT}
+\end{equation}
+as the derivative weight.
+This form of derivative weight in \eeqref{eq:wdRotRatio} is rotational invariant and
+isotropic.
+The coefficients in \eeqref{eq:wdHQMOPT} are taken from \cite{huang2022high}, which were
+obtained through the
+optimization of dissipation and dispersion relations.
+
+The geometric weight uses the form
+\begin{equation}
+    \omega_f^G = \sqrt{S^{\frac{1}{d-1}}d_{ij}^{-1}}
+\end{equation}
+where $d$ is the number of spatial dimension and $S$ is the area of the interface.
+This form of
+geometric weight is also taken from \cite{huang2022high}.
+
+The minimization problem
+\begin{equation}
+    u_i^l = \mathop{\arg \min}(I)
+\end{equation}
+defines the solution to the variational reconstruction system.
+It is observed that $I$ is a quadratic function of $u_i^l, i = 1...N_{cell}$ and
+$I\geq 0$,
+therefore $I$ is a positive semi-definite quadratic form about the global vector of reconstruction
+coefficients. Consequently, the minimization problem converts to a linear equation
+\begin{equation}
+    \partialderivative{I}{u_i^l} = 0, l=1,2,\dots \mathrm{NDOF}(k),\ \ i=1,2,\dots N_{cell} .
+\end{equation}
+This linear equation can be arranged in a cell-block form:
+\begin{equation}
+    \label{eq:vrBlockEq}
+    \sum_{f=f_{ij},j\in S_i, j\neq i}{ \mathbf{A}_{ij} \us_i}
+    =
+    \sum_{f=f_{ij},j\in S_i, j\neq i}{ \mathbf{B}_{ij} \us_j + \mathbf{b}_{ij} (\overline{u}_j - \overline{u}_i)}
+\end{equation}
+where $S_i$ is the compact stencil of $i$ composed of cell $\OO_{i}$ and its face neighbors.
+Local reconstruction coefficient vector is $\us_i = [u_i^1,u_i^2\dots]\trans$.
+The reconstruction coefficient matrices and vectors in \eeqref{eq:vrBlockEq}
+are
+\begin{equation}
+    \label{eq:vrCoeffs}
+    \begin{aligned}
+        \mathbf{A}_{ij} = &
+        \left[
+            \left({
+                \omega_f^G\int_{\OO_i \cap \OO_j}{
+                    \sum_{p+q=0}^{p + q\leq k}
+                    \omega_f^D(p,q)^2
+                    d_{ij}^{2(p+q)}
+                    \partialderivative{^{p+q}\varphi_{i,r}}{x^p\partial y^q}
+                    \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
+                    \dd f}
+            }\right)_{lr}
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)}, \\
+        \mathbf{B}_{ij}=  &
+        \left[
+            \left({
+                \omega_f^G\int_{\OO_i \cap \OO_j}{
+                    \sum_{p+q=0}^{p + q\leq k}
+                    \omega_f^D(p,q)^2
+                    d_{ij}^{2(p+q)}
+                    \partialderivative{^{p+q}\varphi_{j,r}}{x^p\partial y^q}
+                    \partialderivative{^{p+q}\varphi_{i,l}}{x^p\partial y^q}
+                    \dd f}
+            }\right)_{lr}
+        \right]_{\mathrm{NDOF}(k) \times \mathrm{NDOF}(k)}, \\
+        \mathbf{b}_{ij}=  &
+        \left[
+            \left({
+                    \omega_f^G\omega_f^D(0,0)^2
+                    \int_{\OO_i \cap \OO_j}{
+                        \varphi_{i,l}
+                        \dd f}
+                }\right)_{l}
+        \right]_{\mathrm{NDOF}(k) \times 1}.                \\
+    \end{aligned}
+\end{equation}
+
+The local coefficients matrices and vectors \eeqref{eq:vrCoeffs} can be
+calculated at the start of computation.
+The linear reconstruction system \eeqref{eq:vrBlockEq}
+is solved with block-SOR method.
+The details of linear solving of variational reconstruction and the treatments of
+boundary conditions can be found in \cite{wang2017compact_VR}.
+The fact to be emphasized here is that
+the reconstruction is implicit, and
+the reconstruction coefficients must be
+obtained through a series of
+iterations.
+To ensure the efficiency of the numerical method,
+the variational reconstruction is used
+together with temporally implicit discretization
+of the governing equations.
+During an implicit solving procedure,
+the updating of mean values and reconstruction
+coefficients are decoupled
+and executed alternately, with the block-SOR
+iteration carried out only once for every iteration
+of the implicit marching scheme.
+As each block-SOR updating is compact in the sense of data dependency,
+the variational reconstruction is able to have better data locality and
+less communication during the iteration process.
+
+
+
+% TODO
+% \#\#\#
+
+
+\section{Direct integration with temporal reconstruction (DITR)
+  methods for high order time marching}
+\label{sec:HIRK}
+
+\subsection{General ideas}
+
+Considering the first order ODE equation \eqref{eq:FVODE} arising
+from high-order finite volume method
+with
+$t\in[0,\infty)$ and $\uu\in \mathbb{R}^N$:
+\begin{equation*}
+    \frac{\dd \uu}{\dd t} = \R(t, \uu)
+\end{equation*}
+which can be
+considered a more general first order ODE with $\uu$ being
+a general solution vector.
+For example, in finite difference schemes,
+$\uu$ represents the vector of grid point values.
+And for finite volume schemes, $\uu$ is the vector
+of all cell averages.
+A direct integration of equation \eqref{eq:FVODE}
+leads to a time-marching relation
+\begin{equation}
+    \uu^{n+1} = \uu^{n} + \int_{t^n}^{t^{n+1}}{
+    \R(t, \uu) \dd t
+    }
+    \label{eq:DI}
+\end{equation}
+
+In order to acquire the integration result in equation
+\eqref{eq:DI}, a numeric quadrature rule in the interval
+$[t^n, t^{n+1}]$ is used. For example, the current paper
+uses three point polynomial quadrature rule
+\begin{equation}
+    \label{eq:Quad3}
+    \begin{aligned}
+        \frac{\uu^{n+1} - \uu^{n}}{\inc t^n} = & \frac{1}{\inc t^n}
+        \int_{t^n}^{t^{n+1}}{
+        \R(t, \uu) \dd t
+        }                                                           \\ \approx &
+        b_1\R(t^n, \uu(t^n))
+        +
+        b_2\R(t^{n+c_2}, \uu(t^{n+c_2}))
+        +
+        b_3\R(t^{n+1}, \uu(t^{n+1}))
+    \end{aligned}
+\end{equation}
+where $t^{n+c_2} = t^{n} + c_2 (t^{n+1} - t^n)$ and $c_2\in(0,1)$.
+$\inc t^n=t^{n+1} - t^n$ is
+the time step size.
+The parameter $c_2$ represents the relative place of the second abscissa
+in the quadrature rule, where the first and third fixed at $t^{n}$ and $t^{n + 1}$.
+Using quadratic polynomial interpolation,
+the weights of the quadrature rule will be:
+\begin{equation}
+    \begin{aligned}
+        b_1 & = \frac{1}{2} - \frac{1}{6{c_2}},     \\
+        b_2 & = \frac{1}{6{c_2}(1-{c_2})},          \\
+        b_3 & = \frac{1}{2} - \frac{1}{6(1-{c_2})}. \\
+    \end{aligned}
+    \label{eq:integ0}
+\end{equation}
+The quadrature rule defined with
+\eeqref{eq:Quad3} and \eeqref{eq:integ0} has algebraic precision
+of degree 2. When $c_2=1/2$, the quadrature rule has algebraic precision of
+degree 3 and becomes the three point Gauss-Lobatto rule.
+The numeric integration process used in equation \eqref{eq:Quad3}
+is referred to as a direct integration process because it is
+directly derived from the ODE.
+
+
+% The precise value of $\uu(t)$ at each $t\in[t^n, t^{n+1}]$
+% is unknown, thus an approximation is required for numeric calculation.
+% The current paper proposes to use conditions at
+% time steps only, namely $t \in \{t^{n+1}, t^n, t^{n-1}\dots\}$,
+% in acquiring the polynomial reconstruction.
+% Since the step values $\uu^n, \uu^{n-1}\dots$ and
+% their temporal derivatives $\R^n, \R^{n-1}\dots$ are known,
+% the addition of the unknown latest step $\uu^{n+1}, \R^{n+1}$
+% makes the method implicit.
+
+Besides $\uu^{n+1}$, $\uu(t^{n+c_2})$ is also unknown.
+To make \eeqref{eq:integ0}
+solvable, the temporal reconstruction is introduced in the
+present paper.
+The temporal reconstruction is to reconstruct $\uu(t)$
+from known $\uu$ at previous time steps and the desired
+solution $\uu^{n+1}$ of the numerical schemes. Since $\frac{\dd\uu}{\dd t}=\R$
+can be computed from  $\uu$, R at previous time steps as well
+as  $\R^{n+1}$ can be also used in the temporal reconstruction.
+The inclusion of $\uu^{n+1}$ and $\R^{n+1}$ in the reconstruction
+makes the scheme implicit.
+Using the reconstructed $\uu(t)$, $\uu(t^{n+c_2})$
+can be evaluated, making \eeqref{eq:integ0} solvable.
+The current paper has only considered using a subset of
+$\uu(t), \R(t, \uu(t))$ at $t \in \{t^{n+1}, t^n, t^{n-1}\}$
+as conditions of the polynomial reconstruction.
+Generally, the polynomial interpolation
+of $\uu(t)$ could be expressed as
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TR}
+        \uu(t) & \approx
+        A^n_0(t)\uu^{n - 1} +
+        A^n_1(t)\uu^{n} +
+        A^n_2(t)\uu^{n + 1}
+        \\ & +
+        \inc t^n D^n_0(t)\R^{n - 1} +
+        \inc t^n D^n_1(t)\R^{n} +
+        \inc t^n D^n_2(t)\R^{n + 1}
+    \end{aligned}
+\end{equation}
+where $A^n_i(t), D^n_i(t), i=0,1,2$
+are polynomial base functions. Due to the precision of quadrature rule,
+the polynomial reconstruction is only expected to reach 3rd order
+constructing a 4th order accurate scheme.
+Consequently, at most 4 out of the
+6 conditions would be used at the same time.
+The polynomial interpolation in the direction of time in \eeqref{eq:TR}
+is referred to as temporal reconstruction, for
+a continuous distribution of $\uu$ is reconstructed with point values,
+similar to the finite volume reconstruction.
+
+Combining the direct integration in \eeqref{eq:Quad3}
+and a  temporal reconstruction in \eeqref{eq:TR},
+a Direct Integration with Temporal Reconstruction (DITR) method is
+determined.
+The current paper sticks to the same formula of direct integration
+in \eeqref{eq:Quad3}, while experimenting on different
+forms of temporal reconstruction in \eeqref{eq:TR}.
+
+As a remark, the Adams-Moulton scheme which is one of the
+implicit linear multistep method also use the direct
+integration approach.
+However, it relies on the
+reconstruction of $\R(t)$ to make the numerical quadrature
+similar to the right-hand side of \eeqref{eq:integ0} computable.
+For the third order scheme, quadratic reconstruction in terms
+of $\R^{n+1},\R^{n},\R^{n-1}$ is used.
+It is well known that the high-order
+Adams-Moulton schemes have rather poor stability
+property. The present DITR scheme reconstructs U rather
+than R. According to \eeqref{eq:TR},
+more information can be used
+in the reconstruction, making the present method more
+compact and flexible. The present approach can achieve
+high-order of accuracy and better stability property when
+the reconstruction is designed properly.
+
+If the quadrature rule in direct integration is replaced with
+midpoint rule, and the temporal reconstruction uses linear
+reconstruction, the implicit midpoint method for ODE can be derived,
+which is 2nd order accurate. A high order accurate DITR method could
+only be obtained with a high order accurate quadrature rule and
+high degree temporal reconstruction.
+
+Assuming the quadrature rule has algebraic precision
+of degree $m$, and the polynomial interpolation is of degree $n$,
+a straightforward analysis on local truncation error could be conducted.
+Approximation \eqref{eq:Quad3} yields a
+truncation error of $O((\inc t)^{m+2} )$ expressed in equation \eqref{eq:Quad3Err}
+\begin{equation}
+    \label{eq:Quad3Err}
+    \begin{aligned}
+        \uu^{n+1} - \uu^{n} = & \int_{t^n}^{t^{n+1}}{
+        \R(t, \uu)\dd t}                              \\  = &
+        {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu(t^n))
+            +
+            b_2\R(t^{n+c_2}, \uu(t^{n+c_2}))
+            +
+            b_3\R(t^{n+1}, \uu(t^{n+1}))
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2} )
+    \end{aligned}
+\end{equation}
+due to the precision degree of quadrature rule.
+Approximation
+\eeqref{eq:TR} has a truncation error of $O((\inc t)^{n+1})$
+expressed in \eeqref{eq:TRErr}
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRErr}
+        \uu(t^{n+c_2}) & =
+        A^n_0(t^{n+c_2})\uu^{n - 1} +
+        A^n_1(t^{n+c_2})\uu^{n} +
+        A^n_2(t^{n+c_2})\uu^{n + 1}
+        \\ & +
+        \inc t^n D^n_0(t^{n+c_2})\R^{n - 1} +
+        \inc t^n D^n_1(t^{n+c_2})\R^{n} +
+        \inc t^n D^n_2(t^{n+c_2})\R^{n + 1}
+        \\ & +
+        O((\inc t^{n})^{n+1} )
+    \end{aligned}
+\end{equation}
+as a result of polynomial degree.
+Substituting \eeqref{eq:TRErr} into the $t^{n+c_2}$ stage
+of \eeqref{eq:Quad3Err}, the truncation error
+of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
+\begin{equation}
+    \begin{aligned}
+        \uu^{n+1} = & \uu^{n} + {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu^n)
+            +
+            b_2\R(t^{n+c_2}, \uu^{n+c_2} + O((\inc t^{n})^{n+1} ))
+            +
+            b_3\R(t^{n+1}, \uu^{n+1})
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2} )               \\
+        =           &
+        \uu^{n} + {\inc t}^{n}
+        \left[
+            b_1\R(t^n, \uu^n)
+            +
+            b_2\R(t^{n+c_2}, \uu^{n+c_2})
+            +
+            b_3\R(t^{n+1}, \uu^{n+1})
+            \right]
+        \\ + &
+        O((\inc t^{n})^{m+2}  + O((\inc t^{n})^{n+2} ))
+    \end{aligned}
+    \label{eq:fullLTE}
+\end{equation}
+where $\uu^{n+1}, \uu^{n}$ are step values assumed to be accurate here, and
+$\uu^{n+c_2}$ is the approximate
+$c_2$ stage value determined by the temporal reconstruction.
+Equation \eqref{eq:fullLTE} assumes
+$\R(t, \uu)$ to be sufficiently regular and therefore does not
+change the order of error.
+Therefore, for smooth problems the
+order of accuracy of a DITR
+method is theoretically $\min(m,n) + 1$.
+
+The following sections will illustrate some
+practical DITR methods based on equations \eqref{eq:Quad3} and \eqref{eq:TR}.
+
+
+\subsection{Variants of DITR methods}
+
+
+
+\subsubsection{The DITR U2R2 method}
+
+To make the method single-step and 4th order accurate,
+we choose $\uu^{n},\uu^{n+1}$, $\R^{n},\R^{n+1}$ as
+the interpolation conditions, making the interpolation
+basically cubic Hermite interpolation.
+Therefore, the interpolation of $\uu(t^{n+c_2})$
+is:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU2R2}
+        \uu^{n+c_2} & =
+        a_{1,U2R2}\uu^{n} +
+        a_{2,U2R2}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{1,U2R2}\R^{n} +
+        \inc t^n d_{2,U2R2}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{1,U2R2} & = 1 - (3{c_2}^2 - 2 {c_2}^3) , \\
+        a_{2,U2R2} & = 3{c_2}^2 - 2 {c_2}^3 ,       \\
+        d_{1,U2R2} & = {c_2} - 2 {c_2}^2 + {c_2}^3, \\
+        d_{2,U2R2} & = - {c_2}^2 + {c_2}^3 .        \\
+    \end{aligned}
+    \label{eq:interpU2R2}
+\end{equation}
+
+The temporal reconstruction of \eeqref{eq:TRU2R2}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U2R2 method.
+Here U2R2 denotes 2 $\uu$ and 2 $\R$
+step values at $n,n+1$ used in the reconstruction.
+Following analyses indicate that using
+the most recent $\uu$ and $\R$
+will yield a scheme with better stability.
+Therefore, the current paper does not include the
+time step indices in the naming of DITR methods.
+This naming convention is continued in the following
+methods.
+
+When $c_2=1/2$, quadrature rule in equation \eqref{eq:Quad3} has precision
+of degree 3, making the DITR U2R2 method 4th order accurate,
+and the stage value $\uu^{n+c_2}$ has a precision of degree 3.
+When $c_2\neq1/2$, DITR U2R2 becomes 3rd order accurate.
+
+In order to further examine the accuracy order,
+equations \eqref{eq:interpU2R2}, \eqref{eq:Quad3}
+can be reformulated into a standard IRK method,
+yielding a Butcher tableau shown in Table \ref{tab:U2R2Butcher}.
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c|ccc}
+        0     & 0              & 0        & 0              \\
+        $c_2$ & $d_1 + a_2b_1$ & $a_2b_2$ & $d_2 + a_2b_3$ \\
+        1     & $b_1$          & $b_2$    & $b_3$          \\ \hline
+              & $b_1$          & $b_2$    & $b_3$
+    \end{tabular}
+    \caption{Butcher tableau of DITR U2R2}
+    \label{tab:U2R2Butcher}
+\end{table}
+
+According to table \ref{tab:U2R2Butcher} with the coefficients
+determined by \eqref{eq:interpU2R2} and \eqref{eq:integ0},
+one can find that the 4th order accurate
+DITR U2R2 method with $c_2=1/2$
+is actually the Lobatto IIIA method
+of order 4 \cite{wanner1996solving}.
+The classic order and stage order of DITR U2R2 could
+also be verified using Table \ref{tab:U2R2Butcher} via
+the simplifying assumptions, which is a trivial procedure
+given the formulae provided in \cite{wanner1996solving}.
+
+Following standard analysis based on Dahlquist's equation
+$\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
+the stability function giving by $y^{1}=R(h\lambda)y^0$
+applied to DITR U2R2 is in the form:
+\begin{equation}
+    \label{eq:stabilityFuncU2R2}
+    R_{U2R2}(z) = -\frac{4\,z-2\,c_{2}\,z-c_{2}\,z^2+z^2+6}{2\,z+2\,c_{2}\,z-c_{2}\,z^2-6}
+\end{equation}
+which becomes the (2,2)-Pad{\'e} approximation when $c_2=1/2$ and
+DITR U2R2 becomes Lobatto IIIA.
+Analysis on equation \eqref{eq:stabilityFuncU2R2}
+would show that $c_2\in[1/2,1)$ is a sufficient and necessary
+condition of DITR U2R2 being $A$-stable given $c_2\in(0,1)$.
+The limit at infinity
+\begin{equation}
+    \lim_{z\rightarrow\infty}R_{U2R2}(z) = \frac{1-c_2}{c_2}
+\end{equation}
+confirm that DITR U2R2 is unable to achieve $L$-stability
+by adjusting $c_2$.
+
+
+DITR U2R2 ($c_2=1/2$) or Lobatto IIIA method is symmetric,
+which is a preferable property when integrating
+reversible systems including orbital motion and particle
+systems.
+However,
+the symmetry in this ODE method could be considered harmful in CFD application.
+Most CFD systems of interest are physically dissipative,
+while for a symmetric method
+$R(z) \rightarrow 1$ when $z \rightarrow \infty$,
+which means the method is more likely to preserve
+spurious modes arising from spatial discretization.
+Although DITR U2R2 cannot achieve $L$-stability,
+using a value of $c_2 > 1/2$ would still
+produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
+would be a useful property in simulation of dissipative systems.
+With  $c_2 > 1/2$, stiff modes could vanish faster over the time
+steps, while $c_2 = 1/2$ tends to preserve them.
+
+\subsubsection{The DITR U2R1 method}
+
+Giving up one interpolation condition in DITR U2R2
+forces the scheme to have 3rd order accuracy.
+The current paper removes $\R^{n}$ from U2R2, namely
+using $\uu^{n},\uu^{n+1}$, $\R^{n+1}$ for interpolation,
+which is able to produce an $L$-stable DITR scheme.
+
+Similar with U2R2, DITR U2R1 has the interpolation
+written as:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU2R1}
+        \uu^{n+c_2} & =
+        a_{1,U2R1}\uu^{n} +
+        a_{2,U2R1}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{2,U2R1}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{1,U2R1} & = 1 - (2c_2 - {c_2}^2), \\
+        a_{2,U2R1} & = 2c_2 - {c_2}^2,       \\
+        d_{2,U2R1} & = {c_2}^2 - {c_2}.      \\
+    \end{aligned}
+    \label{eq:interpU2R1}
+\end{equation}
+
+The temporal reconstruction equation \eqref{eq:TRU2R1}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U2R1 method.
+
+The interpolation bases shown in \eqref{eq:interpU2R1}
+are quadratic.
+Therefore, the scheme yields 3rd order accuracy
+and the choice of $c_2$ does not affect the order of accuracy.
+Similar to U2R2, DITR U2R1's order of accuracy can
+be examined using
+standard procedures for
+Runge-Kutta methods\cite{wanner1996solving}.
+
+The linear stability function for DITR U2R1 is
+\begin{equation}
+    \label{eq:stabilityFuncU2R1}
+    R_{U2R1}(z) = \frac{2\,z+6}{z^2-4\,z+6},
+\end{equation}
+which is (1,2)-Pad{\'e} approximation and not affected by $c_2$.
+It can be found $|R_{U2R1}(z)| < 1, \forall \real(z) < 0$,
+and obviously $\lim_{z\rightarrow\infty}R_{U2R1}(z) = 0$.
+Therefore, DITR U2R1 method is $L$-stable.
+
+The stability function also
+shows that when $\R$ is a linear function of $\uu$,
+the solution is not
+affected by $c_2$.
+However, for nonlinear $\R$,
+$c_2$ changes the behavior of U2R1.
+
+\subsubsection{The DITR U3R1 method}
+
+To exploit the information when multiple previous
+steps are available,
+using conditions from $t^{n-1}$ would be
+preferable.
+The current paper chooses $\uu^{n-1},\uu^{n}$, $\uu^{n+1}$
+and $\R^{n+1}$ as U3R1's interpolation conditions,
+as other choices do not produce sufficient linear stability.
+The interpolation at $c_2$ node becomes:
+\begin{equation}
+    \begin{aligned}
+        \label{eq:TRU3R1}
+        \uu^{n+c_2} & =
+        a_{0,U3R1}\uu^{n} +
+        a_{1,U3R1}\uu^{n} +
+        a_{2,U3R1}\uu^{n + 1}
+        \\ & +
+        \inc t^n d_{2,U3R1}\R^{n + 1}
+    \end{aligned}
+\end{equation}
+with $\uu^{n+c_2}$ being
+the numerical approximation
+of $\uu(t^{n+c_2})$
+and the interpolation bases at $c_2$ node being:
+\begin{equation}
+    \begin{aligned}
+        a_{0,U3R1} & = -\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}       ,                                                      \\
+        a_{1,U3R1} & = \frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}                     ,                                                \\
+        a_{2,U3R1} & =  \frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2} , \\
+        d_{2,U3R1} & =   \frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}.
+    \end{aligned}
+    \label{eq:interpU3R1}
+\end{equation}
+where $\Theta = \inc t^{n-1}/\inc t^{n}$.
+
+The temporal reconstruction equation \eqref{eq:TRU3R1}
+combined with direct integration equation \eqref{eq:Quad3}
+forms the DITR U3R1 method.
+
+The method is 4th order when $c_2=1/2$, when
+both the interpolation and integration has precision
+of degree 3.
+For the special case of $c_2=1/2$, simplified
+coefficients are given:
+\begin{equation}
+    \begin{aligned}
+        a_{0,U3R1} & = -\frac{1}{8\,\Theta\,{\left(\Theta+1\right)}^2}  ,              \\
+        a_{1,U3R1} & = \frac{\Theta+\frac{1}{2}}{4\,\Theta}        ,                   \\
+        a_{2,U3R1} & =  \frac{6\,\Theta^2+11\,\Theta+4}{8\,{\left(\Theta+1\right)}^2}, \\
+        d_{2,U3R1} & = -\frac{\Theta+\frac{1}{2}}{4\,\left(\Theta+1\right)}.
+    \end{aligned}
+    \label{eq:interpU3R1-S}
+\end{equation}
+
+Linear stability is analyzed when $\Theta =1$ and $c_2 = 1/2$.
+The solution to the test problem
+produces two solutions:
+\begin{equation}
+    \left(
+    \begin{matrix}
+        R_{U3R1}^{(1)}(z) \\
+        R_{U3R1}^{(2)}(z)
+    \end{matrix}
+    \right)=\left(\begin{array}{c} \frac{10\,z-\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48}\\ \frac{10\,z+\sqrt{-6\,z^3+129\,z^2+432\,z+576}+24}{6\,z^2-29\,z+48} \end{array}\right)
+    .
+\end{equation}
+It is obvious $R_{U3R1}^{(1)}(z)\rightarrow 0, R_{U3R1}^{(2)}(z)\rightarrow0$ when
+$z\rightarrow\infty$.
+When observed numerically, it is found both $|R_{U3R1}^{(1)}(z)|$
+and $|R_{U3R1}^{(2)}(z)|$ are less than 1 in the left
+half plane of $z$.
+The current paper therefore believes %! not a linear multistep method
+the DITR U3R1 method is indeed $L$-stable.
+Note that DITR U3R1 is not a linear multistep method,
+and the root locus curve analysis used in those methods
+can not be directly applied here.
+To the author's knowledge, no
+such implicit time marching method
+has been reported in the literature.
+
+With 4th order accuracy and observed $L$-stability, the
+DITR U3R1 method is potentially more favorable than
+U2R2 and U2R1.
+
+\subsubsection{Summary of DITR methods}
+\label{sssec:sumDITRs}
+
+The U2R2, U2R1 and U3R1 variants of the
+DITR method can be written is a unified form.
+The first equation is the direct integration:
+\begin{equation}
+    \uu^{n+1} = \uu^{n} + \inc t^n\left(
+    b_1 \R^n +
+    b_2 \R^{n+c_2} +
+    b_3 \R^{n+1}
+    \right)
+    \label{eq:DISum}
+\end{equation}
+with weights decided by \eqref{eq:integ0},
+and also listed Table \ref{tab:integ0Tab}.
+For simplicity, in numerical expressions,
+notations such as $\R^{n+c_2}=\R(t^{n+c_2}, \uu^{n+c_2})$
+are used from now on.
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        $b_1$                            & $b_2$ & $b_3$ \\
+        \hline
+        $\frac{1}{2} - \frac{1}{6{c_2}}$ &
+        $\frac{1}{6{c_2}(1-{c_2})}$      &
+        $\frac{1}{2} - \frac{1}{6(1-{c_2})} $            \\
+        \hline
+    \end{tabular}
+    \caption{Butcher tableau of DITR U2R2}
+    \label{tab:integ0Tab}
+\end{table}
+
+The second equation is the temporal reconstruction:
+\begin{equation}
+    \label{eq:TRSum}
+    \uu^{n+c_2}  =
+    a^n_0\uu^{n - 1} +
+    a^n_1\uu^{n} +
+    a^n_2\uu^{n + 1}
+    +
+    \inc t^n
+    \left(
+    d^n_1\R^{n} +
+    d^n_2\R^{n + 1}
+    \right)
+\end{equation}
+where the coefficients vary in different schemes
+according to Table \ref{tab:inter0Tab}.
+The time step ratio for the two-step U3R1 method is
+$\Theta = \inc t^{n-1} / \inc t^{n}$.
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        DITR Method & U2R2                          & U2R1                 & U3R1                                                                                                                                   \\
+        \hline
+        $a^n_0$     & 0                             & 0                    & $-\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}$                                                           \\
+        \hline
+        $a^n_1$     & $1-(3{c_2}^2 - 2 {c_2}^3)$    & $1-(2c_2 - {c_2}^2)$ & $\frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}$                                                                   \\
+        \hline
+        $a^n_2$     & $3{c_2}^2 - 2 {c_2}^3$        & $2c_2 - {c_2}^2$     & $\frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2}$ \\
+        \hline
+        $d^n_1$     & ${c_2} - 2 {c_2}^2 + {c_2}^3$ & 0                    & 0                                                                                                                                      \\
+        \hline
+        $d^n_2$     & $- {c_2}^2 + {c_2}^3$         & ${c_2}^2 - {c_2}$    & $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                              \\
+        \hline
+    \end{tabular}
+    \caption{Interpolation coefficients for different DITR methods}
+    \label{tab:inter0Tab}
+\end{table}
+
+In practice, the current research chooses $c_2=0.5,0.55$ for U2R2.
+U2R2 $c_2=0.5$ has optimal order of accuracy (4th order), but it is symmetric.
+U2R2 $c_2=0.55$ is 3rd order accurate but breaks symmetry and gains some stability.
+
+For U2R1, $c_2$ does not affect order of accuracy and stability.
+We empirically choose $c_2=0.25$ for U2R1, the reason roots in
+the convergence of solving PDEs using
+dual time stepping
+.
+% , which will be explained in \ref{sssec:numScan}.
+
+For U3R1, since any $c_2$ gives $L$-stability, so $c_2=0.5$ which
+offers optimal 4th order of accuracy is always used.
+
+\subsection{Iteration method for solving DITR}
+
+In practice, the implicit equations \eeqref{eq:DISum}
+and \eeqref{eq:TRSum} are solved iteratively. 
+In order to utilize the matrix-free linear 
+solvers implemented for BDF and ESDIRK methods,
+the current section will introduce a iteration
+method. The equations are reformulated into
+\begin{equation}
+    \begin{bmatrix}
+        \FF^{n+c_2} \\
+        \FF^{n+1}
+    \end{bmatrix} = 0
+\end{equation}
+where
+\begin{equation}
+    \begin{aligned}
+        \begin{bmatrix}
+            \FF^{n+c_2} \\
+            \FF^{n+1}
+        \end{bmatrix} = \Pm\begin{bmatrix}
+            \GG^{n+c_2} \\
+            \GG^{n+1}
+        \end{bmatrix}  = \Pm\begin{bmatrix}
+            \frac{a^n_0\uu^{n - 1} +
+                a^n_1\uu^{n} +
+                a^n_2\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+            +
+            d^n_1\R^{n} +
+            d^n_2\R^{n + 1}
+            \\
+            \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+            b_1 \R^n +
+            b_2 \R^{n+c_2} +
+            b_3 \R^{n+1}
+        \end{bmatrix}
+        \label{eq:DITRFFDef}
+    \end{aligned}
+\end{equation}
+where $\GG$ are the un-preconditioned residual functions 
+and $\Pm$ is a preconditioning matrix:
+\begin{equation}
+    \Pm = \begin{bmatrix}
+        \Pe_{11}\eye & \Pe_{12}\eye \\
+        \Pe_{21}\eye & \Pe_{22}\eye \\
+        \end{bmatrix}
+\end{equation}
+where $\Pe_{ij}$ entries are scalar real values. 
+Using the dual time stepping technique \cite{jameson1991time},
+and a linearized backward euler method for updating \cite{luo1998fast},
+the current paper proposes a iteration process with two sub-steps in each iteration:
+\begin{equation}
+    \begin{aligned}
+        \left(\frac{\eye}{\inc\tau} -
+        \partialderivative{\FF^{n+c_2}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+c_2}}  \right)
+        \inc\uu^{n+c_2,m} & = \FF^{n+c_2}(\uu^{n+c_2,m}, \uu^{n+1,m}) \\
+        \left(\frac{\eye}{\inc\tau} -
+        \partialderivative{\FF^{n+1}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+1}}  \right)
+        \inc\uu^{n+1,m}   & = \FF^{n+1}(\uu^{n+c_2,m+1}, \uu^{n+1,m}) \\
+    \end{aligned}
+    \label{eq:DITRSDS}
+\end{equation}
+where $\inc \uu^{n+c_2,m} = \uu^{n+c_2,m+1} - \uu^{n+c_2,m}$ and
+$\inc \uu^{n+1,m} = \uu^{n+1,m+1} - \uu^{n+1,m}$.
+In the first updating formula in \eeqref{eq:DITRSDS},
+$\uu^{n+1}$ is considered static and the linearizing is only
+performed on $\uu^{n+c_2}$. The second updating formula
+then makes $\uu^{n+c_2}$ static, and performs linearizing on
+$\uu^{n+1}$ only. Note that the right side $\FF$ functions
+and Jacobian terms $\partialderivative{\FF}{\uu}$ always
+uses the latest versions of $\uu^{n+c_2}$ and $\uu^{n+1}$.
+Both $\uu^{n+c_2}$ and $\uu^{n+1}$ are updated immediately
+after each increment values are obtained.
+The linear systems are in the same form
+of those in BDF and ESDIRK methods, and they
+can be solved using matrix-free linear solvers like
+LU-SGS solvers.
+
+The current paper chooses preconditioning to be 
+\begin{equation}
+    \Pm = \begin{bmatrix}
+        \eye & \beta\eye \\
+        0    & \eye
+    \end{bmatrix}
+    \label{eq:specialP}
+\end{equation}
+and $\beta$ values are chosen for each DITR method.
+For U2R2 $c=0.5$, we empirically choose $\beta = 1$.
+For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
+For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
+For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
+
+
+
+
+% \section{Iteration methods for solving DITR}
+% \label{sec:Solving}
+
+% The DITR methods discussed in the current paper
+% consist of two implicit equations \eqref{eq:DISum} and
+% \eqref{eq:TRSum}, which are results of direct integration
+% and temporal reconstruction respectively.
+% There are two unknown vectors $\uu^{n+1},\uu^{n+c_2}$ in the equations.
+% In order to numerically conduct time marching with DITR, the equations
+% need to be iteratively solved.
+% Although the DITR schemes can be used as the ODE integrator
+% directly, we are mainly interested in using these schemes 
+% as the time marching schemes for solving nonlinear time-dependent
+% PDEs, specifically the compressible Euler and Navier-Stokes equations.
+
+
+
+% \subsection{Dual Time Stepping}
+% \label{ssec:dualTime} 
+
+% Dual time stepping technique \cite{jameson1991time,jameson2017evaluation}
+% is a standard procedure of solving nonlinear
+% implicit time stepping equations
+% in flow problems.
+% The nonlinear equations are written in the form of
+% \begin{equation}
+%     \FF^*(\uu^*) = 0
+%     \label{eq:abstractImplicit}
+% \end{equation}
+% where $\uu^*$ represent one of the unknowns
+% in DIRK, BDF or DITR methods.
+% For example, for trapezoid rule (Crank-Nicolson method),
+% equation \eqref{eq:abstractImplicit} reads
+% \begin{equation}
+%     \label{eq:trapF}
+%     \FF(\uu^{n+1}) =
+%     -\frac{\uu^{n+1}-\uu^{n}}{\inc t^n} + \frac{\R^{n} + \R^{n+1}}{2}
+%     =0
+% \end{equation}
+% Generally, $\FF^*$ should be arranged so that
+% $\R(\uu^*)$ in $\FF^*$ has coefficient being $O(1)$ and positive,
+% while $\uu^*$ has its coefficient being $O(\inc t^{-1})$ and negative.
+% With the idea of dual time stepping, namely
+% \begin{equation}
+%     \frac{\dd\uu^{*}}{\dd \tau} = \FF^*(\uu^{*})
+%     \label{eq:exactDualTime}
+% \end{equation}
+% combined with a backward Euler method on the
+% pseudo time $\tau$, equation \eqref{eq:abstractImplicit}
+% is solved with
+% \begin{equation}
+%     \frac{\uu^{*,m+1} - \uu^{*,m}}{\inc \tau} = \FF^*(\uu^{*,m+1})
+% \end{equation}
+% where $m, m+1$ are pseudo time steps.
+% Clearly $\tau$ has a dimension of time.
+% Further linearizing would produce
+% \begin{equation}
+%     \left(\frac{\eye}{\inc\tau} -
+%     \partialderivative{\FF^*}{\uu^*}  \right)
+%     \inc\uu^{*,m} = \FF^*(\uu^{*,m})
+%     \label{eq:abstractNewton}
+% \end{equation}
+% where $\inc\uu^{*,m} = \uu^{*,m+1} - \uu^{*,m}$ is the increment
+% of the iteration.
+% The Jacobian of residual $\partialderivative{\FF^*}{\uu^*}$
+% is a non-trivial matrix, thus each update of $\uu^*$ requires
+% the solution of a sparse linear problem.
+% When $\inc\tau\rightarrow0$, Equation \eqref{eq:abstractNewton}
+% tends to reflect the exact evolution of dual time stepping
+% equation \eqref{eq:exactDualTime}.
+% Equation \eqref{eq:abstractNewton} becomes the
+% standard Newton-Raphson method when $\inc\tau\rightarrow\infty$.
+
+% In this paper, the dual time stepping technique is considered to be crucial
+% in helping the numerical system overcome the convergence difficulties
+% arising from strong nonlinearity and discontinuity
+% in certain compressible flows.
+% The pseudo time term in dual time stepping
+% serves as a stabilizing term in the iteration,
+% which is necessary when the flow has strong transient features.
+% Therefore, the following sections will focus on different
+% methods of applying dual time iteration to DITR.
+
+% Dual time stepping \eeqref{eq:exactDualTime} is an artificial
+% pseudo-time-dependent ODE system, and linear stability features with
+% respect to $\tau$ can be performed \cite{jameson1991time}.
+% The current paper considers using Fourier analysis
+% to gain a perception of the stability features in pseudo time
+% when the form of $\FF^*$ varies.
+% Therefore, the current section will introduce the
+% Fourier analysis in pseudo time using standard BDF and DIRK
+% methods as an example.
+
+
+% \subsubsection{Fourier analysis in pseudo time}
+% \label{sssec:fourier}
+
+
+
+% To start the Fourier analysis, consider the linear advection problem
+% solved on an infinitely large 1-D uniform
+% grid.
+% Suppose the 1-D linear advection problem reads
+% \begin{equation}
+%     \partialderivative{u}{t} = -a \partialderivative{u}{x}
+% \end{equation}
+% with positive convection speed $a$.
+% Some difference scheme on uniform grid is used as spatial  discretization, which
+% yields the ODE system:
+% \begin{equation}
+%     R_i=\derivative{u_i}{t} = -\frac{a}{\inc x} \sum_{j\in S_i}u_j\alpha_j
+%     \label{eq:fd}
+% \end{equation}
+% where $\alpha_j$ is the coefficients for finite difference approximation
+% and $S_i$ is the stencil set. $R_i$ denotes the right-hand-side of the ODE,
+% or components of $\R$ in other words.
+% As the problem is linear,
+% a simple wave solution
+% \begin{equation}
+%     u = A(t)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+% \end{equation}
+% can be substituted in and produces
+% a relation of
+% \begin{equation}
+%     \frac{\dd A(t)}{\dd t} = -\imagUnit a\frac{\kappa'}{\inc x}  A(t)
+% \end{equation}
+% where $\kappa'$ is the modified non-dimensional wave number,
+% and $\imagUnit$ is the imaginary unit.
+% For a finite difference scheme in equation \eqref{eq:fd},
+% $\kappa'$ can be found as
+% \begin{equation}
+%     \kappa' = \frac{1}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j
+% \end{equation}
+% The modified wave number $\kappa'$ is commonly used to evaluate the performance of
+% spatial  discretization schemes.
+% A stable discretization would require $\imag(\kappa) \leq 0$ so that
+% $A(t)$ does not exponentially increase in magnitude.
+
+% Next, the classic linear analysis on dissipation and dispersion is
+% extended to dual time stepping. The dual time
+% stepping equation \eqref{eq:exactDualTime} can be
+% considered the evolution equation of the solution in pseudo time.
+% Thus, for the linear advection problem,
+% a simple wave pseudo time solution
+% \begin{equation}
+%     u^*(\tau,x) = A^*(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+%     \label{eq:simpleWaveTestTau}
+% \end{equation}
+% where $*$ represent a certain unknown stage or step value.
+% For standard BDF and ESDIRK methods, the residual $\FF^*$
+% can be written as
+% \begin{equation}
+%     \FF^*(\uu^*) = \mathbf{C} - \frac{\mathcal{A}}{\inc t} \uu^* + \mathcal{B}\R(t^*, \uu^*)
+%     \label{eq:canonicalFF}
+% \end{equation}
+% where $\mathbf{C}$ is the part of vectors irrelevant with $\uu^*$,
+% and $\mathcal{A},\mathcal{B}$ are positive real coefficients.
+% $\mathbf{C}$ contains the transient terms of ODE integrator,
+% and stays constant in the pseudo time iteration and is
+% therefore irrelevant to linear stability.
+% With  spatial discretization \eeqref{eq:fd},
+% time integrator \eeqref{eq:canonicalFF},
+% and
+% the simple wave solution \eeqref{eq:simpleWaveTestTau}
+% substituted into the exact pseudo time evolution \eeqref{eq:exactDualTime},
+% the wave amplitudes are found to have the form
+% \begin{equation}
+%     \frac{\dd A^*(\tau)}{\dd \tau} = -\imagUnit a\frac{\kappa^*}{\inc x}  A^*(\tau) + C^*
+%     \label{eq:kappaSDefTau}
+% \end{equation}
+% where $\kappa^*$ represents the modified wave number for pseudo time.
+% The $C^*$ term in the above equation is a constant coefficient arising
+% from the $\mathbf{C}$ term in the time stepping method.
+% Clearly only the linear term with $\kappa^*$ could induce an exponentially diverging
+% solution, while the constant term only changes the asymptotic solution
+% when the pseudo time evolution is stable.
+% The pseudo time modified wave number $\kappa^*$ is found to be
+% \begin{equation}
+%     \begin{aligned}
+%         \kappa^* & = -\imagUnit\frac{\mathcal{A}}{\CFLt} +
+%         \frac{\mathcal{B}}{\imagUnit} \sum_{j\in S_i}\exp(\imagUnit (j-i)\kappa)\alpha_j \\
+%                  & =-\imagUnit\frac{\mathcal{A}}{\CFLt} + \mathcal{B}\kappa'
+%     \end{aligned}
+% \end{equation}
+% where $\CFLt = \frac{a\inc t }{\inc x}$ is the physical CFL number.
+% When the finite difference scheme is stable,
+% the physical time modified wave number satisfies $\imag (\kappa') \leq 0$ for
+% all $\kappa$.
+% Consequently, $\imag (\kappa^*) < 0$, and the exact pseudo time marching
+% is stable.
+
+% To summarize, for stage residual function $\FF^*$ in the form of
+% equation \eqref{eq:canonicalFF}, it is guaranteed $\imag (\kappa^*) < 0$,
+% and the pseudo time evolution is stable in the sense of a continuous $\tau$.
+
+% This result clearly demonstrates the benefit of using the dual time stepping
+% technique,
+% that it is automatically stable when applied to common ODE methods including
+% BDF and ESDIRK.
+
+
+% \subsection{The fully coupled iteration method for solving DITR}
+
+% For linear multistep methods (including BDF) and DIRK type methods (including ESDIRK),
+% at each step or stage, only one $\uu^{*}=\uu^{n,s}$
+% ($s$ is the stage index) or $\uu^{*}=\uu^{n+1}$ is unknown,
+% thus equation \eqref{eq:abstractNewton} can be applied directly.
+% However, in fully implicit RK methods and the current DITR methods,
+% more than one unknown $\uu^{*}$ are present at each stage.
+% For example, in DITR methods, both $\uu^{n+1},\uu^{n+c_2}$
+% are present in both equations \eqref{eq:DISum} and \eqref{eq:TRSum}.
+% Note that in equations \eqref{eq:DISum} and \eqref{eq:TRSum},
+% $\R^{n+1},\R^{n+c_2}$ are also dependent on $\uu^{n+1},\uu^{n+c_2}$.
+% Assuming $\R$ to be nonlinear, linear combinations of
+% equations \eqref{eq:DISum} and \eqref{eq:TRSum} are
+% impossible to completely eliminate
+% the dependence on one of $\uu^{n+1},\uu^{n+c_2}$, and
+% fully implicit RK methods share the same issue.
+
+% One of the most obvious solutions to the multiple unknowns
+% in DITR and fully implicit RK methods is to apply
+% equation \eqref{eq:abstractNewton} to an enlarged
+% system.
+% The enlarged system concatenates different $\uu$
+% stages as one vector and uses the concatenated vector as
+% $\uu^*$ in \eqref{eq:abstractNewton}.
+% The residual function $\FF^*$ is therefore a concatenated vector of
+% the residual vectors at different stages.
+% Therefore, for methods with $k$ unknown stages, the number of
+% unknowns solved concurrently is $k$ times of that in BDF or ESDIRK methods.
+% Applied to DITR methods, there is
+% \begin{equation}
+%     \uu^* = \begin{bmatrix}
+%         \uu^{n+c_2} \\
+%         \uu^{n+1}
+%     \end{bmatrix}
+% \end{equation}
+% and we denote
+% \begin{equation}
+%     \begin{aligned}
+%         \FF^* & =\begin{bmatrix}
+%             \FF^{n+c_2} \\
+%             \FF^{n+1}
+%         \end{bmatrix} = \Pm\begin{bmatrix}
+%             \GG^{n+c_2} \\
+%             \GG^{n+1}
+%         \end{bmatrix} \\ & = \Pm\begin{bmatrix}
+%             \frac{a^n_0\uu^{n - 1} +
+%                 a^n_1\uu^{n} +
+%                 a^n_2\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+%             +
+%             d^n_1\R^{n} +
+%             d^n_2\R^{n + 1}
+%             \\
+%             \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+%             b_1 \R^n +
+%             b_2 \R^{n+c_2} +
+%             b_3 \R^{n+1}
+%         \end{bmatrix}
+%         \label{eq:DITRFFDef}
+%     \end{aligned}
+% \end{equation}
+% where $\Pm$ is a preconditioning matrix:
+% \begin{equation}
+%     \Pm = \begin{bmatrix}
+%         \Pe_{11}\eye & \Pe_{12}\eye \\
+%         \Pe_{21}\eye & \Pe_{22}\eye \\
+%     \end{bmatrix}
+% \end{equation}
+% with $\Pe_{11},\Pe_{12} \dots$ being real scalars.
+% Functions $\GG^{n+c_2},\GG^{n+1}$ are the original residuals
+% corresponding to temporal reconstruction \eeqref{eq:TRSum} and
+% direct integration \eeqref{eq:DISum} respectively. Note that
+% $\FF^{n+c_2},\FF^{n+1}$ and $\GG^{n+c_2},\GG^{n+1}$ are all
+% dependent on both $\uu^{n+c_2},\uu^{n+1}$.
+% And consequently \eeqref{eq:exactDualTime} becomes
+% \begin{equation}
+%     \begin{bmatrix}
+%         \derivative{\uu^{n+c_2}}{\tau} \\
+%         \derivative{\uu^{n+1}}{\tau}
+%     \end{bmatrix} =
+%     \begin{bmatrix}
+%         \FF^{n+c_2} \\
+%         \FF^{n+1}
+%     \end{bmatrix}
+%     \label{eq:DITRNaiveDualTime}
+% \end{equation}
+% Applying \eeqref{eq:DITRNaiveDualTime} directly to \eeqref{eq:abstractNewton}
+% would require the solution of an enlarged sparse linear problem.
+
+% For solvers that explicitly implement sparse matrix storage,
+% such enlargement is trivial at the cost of $k^2$ times
+% of matrix storage. But for inherently matrix-free flow solvers,
+% such enlargement could require drastic modification and addition to
+% the original codebase.
+% The direct enlargement of the problem is referred to as
+% the fully coupled iteration method in the current paper.
+% Due to its complexity of implementation,
+% the current research does not consider using the
+% fully coupled iteration method
+% to solve DITR time stepping schemes.
+
+
+
+
+% \subsection{The nested iteration method for solving DITR}
+
+% A characteristic of \eeqref{eq:TRSum} is that
+% $\uu^{n+c_2}$ only exists on the left side, namely the
+% right side of \eeqref{eq:TRSum} has only $\uu^{n+1}$ as
+% unknown. Consequently, by substitution, equivalent
+% to the previous derivations leading to \eeqref{eq:fullLTE},
+% $\uu^{n+c_2}$ can be eliminated nonlinearly:
+% \begin{equation}
+%     \begin{aligned}
+%         \uu^{n+1} & =                       \\
+%                   & \uu^{n} + \inc t\biggl[
+%         b_1 \R^n                            \\
+%                   & +
+%             b_2 \R(t^{n+c_2},a^n_0\uu^{n - 1} +
+%             a^n_1\uu^{n} +
+%             a^n_2\uu^{n + 1}
+%             +
+%             \inc t^n
+%             \left(
+%             d^n_1\R^{n} +
+%             d^n_2\R^{n + 1}
+%         \right))                            \\
+%                   & +
+%             b_3 \R(t^{n+1},\uu^{n+1})
+%             \biggr]
+%         \label{eq:nestedDITR}
+%     \end{aligned}
+% \end{equation}
+% which we rewrite into the general residual form required in section \ref{ssec:dualTime}:
+% \begin{equation}
+%     \begin{aligned}
+%         \FF^N(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
+%                          & +
+%         b_1 \R^n                                                   \\
+%                          & +
+%         b_2 \R\left(t^{n+c_2},a^n_0\uu^{n - 1} +
+%         a^n_1\uu^{n} +
+%         a^n_2\uu^{n + 1}
+%         +
+%         \inc t^n
+%         \left(
+%         d^n_1\R^{n} +
+%         d^n_2\R^{n + 1}
+%         \right)\right)                                             \\
+%                          & +
+%         b_3 \R(t^{n+1},\uu^{n+1}) = 0.
+%         \label{eq:nestedDITR_F}
+%     \end{aligned}
+% \end{equation}
+% Next, using the linearized implicit backward Euler approximation,
+% namely equation \eqref{eq:abstractNewton}, DITR methods can be solved:
+% \begin{equation}
+%     \left(\frac{\eye}{\inc\tau} -
+%     \partialderivative{\FF^N}{\uu^{n+1}}  \right)
+%     \inc\uu^{n+1,m} = \FF^N(\uu^{n+1,m})
+%     \label{eq:abstractNewtonNested}
+% \end{equation}
+% where $\inc\uu^{n+1,m}=\uu^{n+1,m+1}-\uu^{n+1,m}$.
+
+% The huge advantage of this iteration method is that only one equation is solved,
+% with only the next step value as unknown.
+% This iteration method requires $\R$ to be nested in another $\R$ evaluation and
+% is referred to as the nested iteration method.
+
+% The nested iteration method exploits the
+% local explicitness of DITR's formulation.
+% The nested iteration method is similar, and sometimes equivalent with
+% the iteration methods used in MIRK \cite{cash1975classMIRKOrig,cash1977clasMIRK1,cash1982monoMIRK2}
+% and NIRK \cite{kulikov2006familyNIRKOrig,kulikov2009adaptive,kulikov2007asymptotic}.
+% In these literature, the residual function $\FF^N$ is directly
+% solved using a Newton method:
+% \begin{equation}
+%     -\partialderivative{\FF^N}{\uu^{n+1}}
+%     \inc\uu^{n+1,m} = \FF^N(\uu^{n+1,m})
+%     \label{eq:abstractNewtonNestedNoTau}
+% \end{equation}
+% The Jacobian matrix $\partialderivative{\FF^N}{\uu^{n+1}}$
+% is a quadratic polynomial of the Jacobian of right-hand-side $\R$.
+% Kulikov originally proposed to use an approximate factorization \cite{kulikov2006familyNIRKOrig}
+% of $\partialderivative{\FF^N}{\uu^{n+1}}$ to solve \eeqref{eq:abstractNewtonNestedNoTau},
+% which allows the direct using of matrix-free solvers.
+% However, in previous literature, MIRK and NIRK methods are mainly used on small-scale
+% ODEs rather than as an implicit time marching scheme for compressible flow solvers,
+% and no pseudo time term was involved.
+
+% Our numerical experiments indicate that with small $\inc\tau$
+% and relatively large $\inc t$,
+% the nested iteration method \eeqref{eq:abstractNewtonNested}
+% usually fails to converge even in solving linear problems.
+% The original iteration methods of NIRK \eeqref{eq:abstractNewtonNestedNoTau}
+% which does not involve dual time stepping
+% are found to work on linear problems.
+% However,  when dual time stepping is abandoned, i.e., $\inc \tau=+\infty$,
+% for nonlinear flow problems like the isentropic vortex,
+% when $\inc t$ is relatively large, convergence is almost impossible
+% to achieve.
+% Since dealing with large physical CFL number using local
+% pseudo time stepping is an essential ability of implicit
+% time stepping methods,
+% this divergent result denies the practicality of the
+% nested iteration method.
+
+
+
+
+
+
+% \subsubsection{Fourier analysis in pseudo time: the nested iteration method}
+
+% To explain the failure of the nested iteration method
+% in solving PDEs uisng the dual time stepping technique, Fourier
+% analysis based on pseudo time introduced in \ref{sssec:fourier} is considered.
+
+% When DITR is solved using the nested iteration method,
+% residual $\FF^N$ in \eeqref{eq:nestedDITR_F}
+% cannot be written in the form of  \eeqref{eq:canonicalFF},
+% as a result of nested $\R$ terms.
+% In this case, there is an interaction
+% between the temporal and spatial discretization.
+% To facilitate the analysis, the spatial discretization
+% could be specified.
+% Here we choose the first-order
+% upwind difference as an example:
+% \begin{equation}
+%     \derivative{u_i}{t} = -a \frac{u_i - u_{i-1}}{\inc x}
+%     \label{eq:fdup1}
+% \end{equation}
+% Therefore from \eeqref{eq:nestedDITR_F} and \eeqref{eq:canonicalFF} we have:
+% \begin{equation}
+%     \begin{aligned}
+%         \frac{\dd u_i^{n+1}}{\dd \tau} & =
+%         -\frac{u_i^{n+1} - u_i^{n}}{\inc t^n}      \\
+%                                        & +
+%         b_1 (-a\frac{u_i^{n}-u_{i-1}^{n}}{\inc x}) \\
+%                                        & +
+%         b_2 \Bigl[-\frac{a}{\inc x} \nabla_i
+%         \bigl[
+%         a^n_0u^{n - 1}_i +
+%         a^n_1u^{n}_i +
+%         a^n_2u^{n + 1}_i                           \\
+%                                        & +
+%         \inc t^n
+%         \left(
+%         d^n_1(-a\frac{u_i^{n}-u_{i-1}^{n}}{\inc x}) +
+%         d^n_2(-a\frac{u_i^{n+1}-u_{i-1}^{n+1}}{\inc x})
+%         \right)\bigr]  \Bigr]                      \\
+%                                        & +
+%         b_3 (-a\frac{u_i^{n+1}-u_{i-1}^{n+1}}{\inc x})
+%         \label{eq:nestedDITR_F1}
+%     \end{aligned}
+% \end{equation}
+% where $\nabla_i(u_i) = u_i - u_{u_i-1}$ is the $i$ direction
+% backward difference operator.
+% Since only $n+1$ related parts on
+% the right side is of interest,
+% the \eeqref{eq:nestedDITR_F1} can be reformulated into:
+% \begin{equation}
+%     \begin{aligned}
+%         \frac{\dd u_i^{n+1}}{\dd \tau}\frac{\inc x}{a} & =
+%         C_i^n                                              \\
+%                                                        &
+%         -  \frac{1}{\CFLt} u_i^{n+1}
+%         -  b_2a_2^n u_i^{n+1}
+%         +  b_2a_2^n u_{i-1}^{n+1}
+%         \\
+%                                                        &
+%         + \CFLt b_2 d_2^n u_i^{n+1}
+%         - \CFLt b_2 d_2^n u_{i-1}^{n+1}
+%         \\
+%                                                        &
+%         - \CFLt b_2 d_2^n u_{i-1}^{n+1}
+%         + \CFLt b_2 d_2^n u_{i-2}^{n+1}
+%         \\
+%                                                        &
+%         -b_3 u_i^{n+1}
+%         +b_3 u_{i-1}^{n+1}
+%         \\
+%                                                        &
+%         =C_i^n  +  \CFLt b_2 d_2^n u_{i-2}^{n+1}
+%         \\
+%                                                        & +
+%         (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)u_{i-1}^{n+1}
+%         \\
+%                                                        & +
+%         (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})u_i^{n+1}
+%         \label{eq:nestedDITR_F2}
+%     \end{aligned}
+% \end{equation}
+% where $C_i^m$ are terms unrelated to $u_i^{n+1}, u_{i-1}^{n+1}\dots$
+% and remain constant throughout the pseudo time evolution.
+
+% Once again simple wave solution from equation \eqref{eq:simpleWaveTestTau}
+% is applied in \eqref{eq:nestedDITR_F2}, and comparing with
+% \eqref{eq:kappaSDefTau}, it is found
+% \begin{equation}
+%     \begin{aligned}
+%         \kappa^* = & \imagUnit
+%         \Biggl[
+%             \CFLt b_2 d_2^n \exp(-2\imagUnit\kappa)
+%             +
+%             (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)\exp(-\imagUnit\kappa)
+%         \\ + &
+%             (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})
+%             \Biggr]
+%     \end{aligned}
+% \end{equation}
+% and therefore the imaginary part:
+% \begin{equation}
+%     \begin{aligned}
+%         \imag(\kappa^*) = &
+%         \CFLt b_2 d_2^n \cos(2\kappa)
+%         +
+%         (-2\CFLt b_2 d_2^n + b_2a_2^n + b_3)\cos(\kappa)
+%         \\ + &
+%         (\CFLt b_2 d_2^n - b_3 - b_2a_2^n -  \frac{1}{\CFLt})
+%         \\
+%         =                 &
+%         \CFLt b_2 d_2^n \left[\cos(2\kappa) -2\cos(\kappa) + 1\right]
+%         + (b_2a_2^n + b_3) (\cos(\kappa) - 1) - \frac{1}{\CFLt}
+%     \end{aligned}
+%     \label{eq:imagKsTauDITR}
+% \end{equation}
+
+% In equation \eqref{eq:imagKsTauDITR},
+% the $\left[\cos(2\kappa) -2\cos(\kappa) + 1\right]$ term
+% is negative for $\kappa \in (0, \pi/2)$, and for
+% all current DITR methods, $b_2>0$ and $d_2^n < 0$.
+% Consequently, there always exists a $\CFLt$ that is large enough
+% so that $\imag(\kappa^*(\kappa)) \leq 0, \forall \kappa$ is false.
+% Which means for a large enough physical CFL number, the nested
+% iteration method is unstable in the sense of continuous $\tau$
+% evolution.
+
+% As an example, DITR U2R2 method with $c_2=1/2$ gives
+% a specific formulation of $\imag(\kappa^*)$ that only depends on $\kappa$
+% and $\CFLt$, which is illustrated in figure \ref{fig:HM3_U2R2050_KappaS}.
+% Figure \ref{fig:HM3_U2R2050_KappaS} indicates for DITR U2R2 $c_2=1/2$,
+% when using nested iteration method, it is unable to linearly converge
+% with small $\inc \tau$ and approximately $\CFLt > 8$.
+% In other words, even with linear advection equation and first order upwind
+% scheme,
+% the nested iteration method does not converge when physical CFL reaches 8
+% and pseudo time step is small.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R2050_KappaS.pdf}
+%     \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using
+%         nested solving}
+%     \label{fig:HM3_U2R2050_KappaS}
+% \end{figure}
+
+% After further analysis,
+% besides the first-order upwind spatial discretization,
+% for any linear spatial discretization with modified wave number $\kappa'$,
+% the pseudo time wave number $\kappa^*$ is
+% \begin{equation}
+%     \begin{aligned}
+%         \kappa^* =
+%         -i\CFLt b_2 d_2^n {\kappa'}^2
+%         + (b_2a_2^n + b_3) \kappa' - \frac{i}{\CFLt}
+%     \end{aligned}
+%     \label{eq:imagKsTauDITR_General}
+% \end{equation}
+% and for $\kappa'$ with finite non-zero real and imaginary parts,
+% it is always easy to find a large enough $\CFLt$ that makes
+% $\imag(\kappa^*) > 0$.
+
+
+% According to numerical tests with linear advection problem,
+% when $\inc \tau \rightarrow \infty$, the nested solving
+% approach is possibly convergent. However, for strongly nonlinear
+% flow problems, a small $\inc \tau$ is almost a must.
+% The current research has tested nested iteration method
+% with N-S equations discretized using high-order FV method,
+% and the nested iteration method is indeed unable to successfully
+% converge in many scenarios.
+% The failure in both theoretical pseudo time stability and
+% real life problems makes
+% the nested iteration method inapplicable.
+
+% \subsection{The stage-decoupled iteration method of DITR}
+
+% The failure of nested iteration method in dual time stepping
+% roots in the nesting of right-hand-side $\R$ terms
+% (i.e. spatial  discretization operators), which
+% causes an $O(\CFLt)$ term in the modified wave number,
+% making the wave number unbounded when $\CFLt\rightarrow + \infty$.
+% Therefore, the non-nested form of dual time stepping in
+% the fully coupled iteration method \eeqref{eq:DITRFFDef} and \eeqref{eq:DITRNaiveDualTime}
+% seems more favorable.
+
+% In order to circumvent the complexity encountered in solving the enlarged
+% system via the fully coupled iteration method, the present paper
+% proposes a simplified iteration method to solve the enlarged dual time marching
+% \eeqref{eq:DITRNaiveDualTime}:
+% \begin{equation}
+%     \begin{aligned}
+%         \left(\frac{\eye}{\inc\tau} -
+%         \partialderivative{\FF^{n+c_2}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+c_2}}  \right)
+%         \inc\uu^{n+c_2,m} & = \FF^{n+c_2}(\uu^{n+c_2,m}, \uu^{n+1,m}) \\
+%         \left(\frac{\eye}{\inc\tau} -
+%         \partialderivative{\FF^{n+1}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+1}}  \right)
+%         \inc\uu^{n+1,m}   & = \FF^{n+1}(\uu^{n+c_2,m+1}, \uu^{n+1,m}) \\
+%     \end{aligned}
+%     \label{eq:DITRSDS}
+% \end{equation}
+% where $\inc \uu^{n+c_2,m} = \uu^{n+c_2,m+1} - \uu^{n+c_2,m}$ and
+% $\inc \uu^{n+1,m} = \uu^{n+1,m+1} - \uu^{n+1,m}$.
+% In the first updating formula in \eeqref{eq:DITRSDS},
+% $\uu^{n+1}$ is considered static and the linearizing is only
+% performed on $\uu^{n+c_2}$. The second updating formula
+% then makes $\uu^{n+c_2}$ static, and performs linearizing on
+% $\uu^{n+1}$ only. Note that the right side $\FF$ functions
+% and Jacobian terms $\partialderivative{\FF}{\uu}$ always
+% uses the latest versions of $\uu^{n+c_2}$ and $\uu^{n+1}$.
+% Both $\uu^{n+c_2}$ and $\uu^{n+1}$ are updated immediately
+% after each increment values are obtained.
+% The linear systems are in the same form
+% of those in BDF and ESDIRK methods, and they
+% can be solved using matrix-free linear solvers like
+% LU-SGS solvers.
+
+% Compared to the updating procedure in fully coupled iteration method,
+% where both increment values are solved in a coupled system,
+% the current iteration method decouples the inter-stage linear connections.
+% So, this iteration method is referred to as the stage-decoupled iteration method.
+
+% The convergence of the stage-decoupled iteration method relies on
+% the preconditioning matrix $\Pm$.
+% As $\Pm$ is required to be non-singular, and
+% $\GG$ terms in \eeqref{eq:DITRFFDef} are already
+% well-formed, the current research limits the form
+% of $\Pm$ to be:
+% \begin{equation}
+%     \Pm = \begin{bmatrix}
+%         \eye & \beta\eye \\
+%         0    & \eye
+%     \end{bmatrix}
+%     \label{eq:specialP}
+% \end{equation}
+% where $\beta$ is a real parameter.
+% Note that restricting the form of $\Pm$ does not affect the
+% generality of the following discussions,
+% where the analysis methodologies
+% are applicable to all forms of $\Pm$.
+
+% With the specified preconditioning \eeqref{eq:specialP},
+% the residual functions take the form:
+% \begin{equation}
+%     \begin{aligned}
+%         \FF^{n+c_2} & =
+%         \frac{a^n_0\uu^{n - 1} +
+%             (a^n_1+\beta)\uu^{n} +
+%             (a^n_2-\beta)\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+%         \\ & +
+%         (d^n_1 + \beta b_1)\R^{n} +
+%         \beta b_2 \R^{n+c_2} +
+%         (d^n_2 + \beta b_3)\R^{n + 1},                             \\
+%         \FF^{n+1}   & =    \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+%         b_1 \R^n +
+%         b_2 \R^{n+c_2} +
+%         b_3 \R^{n+1}.
+%     \end{aligned}
+% \end{equation}
+
+% The current paper uses matrix-free approximate LU-SGS
+% \cite{luo1998fast,luo2001accurate} to solve the linear problems \eeqref{eq:DITRSDS}.
+
+% \subsubsection{Fourier analysis for pseudo time: the stage-decoupled iteration method}
+% \label{sssec:SDSFourier}
+
+% When $\inc \tau \rightarrow 0$, the stage-decoupled pseudo time marching
+% \eeqref{eq:DITRSDS} is still consistent with the continuous
+% pseudo time marching \eeqref{eq:DITRNaiveDualTime}, therefore
+% general Fourier analysis on \eeqref{eq:DITRNaiveDualTime} is performed.
+% To simplify the analysis, we can rewrite \eeqref{eq:DITRFFDef}
+% as a linear form:
+% \begin{equation}
+%     \begin{bmatrix}
+%         \FF^{n+c_2} \\
+%         \FF^{n+1}
+%     \end{bmatrix}
+%     =
+%     \begin{bmatrix}
+%         \C_1 + \frac{1}{\inc t^n}(A_{11}\uu^{n+c_2} + A_{12}\uu^{n+1})
+%         + B_{11}\R^{n+c_2} + B_{12}\R^{n+1} \\
+%         \C_2 + \frac{1}{\inc t^n}(A_{21}\uu^{n+c_2} + A_{22}\uu^{n+1})
+%         + B_{21}\R^{n+c_2} + B_{22}\R^{n+1}
+%     \end{bmatrix}
+%     \label{eq:linearDITRFF}
+% \end{equation}
+% where $A_{ij},B_{ij}$ are constant coefficients
+% decided by the DITR method, and $\C_i$ are
+% vectors that are constant in the solving process.
+
+% Using simple wave modes:
+% \begin{equation}
+%     \begin{aligned}
+%         u^{n+c_2}(\tau,x) & = A^{n+c_2}(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x) \\
+%         u^{n+1}(\tau,x)   & = A^{n+1}(\tau)\exp(\imagUnit \frac{\kappa}{\inc x} x)
+%     \end{aligned}
+% \end{equation}
+
+% By applying the Fourier analysis mentioned before,
+% with some spatial  discretization with modified having number
+% being $\kappa'$, the evolution of wave strength is:
+% \begin{equation}
+%     \derivative{ }{\tau}
+%     \begin{bmatrix}
+%         A^{n+c_2}(\tau) \\
+%         A^{n+1}(\tau)
+%     \end{bmatrix}
+%     =
+%     -\imagUnit \frac{a}{\inc x}
+%     \left(\frac{\imagUnit}{\CFLt}\begin{bmatrix}
+%         A_{11} & A_{12} \\
+%         A_{21} & A_{22} \\
+%     \end{bmatrix}
+%     +\kappa'
+%     \begin{bmatrix}
+%         B_{11} & B_{12} \\
+%         B_{21} & B_{22} \\
+%     \end{bmatrix}
+%     \right)
+%     \begin{bmatrix}
+%         A^{n+c_2}(\tau) \\
+%         A^{n+1}(\tau)
+%     \end{bmatrix}
+%     +
+%     \begin{bmatrix}
+%         C_1 \\C_2
+%     \end{bmatrix}
+% \end{equation}
+% where $C_1,C_2$ are constants during the pseudo time marching.
+% Therefore, the modified pseudo time marching wave number is
+% the eigenvalues $\kappa^*_1,\kappa^*_2$ of matrix $\mathbf{K}^*$ and
+% \begin{equation}
+%     \mathbf{K}^* = \frac{\imagUnit}{\CFLt}\begin{bmatrix}
+%         A_{11} & A_{12} \\
+%         A_{21} & A_{22} \\
+%     \end{bmatrix}
+%     +\kappa'
+%     \begin{bmatrix}
+%         B_{11} & B_{12} \\
+%         B_{21} & B_{22} \\
+%     \end{bmatrix}
+% \end{equation}
+
+% While preconditioner $\Pm$ is in the form of \eeqref{eq:specialP},
+% for the DITR methods discussed in the current paper,
+% the coefficient matrices are
+% \begin{equation}
+%     \begin{bmatrix}
+%         A_{11} & A_{12} \\
+%         A_{21} & A_{22} \\
+%     \end{bmatrix} = \begin{bmatrix}
+%         -1 & a_2^n - \beta \\
+%         0  & -1            \\
+%     \end{bmatrix},\ \
+%     \begin{bmatrix}
+%         B_{11} & B_{12} \\
+%         B_{21} & B_{22} \\
+%     \end{bmatrix} = \begin{bmatrix}
+%         b_2\beta & b_3\beta + d_2^n \\
+%         b_2      & b_3              \\
+%     \end{bmatrix}
+%     \label{eq:ABBetaForm}
+% \end{equation}
+% Therefore, $\mathbf{K}^*$ is determined by the DITR coefficients,
+% $\beta$, $\kappa'$ and physical CFL number.
+% Since $\CFLt > 0$, $\real(\frac{\CFLt\kappa^*_i}{\imagUnit}) \leq 0, i=1,2$
+% is equivalent with $\imag(\kappa^*_i) \leq 0, i=1,2$,
+% we will investigate the eigenvalues of
+% $\frac{\CFLt}{\imagUnit}\mathbf{K}^*$, which is
+% determined by DITR coefficients, $\beta$ and the
+% combined non-dimensional eigenvalue of spatial  discretization $\mu'$
+% where
+% \begin{equation}
+%     \mu' = \frac{\CFLt \kappa'}{\imagUnit}
+% \end{equation}
+% and
+% \begin{equation}
+%     \frac{\CFLt}{\imagUnit}\mathbf{K}^* = \begin{bmatrix}
+%         A_{11} & A_{12} \\
+%         A_{21} & A_{22} \\
+%     \end{bmatrix} + \mu \begin{bmatrix}
+%         B_{11} & B_{12} \\
+%         B_{21} & B_{22} \\
+%     \end{bmatrix}
+% \end{equation}
+
+% Therefore, to ensure the stability of continuous pseudo time
+% marching of DITR's stage-decoupled iteration method, it is
+% required
+% \begin{equation}iteration method
+%     \real(\mu^*_i) \leq 0,\  i = 1,2,\  \forall \real(\mu') \leq 0
+% \end{equation}
+% where
+% \begin{equation}
+%     \mu^*_i = \frac{\CFLt\kappa^*_i}{\imagUnit},\ i=1,2
+% \end{equation}
+
+% As an example, $\max(\real(\mu^*_1),\real(\mu^*_2))$ is plotted for
+% DITR U2R2 $c_2=1/2$ in Figure \ref{fig:MuU2R2} with varying $\beta$ choices.
+% When $\beta = 0$ or the preconditioner is identity, the pseudo time marching is
+% unstable. Stability seems to be achieved when $\beta = 1$, because
+% the left half plane seems to have $\max(\real(\mu^*_1),\real(\mu^*_2)) < 0$.
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0_TauMu.pdf}
+%         \caption[]{$\beta = 0$}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0.5_TauMu.pdf}
+%         \caption[]{$\beta = 0.5$}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_TauMu.pdf}
+%         \caption[]{$\beta = 1$}
+%     \end{subfigure}
+%     \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0}
+%     \label{fig:MuU2R2}
+% \end{figure}
+
+% To determine the choices of the preconditioning parameter  $\beta$
+% with Fourier analysis, the
+% present paper has performed numerical scanning
+% on $\beta$, which will be discussed later.
+
+% \subsubsection{Gauss-Seidel stability of stage-decoupled iteration method}
+% \label{sssec:GSStability}
+
+% The previous section has discussed the ideal
+% situation of a continuous $\tau$ evolution, where
+% $\inc \tau \rightarrow 0$. When $\inc \tau$ is finite
+% or $\inc \tau \rightarrow +\infty$,
+% the effect of stage-decoupling as described in \eeqref{eq:DITRSDS}
+% is non-trivial.
+% If $\R$ is linear, and $\inc \tau \rightarrow +\infty$,
+% the iterating process of \eeqref{eq:DITRSDS} is
+% actually a 2-by-2 block Gauss-Seidel iteration that obtains
+% the linear increment if convergent.
+% Therefore, the current section is about to discuss the
+% near Guass-Seidel behavior of the stage-decoupled iteration method.
+
+% Assuming $\R$ to be linear and diagonalizable,
+% a linear scalar ODE
+% \begin{equation}
+%     \derivative{y}{t} = \lambda y
+% \end{equation}
+% with $\real(\lambda)\leq 0$
+% is tested in the stage-decoupled iteration method when
+% $\inc \tau \rightarrow +\infty$.
+% \eeqref{eq:DITRSDS} therefore becomes
+% \begin{equation}
+%     \begin{aligned}
+%         \inc y^{n+c_2, m} & = -\frac{1}{ E_{11} } (c_1 + E_{11}  y^{n+c_2, m}+ E_{12}  y^{n+1, m})     \\
+%         \inc y^{n+1, m}   & = -\frac{1}{ E_{22} } (c_2 + E_{21}  y^{n+c_2, m + 1}+ E_{22}  y^{n+1, m})
+%     \end{aligned}
+%     \label{eq:scalarGS}
+% \end{equation}
+% where $E_{ij}=A_{ij}+zB_{ij},\ i,j=1,2$, and $A_{ij}, B_{ij}$ are
+% linear coefficients described in the linear form \eeqref{eq:linearDITRFF}
+% and can be calculated with \eeqref{eq:ABBetaForm} using the $\beta$ form
+% preconditioning. $z=\lambda\inc t^n$ is the non-dimensional eigenvalue.
+% $c_1,c_2$ are constant values not dependent on $y^{n+1}, y^{n+c_2}$.
+
+% Considering $y^{n+c_2,m} + \inc y^{n+c_2,m} = y^{n+c_2,m+1}$ and
+% $y^{n+1,m} + \inc y^{n+1,m} = y^{n+1,m+1}$,
+% \eeqref{eq:scalarGS} has matrix form:
+% \begin{equation}
+%     \begin{bmatrix}
+%         y^{n+c_2, m + 1} \\
+%         y^{n+1, m + 1}
+%     \end{bmatrix}
+%     =
+%     -\begin{bmatrix}
+%         E_{11} & 0      \\
+%         E_{21} & E_{22}
+%     \end{bmatrix}^{-1} \begin{bmatrix}
+%         c_1 \\c_2
+%     \end{bmatrix}
+%     -
+%     \begin{bmatrix}
+%         E_{11} & 0      \\
+%         E_{21} & E_{22}
+%     \end{bmatrix}^{-1}
+%     \begin{bmatrix}
+%         0 & E_{12} \\
+%         0 & 0
+%     \end{bmatrix}
+%     \begin{bmatrix}
+%         y^{n+c_2, m} \\
+%         y^{n+1, m}
+%     \end{bmatrix}
+%     \label{eq:scalarGSMat}
+% \end{equation}
+% \eeqref{eq:scalarGSMat} clearly demonstrates that the stage-decoupled
+% iteration method reduces to a $2\times2$ linear Gauss-Seidel iteration.
+% The recursion transformation
+% \begin{equation}
+%     \B_{GS} = -\begin{bmatrix}
+%         E_{11} & 0      \\
+%         E_{21} & E_{22}
+%     \end{bmatrix}^{-1}
+%     \begin{bmatrix}
+%         0 & E_{12} \\
+%         0 & 0
+%     \end{bmatrix}
+% \end{equation}
+% has only one non-zero eigenvalue
+% \begin{equation}
+%     G_{GS} = \frac{E_{12}\,E_{21}}{E_{11}\,E_{22}}
+% \end{equation}
+% To make the Gauss-Seidel recursion \eeqref{eq:scalarGSMat}
+% convergent, $|G_{GS}|\leq 1, \forall \real(z) \leq 0$ is required.
+
+% As an example, distribution of $|G_{GS}|$ for DITR U2R2 $c_2=1/2$
+% is illustrated in Figure \ref{fig:GGSU2R2}.
+% The figure shows when $\beta=0$, the stability region is finite.
+% When $\beta>0.5$, the figure shows that the stability region includes
+% the left half plane.
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0_GGS.pdf}
+%         \caption[]{$\beta = 0$}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta0.5_GGS.pdf}
+%         \caption[]{$\beta = 0.5$}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.33\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_GGS.pdf}
+%         \caption[]{$\beta = 1$}
+%     \end{subfigure}
+%     \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1}
+%     \label{fig:GGSU2R2}
+% \end{figure}
+
+% Using the Gauss-Seidel stability of the stage-decoupled iteration method,
+% the choice of $\beta$ can be again narrowed down.
+% Numerical scanning is also conducted to find optimized $\beta$ value for
+% DITR methods, which will be discussed in the next section.
+
+% \subsubsection{Numerical Scanning for the Preconditioning Parameter}
+% \label{sssec:numScan}
+
+% The preconditioning parameter, $\beta$, as discussed in \ref{sssec:SDSFourier}
+% and \ref{sssec:GSStability}, affects convergence properties of the
+% stage-decoupled solving strategy.
+% When $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier},
+% $\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth
+% rate of the $\tau$ evolution. When the DITR method parameters are settled,
+% $\mu^*_1=\mu^*_1(\beta, \mu')$, $\mu^*_2=\mu^*_2(\beta, \mu')$ and $G_{GS}=G_{GS}(\beta, z)$.
+% When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability}
+% represents the magnifying factor in the Gauss-Seidel updating.
+% Similar to $A$-stability of ODE integrators,
+% the relations:
+% \begin{equation}
+%     \max(\real(\mu^*_1),\real(\mu^*_2)) \leq 0,\ \forall \real(\mu') \leq 0
+% \end{equation}
+% and
+% \begin{equation}
+%     |G_{GS}| \leq 1,\ \forall \real(z) \leq 0
+% \end{equation}
+% are referred to as the $A(\tau,0)-$stability and
+% $A(\tau,\infty)-$stability
+% of the stage-decoupled iteration method.
+% The current paper hopes to utilize both extremes of $\inc\tau$ to
+% narrow down the choice of an optimized $\beta$.
+
+
+% First, $\beta$ is restrained to be no greater than $O(1)$ to make
+% the preconditioning non-singular.
+% Meanwhile, $\beta\leq 0$ leads to a negative coefficient of $\R^{n+c_2}$
+% in $\FF^{n+c_2}$ according to \eeqref{eq:DITRFFDef}, which almost
+% guarantees the loss of stability. Therefore, empirically, $\beta\in[0,2]$
+% is to be the numerical scanning interval.
+
+% Next, given a certain $\beta$ value and a certain DITR method, the
+% stability indicators $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
+% can be calculated as functions of $\mu'$ and $z$ respectively.
+% To check on the $A(\tau,0)-$ and $A(\tau,\infty)-$stability of this
+% certain $\beta$ choice, $\mu'$ and $z$ are numerically sampled
+% in the left half complex plane. The samples include $101\times101$
+% uniform points in $[-10,0]\times[0,10]$. Furthermore, radially distributed
+% points with 101 argument samples in $[\pi/2,\pi]$ and 10 exponentially
+% distributed radius samples in $[10^1, 10^{10}]$ are included.
+% Note that the sample points are all above the real axis, because the
+% distributions of $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$
+% are symmetric about the real axis with the DITR coefficients being real.
+% The numeric sample points form the sample
+% sets $\{\mu'_i\}$ and $\{z_i\}$. Then, the numeric maximums are
+% calculated:
+% \begin{equation}
+%     \begin{aligned}
+%         \mu^*_{M}(\beta) & = \max_{i}\{\max(\real(\mu^*_1(\beta,\mu'_i)),\real(\mu^*_2(\beta,\mu'_i)))\} \\
+%         G_{GS,M}(\beta)  & = \max_{i}\{|G_{GS}(\beta,z_i)|\}
+%     \end{aligned}
+% \end{equation}
+% if for some $\beta=\beta_0$, $\mu^*_{M}(\beta_0) \leq 0,G_{GS,M}(\beta_0) \leq 1$,
+% it is known for  $\beta=\beta_0$, $A(\tau,0)-$stability and
+% $A(\tau,\infty)-$stability are achieved.
+
+
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Methods_SearchMu.pdf}
+%         % \caption[]{$\beta = 0$}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/HM3_Methods_SearchGGS.pdf}
+%         % \caption[]{$\beta = 0.5$}
+%     \end{subfigure}
+%     \caption{Numerical scanning results of $\beta$}
+%     \label{fig:MuGGSSearch}
+% \end{figure}
+% Figure \ref{fig:MuGGSSearch} illustrates the numerical scanning
+% results of maximal values of
+% $\max(\real(\mu^*_1),\real(\mu^*_2))$ and $|G_{GS}|$ in the left
+% half plane. Note that U3R1 methods uses $c_2=0.5$ in all cases, and $Theta$ is
+% the ratio of time step sizes.
+% In the sense of satisfying the stability conditions $\mu^*_{M} \leq 0,G_{GS,M} \leq 1$,
+% $\mu^*_{M}$ offers a more strict restriction.
+% The approximate results are listed in Table \ref{tab:resrictionBetaSearch}.
+
+% \begin{table}[htbp]
+%     \centering
+%     \begin{tabular}{|c|c|c|}
+%         \hline
+%         Method             & Restriction from $\mu^*_{M}$ & Restriction from $G_{GS,M}$ \\
+%         \hline
+%         U2R2 $c_2=0.5$     & $\beta > 0.63$               & $\beta > 0.38$              \\
+%         \hline
+%         U2R2 $c_2=0.55$    & $\beta > 0.72$               & $\beta > 0.53$              \\
+%         \hline
+%         U2R1 $c_2=0.25$    & $\beta > 0.63$               & $\beta > 0.34$              \\
+%         \hline
+%         U2R1 $c_2=0.5$     & $\beta > 1$                  & $\beta > 0.75$              \\
+%         \hline
+%         U3R1 $\Theta=0.25$ & $\beta > 0.71$               & $\beta > 0.45$              \\
+%         \hline
+%         U3R1 $\Theta=1$    & $\beta > 0.83$               & $\beta > 0.57$              \\
+%         \hline
+%         U3R1 $\Theta=4$    & $\beta > 0.94$               & $\beta > 0.68$              \\
+%         \hline
+%     \end{tabular}
+%     \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
+%     \label{tab:resrictionBetaSearch}
+% \end{table}
+
+% In practice, the current research observed that
+% when $\beta$ is significantly larger than the approximate
+% restriction boundaries in Table \ref{tab:resrictionBetaSearch},
+% convergence is faster and more reliable.
+% The reason could be that with larger $\beta$, $\mu^*_M$  and $G_{GS,M}$
+% are allowed to be significantly smaller than $0$ and $1$ respectively,
+% making $A(\tau,0)-$stability and
+% $A(\tau,\infty)-$stability stronger.
+% Meanwhile, it is observed that the shape of the stability region
+% $|G_{GS}|\leq1$ is greatly affected by the choice of $\beta$,
+% which is indicated in Figure \ref{fig:HM3_U2R205_GGSRegions}.
+% In Figure \ref{fig:HM3_U2R205_GGSRegions}, with the
+% increase of $\beta$, the unstable region is more
+% compacted around the real axis, making the iteration with $\inc\tau\rightarrow\infty$
+% converge more reliably.
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R205_GGSRegions.pdf}
+%     \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R2 $c_2=0.5$ with different $\beta$}
+%     \label{fig:HM3_U2R205_GGSRegions}
+% \end{figure}
+
+% However, when $\beta>1.5$, in all cases $\mu^*_{M}$ and $G_{GS,M}$ increase
+% with $\beta$, which means some modes in the linear error will
+% decay slower. In practice, the current research indeed finds a larger
+% $\beta$ causes slow convergence.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R1_GGSRegions.pdf}
+%     \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R1 with different $\beta$ and $c_2$}
+%     \label{fig:HM3_U2R1_GGSRegions}
+% \end{figure}
+% Another issue that should be addressed here is the
+% selection of $c_2$ for U2R1 methods. $c_2$ does not
+% affect order of accuracy and ODE stability of U2R1, but
+% has influence on the convergence behavior, as is shown
+% in Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch}.
+% From Figure \ref{fig:MuGGSSearch} and Table \ref{tab:resrictionBetaSearch},
+% with $c_2=0.25$, U2R1 has less restriction on $\beta$ than with $c_2=0.5$.
+% Meanwhile, Figure \ref{fig:HM3_U2R1_GGSRegions} illustrates the
+% impact of $c_2$ on $|G_{GS}|\leq1$ stability regions.
+% With $c_2=0.5$, the unstable region expands far from the real axis,
+% while when $c_2=0.25$, the unstable region is
+% more concentrated around the real axis similar with U2R2 $c_2=0.5$
+% shown in Figure \ref{fig:HM3_U2R205_GGSRegions}.
+% Consequently, the current research chooses $c_2=0.25$ over $c_2=0.5$
+% for U2R1 due to its better convergence behavior in
+% the stage-decoupled iteration method.
+
+
+
+% Combining the discussions above,
+% for U2R2 $c=0.5$, we empirically choose $\beta = 1$.
+% For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
+% For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
+% For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
+% These $\beta$ values are significantly larger than the
+% stability restrictions and guarantees
+% $A(\tau,0)-$stability and
+% $A(\tau,\infty)-$stability.
+% Also, these  $\beta$ values are large enough to make the stable regions of $|G_{GS}|\leq1$
+% crudely larger, which produces better reliability of convergence.
+% Meanwhile, $\beta$ values are not so large that $\mu^*_{M}$ and $G_{GS,M}$
+% are too close to 1, maintaining sufficient convergence speed.
+
+
+
+\section{Numerical tests}
+\label{sec:Results}
+
+During numerical tests,
+BDF2 and ESDIRK4 methods taken from
+\cite{bijl2002implicitBDFvESDIRK,kennedy2003additiveARK}
+are chosen to be
+baseline time marching methods.
+For DITR methods, instances of
+U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
+
+The isentropic vortex, two dimensional vortex shedding
+and  double mach reflection problems use
+$P^3$ variational reconstruction finite volume method declared in
+section \ref{sec:CFV} as spatial  discretization.
+Iterative solution of the implicit reconstruction
+is conducted before each right-hand-side evaluation,
+which consists of 1 block-Jacobi iteration by default.
+Pseudo time continued Newton iteration on mean values are
+solved using 5 times of block-Jacobi iteration by default,
+which is found both stable and efficient enough for VFV solving
+transient problems.
+It should be noted that, in other words,
+both the reconstruction system and
+the time stepping implicit system use linear solvers that
+runs for a fixed number of steps without monitoring convergence.
+Only the magnitude of the nonlinear time stepping residual
+is monitored to ensure convergence.
+This linear solving method simplifies the control flow of
+the program,
+while providing a simple yet reliable way of
+comparing total calculation consumption between ODE solvers,
+which will be explained in section \ref{ssec:resultIV}.
+
+
+
+\subsection{Isentropic vortex}
+\label{ssec:resultIV}
+
+The isentropic vortex problem is a classic
+accuracy testing problem for Euler equations.
+The settings can be found in \cite{hu1999weighted_WENO}.
+The free-stream flow is $(\rho,u,v,p)=(1,1,1,1)$,
+and a perturbation at initial time:
+\begin{equation}
+    \left\{
+    \begin{array}[2]{ll}
+        (\delta u, \delta v) & = \frac{\epsilon}{2\pi}\exp(\frac{1-[(x-x_c)^2+(y-y_c)^2]}{2})(-y+y_c,x-x_c) \\
+        \delta T             & = - \frac{(\gamma-1)\epsilon^2}{8\gamma\pi^2}\exp(1-[(x-x_c)^2+(y-y_c)^2])   \\
+        \delta S             & = 0                                                                          \\
+    \end{array}
+    \right.
+\end{equation}
+with ideal gas setting of $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$.
+Initial vortex center is chosen $(x_c,y_c)=(5,5)$,
+and vortex strength is $\epsilon = 5$.
+The analytic solution to the isentropic vortex problem is a
+translation of initial field with speed $(1,1)$.
+The computational domain is $[0,10]\times[0,10]$,
+using periodic boundary conditions.
+
+First, the implicit ODE integrators are tested with aggressively large
+time steps.
+The mesh is $40\times40$ square grid,
+and solution is calculated until $t=10$ with $\inc t=1$.
+The CFL number based on $\inc t, \inc x$ is roughly $11$,
+making the propagation of the vortex hard to
+simulate.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3LBT.png}
+        \caption[]{DITR U2R2 $c_2=0.5$}
+        \label{sfig:IV10Step_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3.png}
+        \caption[]{DITR U2R2 $c_2=0.55$}
+        \label{sfig:IV10Step_HM3}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3U2R1.png}
+        \caption[]{DITR U2R1}
+        \label{sfig:IV40_10steps_HM3U2R1}
+    \end{subfigure}\\
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_HM3U3R1.png}
+        \caption[]{DITR U3R1}
+        \label{sfig:IV40_10steps_HM3U3R1}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_ESDIRK4.png}
+        \caption[]{ESDIRK4}
+        \label{sfig:IV10Step_ESDIRK4}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+        \includegraphics[width=\textwidth]{pics/IV40_10steps_BDF2.png}
+        \caption[]{BDF2}
+        \label{sfig:IV10Step_BDF2}
+    \end{subfigure}
+    \caption{Density of isentropic vortex problem, with aggressively large time step $\inc t = 1$ at $t=10$}
+    \label{fig:IV10Step}
+\end{figure}
+
+Results of large time step testing are shown in figure \ref{fig:IV10Step}.
+Clearly, from figure \ref{sfig:IV10Step_BDF2}, BDF2 almost completely
+smears the initial vortex with only 10 steps for one period.
+The higher order methods somehow preserve the characteristics of
+a vortex. DITR U2R2 $c_2=0.5$ produces significant numerical oscillation along
+the propagation direction as shown in figure \ref{sfig:IV10Step_HM3LBT},
+while the DITR U2R2 $c_2=0.55$ inhibits them better in figure \ref{sfig:IV10Step_HM3}.
+The peak value in the vortex center produced by DITR U2R2 $c_2=0.5$ is comparable with
+ESDIRK4, while DITR U2R2 $c_2=0.55$ gives a flatter density peak.
+Both U2R1 and U3R1 methods are $L$-stable like ESDIRK4, and they
+are indeed better at suppressing non-physical oscillations.
+Note that it seems ESDIRK4 outperforms all the DITR methods in
+this case, but DITR only needs 2 internal stages to be solved while
+ESDIRK4 needs 5.
+
+Next, precision and efficiency of different ODE methods are
+qualitatively evaluated with isentropic vortex solved on a $160\times160$
+grid until $t=2$.
+The fine mesh makes spatial
+discretization error negligible compared with
+time marching error.
+The density error is defined as an $L1$ norm in the form of
+\begin{equation}
+    \epsilon_\rho = \frac{\int{|\rho-\rho_a| \dd x\dd y}}{
+        100
+    }
+\end{equation}
+with  $\rho$ the numeric result of density
+and $\rho_a$ the analytic result.
+
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.pdf}
+        \caption[]{Density error vs. time step size }
+        \label{sfig:IVTests_Conv}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
+        \caption[]{Density error vs. total CPU time consumption}
+        \label{sfig:IVTests_Eff}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency test with isentropic vortex problem}
+    \label{fig:IVTests}
+\end{figure}
+
+Results of convergence and efficiency study with isentropic vortex is
+shown in figure \ref{fig:IVTests}.
+
+Figure \ref{sfig:IVTests_Conv} shows that with the same time step size,
+ESDIRK4 has the best accuracy, while DITR U2R2 $c_2=0.5$ is close to
+ESDIRK4 when time step is refined. DITR U2R2 $c_2=0.55$ is less accurate
+than DITR U2R2 $c_2=0.5$, but it performs almost as well as
+DITR U2R2 $c_2=0.5$ when time step is large.
+DITR U3R1 and U2R1 are less accurate than U2R2 methods with
+the same time step.
+
+As of order of error, in Figure \ref{sfig:IVTests_Conv},
+error of ESDIRK4 is barely able to reach 4th order of convergence,
+while DITR U2R2 $c_2=0.5$ and U3R1 methods are also able to reach
+4th order convergence with smaller time steps. U2R1 and U2R2 $c_2=0.55$
+methods are closer to the 3rd order slope, which conforms with
+their theoretical order.
+
+Figure \ref{sfig:IVTests_Eff}
+implies that when consuming the same computational resource,
+DITR U2R2 methods have the best accuracy and efficiency.
+All the high-order
+time marching methods have better efficiency than BDF2,
+while DITR U2R2 methods have better efficiency than ESDIRK4.
+The symmetric DITR U2R2 $c_2=0.5$ has better efficiency
+compared with more stable DITR U2R2 $c_2=0.55$.
+
+
+\subsection{Two dimensional vortex shedding}
+
+Vortex shedding from a circular cylinder and forming a vortex street
+is a classic test problem for transient fluid simulation. Due to the refined
+mesh near solid wall, such cases usually prefer implicit time marching
+over explicit ones whose time steps are bounded by CFL condition.
+The current paper studies the 2D laminar case, where
+Reynolds number
+$Re_d=\rho_\infty u_\infty d / \mu_\infty $ is  $1200$,
+with Mach number being $Ma=0.1$.
+Parameters are normalized so that freestream speed, density
+and diameter of the cylinder are unit values.
+Small Mach number makes the flow more incompressible, and
+the speed of sound makes time steps in explicit time marching
+restricted.
+Implicit time marching schemes can automatically omit the restrictions
+of the speed of sound, thus being potentially more favorable.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
+        \caption[]{Mesh}
+        \label{sfig:CylinderRe1200Demo_Mesh}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
+        \caption[]{Vorticity distribution}
+        \label{sfig:CylinderRe1200Demo_Vort}
+    \end{subfigure}
+    \caption[]{Mesh and a instance of z-vorticity distribution
+        in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200Demo}
+\end{figure}
+
+Figure \ref{sfig:CylinderRe1200Demo_Mesh} demonstrates
+the unstructured grid used in the $Re=1200$  vortex
+street calculation, and Figure \ref{sfig:CylinderRe1200Demo_Vort}
+demonstrates z-vorticity distribution in the 2-D vortex street
+after it is fully developed.
+
+In order to quantitatively compare different
+time marching schemes,
+the time marching error is compared.
+Using the same mesh as in Figure \ref{sfig:CylinderRe1200Demo_Mesh}
+and the same compact FV spatial  discretization,
+a numeric reference solution is calculated with ESDIRK4 using
+very fine time step $\inc t = 0.00125$.
+In the reference solution, restart information at $t=200$
+is stored, in which the vortex street has fully developed.
+Next, starting from the $t=200$ flow field, combined with
+different time marching schemes and time step sizes
+varying from $0.04$ to $0.1$, transient flow is simulated until $t=210$.
+CPU consumption and error values are evaluated.
+The transient errors are defined with
+\begin{equation}
+    \begin{aligned}
+        \|\epsilon_{My}\|_{t,2}^2
+        = & \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{y,i}-M_{y,ref}(t_i))^2} \\
+        \|\epsilon_{Mx}\|_{t,2}^2
+        = & \frac{1}{N_{t}}\sum_{i=1}^{N_t}{(M_{x,i}-M_{x,ref}(t_i))^2}
+    \end{aligned}
+    \label{eq:vorstreetErr}
+\end{equation}
+where $N_{t}$ is the number of time steps for $t\in(200,210]$,
+$t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are
+the norms of time derivatives of $y$ and $x$ momentum:
+\begin{equation}
+    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \
+    M_x = \int_{\Omega}{\left|\derivative{\rho u_x}{t}\right| \dd \Omega}
+\end{equation}
+Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values
+obtained in the reference solution.
+
+This manner of calculating transient error avoids the difficulty
+of preserving all the transient solutions at each time step of
+the very fine reference solution.
+As the reference solution uses significantly smaller time step,
+its temporal error is considered to be negligible.
+In other words, the reference solution is a good enough
+approximation of the exact solution of the semi-discretized
+FV equations \eeqref{eq:FVODE}.
+Compared with the reference
+solution, the solution using regular time steps
+induces major temporal discretization error, which can
+be illustrated with the errors constructed in \eeqref{eq:vorstreetErr}.
+
+In order to mitigate the influence of the error induced
+by implicit dual time stepping in each step,
+each dual time stepping are terminated after
+the residual is smaller than $10^{-7}$ of the
+starting value.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.7\textwidth]{pics/CylinderA1_Re2000_Mesh.png}
+%     \caption[]{Part of mesh used in $Re=2000$ vortex shedding problem}
+%     \label{fig:CylinderRe2000_Mesh}
+% \end{figure}
+
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3LBT.png}
+%         \caption[]{HIRK $c_2=0.5$}
+%         \label{sfig:CylinderRe2000_HM3LBT}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/CylinderA1_Re2000_HM3.png}
+%         \caption[]{HIRK $c_2=0.55$}
+%         \label{sfig:CylinderRe2000_HM3}
+%     \end{subfigure}
+%     \caption[]{Comparison of pressure distribution in $Re=2000$ vortex shedding problem}
+%     \label{fig:CylinderRe2000}
+% \end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig14.pdf}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_My_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig4.pdf}
+        \caption[]{Error vs. CPU Time}
+        \label{sfig:CylinderRe1200_My_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_My}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig15.pdf}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_Mx_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig5.pdf}
+        \caption[]{Error vs. CPU Time}
+        \label{sfig:CylinderRe1200_Mx_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{Mx}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_Mx}
+\end{figure}
+
+Results of the errors versus time step size and CPU time
+are illustrated in
+Figure \ref{fig:CylinderRe1200_My} and \ref{fig:CylinderRe1200_Mx}.
+Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C}
+illustrates the results of convergence analysis, where
+with the refinement of time step, the temporal
+discretization error is reduced.
+The ESDIRK4, DITR U2R2 $c_2=0.5$, DITR U3R1 methods
+approximately 4th order convergence in
+Figure \ref{sfig:CylinderRe1200_My_C} and \ref{sfig:CylinderRe1200_Mx_C},
+while U2R1 and U2R2 $c_2=0.55$ are 3rd order.
+BDF2 is indeed 2nd order accurate, and is only able
+to be comparable with high-order methods when $\inc t$
+is very small.
+Among the DITR methods, U2R2 $c_2=0.5$ has the smallest error.
+U3R1 and U2R2 $c_2=0.55$ are close but U3R1 has higher order of convergence.
+Although better than BDF2,
+U2R1 has the worst error of vortex street simulation among DITR methods.
+
+Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E}
+use CPU Time as the horizontal axis, therefore comparison of efficiency is illustrated.
+In Figure \ref{sfig:CylinderRe1200_My_E} and \ref{sfig:CylinderRe1200_Mx_E},
+in order to achieve an error with magnitude of $10^{-3}$, the
+high-order methods are significantly more economic than the
+2nd order BDF2.
+Among the high order methods, DITR U2R2 $c_2=0.55$ is
+close to ESDIRK4 in efficiency, while
+U2R2 $c_2=0.5$ and U3R1 are more efficient than ESDIRK4.
+The most efficient U2R2 $c_2=0.5$ takes less than 70\% of
+the time used in ESDIRK4 when the error is $10^-4$.
+
+
+
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/Cylinder_fig13.pdf}
+%         \caption[]{Error vs. time step size}
+%         \label{sfig:CylinderRe1200_St_C}
+%     \end{subfigure}\hfill
+%     \begin{subfigure}{0.5\textwidth}
+%         \includegraphics[width=\textwidth]{pics/Cylinder_fig3.pdf}
+%         \caption[]{Error vs. effective iterations}
+%         \label{sfig:CylinderRe1200_St_E}
+%     \end{subfigure}
+%     \caption[]{Convergence and efficiency analysis with $\epsilon_{St}$ in $Re=1200$ vortex shedding problem}
+%     \label{fig:CylinderRe1200_St}
+% \end{figure}
+
+\subsection{Double mach reflection}
+
+The double Mach reflection problem \cite{woodward1984dmr} is tested to
+compare the resolution capabilities
+of different time marching schemes.
+The double Mach reflection computes
+inviscid ideal gas in $[0,4]\times[0,1]$,
+initialized by a Ma 10 moving shock located
+at $x = 1/6 + \cot(60^\circ) y$.
+The boundary of $y=0, x\in[1/6,4]$ is
+inviscid wall, and all other boundaries
+conforms with the Ma 10 moving shock.
+Details about the initial and boundary settings may be found in \cite{woodward1984dmr}.
+The compact FV scheme is additionally equipped with
+an accuracy preserving CWBAP limiter \cite{wu2023cwbap},
+which grants the ability to capture spatial  discontinuities.
+To handle strong discontinuities, the local Lax-Friedrichs flux
+is used here.
+The computations are conducted on a uniform quadrilateral mesh with
+mesh size $h=1/480$.
+Physical time step is set to a relatively large $\inc t= 2\times10^{-4}$,
+and the solutions at $t=0.25$ are compared.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
+        \caption[]{DITR U2R2 $c_2=0.5$}
+        \label{sfig:DM480_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
+        \caption[]{DITR U2R2 $c_2=0.55$}
+        \label{sfig:DM480_HM3}
+    \end{subfigure}
+    \caption{Density in double mach reflection problem, DITR U2R2}
+    \label{fig:DM480-1}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U2R1.png}
+        \caption[]{DITR U2R1}
+        \label{sfig:DM480_HM3U2R1}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
+        \caption[]{DITR U3R1}
+        \label{sfig:DM480_HM3U3R1}
+    \end{subfigure}
+    \caption{Density in double mach reflection problem, DITR U2R1 and U3R1}
+    \label{fig:DM480-2}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_ESDIRK4-T2.png}
+        \caption[]{ESDIRK4}
+        \label{sfig:DM480_ESDIRK4}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_BDF-T2.png}
+        \caption[]{BDF2}
+        \label{sfig:DM480_BDF2}
+    \end{subfigure}
+    \caption{Density in double mach reflection problem, baseline methods}
+    \label{fig:DM480-3}
+\end{figure}
+
+Figure \ref{fig:DM480-1}, \ref{fig:DM480-2} and \ref{fig:DM480-3}
+illustrate a zoomed view of density distribution.
+From Figure \ref{fig:DM480-3},
+it is observed BDF2 produces
+a deformed Mach stem, which, according
+to further tests, can be
+corrected by using smaller $\inc t$.
+Using the same $\inc t= 2\times10^{-4}$,
+all high-order methods produce a
+normal Mach stem.
+Meanwhile, the second order BDF2
+completely smears the K-H instability
+in the shear layer, despite that the spatial
+discretization is 4th order accurate.
+All high-order time march methods methods can successfully
+simulate K-H instability and resolve the
+small structures induced.
+The results of DITR U2R2 $c_2=0.5$, U2R2  $c_2=0.55$
+and U3R1 are very similar with ESDIRK4, while U2R1
+appears to produce less vortices in the shear layer.
+
+Like the results from isentropic vortex and vortex shedding simulation,
+using the same time step, DITR methods
+use less time than ESDIRK4 due to the reduction of stage numbers.
+The U2R2 $c_2=0.5$ method consumes around $63\%$ of ESDIRK4's time,
+and U3R1 uses $79\%$.
+
+
+
+\section{Conclusion}
+\label{sec:Conc}
+
+The current paper has described a method of
+developing time marching schemes using a
+direct integration and a temporal reconstruction.
+Using one form of quadrature rule and several
+forms of temporal reconstruction, a series of
+specific DITR methods are discovered and analyzed.
+The DITR U2R2 method is $A$-stable, and with $c_2=0.5$, U2R2 is 4th order accurate.
+The DITR U2R1 method is $L$-stable with 3rd order accuracy, and
+the DITR U3R1 method is $L$-stable with 4th order accuracy.
+
+After analyzing the results of numerical tests, it is confirmed
+all the DITR methods can exhibit their theoretical order of accuracy.
+With the same time step, DITR methods are much more accurate than
+BDF2 and comparable with ESDIRK4.
+Due to having only 2 stages, DITR methods takes less time than ESDIRK4
+each step.
+When reaching the same accuracy, some DITR methods are
+distinctively faster than ESDIRK4.
+In summary, the DITR methods are steady implicit time marching methods
+that are easy to implement and more efficient.
