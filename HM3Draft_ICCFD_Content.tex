@@ -1,46 +1,5 @@
 % !TeX root = ./HM3Draft_ICCFD.tex
 
-\newcommand{\trans}{^\mathrm{T}}
-
-\newcommand{\U}{\mathbf{U}}
-\newcommand{\F}{\mathbf{F}}
-\newcommand{\x}{\mathbf{x}}
-
-\newcommand{\OO}{\mathbf{\Omega}}
-\newcommand{\UM}{\overline{\U}}
-\newcommand{\Fn}{\tilde{\F}}
-\newcommand{\n}{\mathbf{n}}
-\newcommand{\uu}{\overline{\mathbf{U}}}
-\newcommand{\R}{\mathbf{R}}
-\newcommand{\inc}{\mathrm\Delta}
-\newcommand{\Tau}{\mathrm{T}}
-\renewcommand{\real}{\mathrm{Re}}
-\newcommand{\imag}{\mathrm{Im}}
-
-\newcommand{\CFLt}{\text{CFL}_t}
-\newcommand{\CFLtau}{\text{CFL}_\tau}
-
-\newcommand{\eeqref}[1]{Eq.\eqref{#1}}
-\newcommand{\us}{\mathbf{u}}
-
-
-\renewcommand{\Res}{\mathcal{R}}
-\newcommand{\Jres}{\mathcal{J}}
-\newcommand{\eye}{\mathbf{I}}
-\newcommand{\J}{\mathbf{J}}
-\newcommand{\FF}{\mathcal{F}}
-\newcommand{\Pm}{\mathbf{P}}
-\newcommand{\Pe}{\mathrm{P}}
-
-\newcommand{\imagUnit}{\mathrm{i}}
-
-\newcommand{\GG}{\mathcal{G}}
-
-
-\newcommand{\A}{\mathbf{A}}
-\newcommand{\B}{\mathbf{B}}
-\newcommand{\C}{\mathbf{C}}
-
 %% main text
 \section{Introduction}
 \label{sec:intro}
@@ -741,7 +700,9 @@ leads to a time-marching relation
 In order to acquire the integration result in equation
 \eqref{eq:DI}, a numeric quadrature rule in the interval
 $[t^n, t^{n+1}]$ is used. For example, the current paper
-uses three point polynomial quadrature rule
+uses quadrature rule based on three-point polynomial 
+interpolation, and the direct integration has 
+the form:
 \begin{equation}
     \label{eq:Quad3}
     \begin{aligned}
@@ -841,7 +802,7 @@ in \eeqref{eq:Quad3}, while experimenting on different
 forms of temporal reconstruction in \eeqref{eq:TR}.
 
 As a remark, the Adams-Moulton scheme which is one of the
-implicit linear multistep method also use the direct
+implicit linear multistep methods also use the direct
 integration approach.
 However, it relies on the
 reconstruction of $\R(t)$ to make the numerical quadrature
