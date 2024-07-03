@@ -173,7 +173,7 @@ DG \cite{pazner2017stage}
 as mentioned before,
 but their implementations
 in CFD methods are significantly more
-complex compared to DIRK methods.
+complex compared to SDIRK type methods.
 
 Different from previous approaches,
 the current paper aims to construct implicit
@@ -214,7 +214,7 @@ and temporal reconstructions in these two steps, single-step
 and multistep methods with arbitrary orders of temporal
 accuracy can be constructed. Therefore, the DITR approaches
 are new methodologies for designing implicit time marching
-schemes that are different from the IRK and multistep
+schemes that are different from the IRK and linear multistep
 methods.
 It will be shown that the new DITR schemes can be implemented
 in a matrix-free style, guaranteeing their portability.
@@ -1028,7 +1028,7 @@ spurious modes arising from spatial discretization.
 Although DITR U2R2 cannot achieve $L$-stability,
 using a value of $c_2 > 1/2$ would still
 produce $\lim_{z\rightarrow\infty}R(z)\in(0,1)$, which
-would be a useful property in simulation of dissipative systems.
+would be a useful property in the simulation of dissipative systems.
 With  $c_2 > 1/2$, stiff modes could vanish faster over the time
 steps, while $c_2 = 1/2$ tends to preserve them.
 
@@ -2735,8 +2735,8 @@ where $N_{t}$ is the number of time steps for $t\in(200,210]$,
 $t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are
 the norms of time derivatives of $y$ and $x$ momentum:
 \begin{equation}
-    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \
-    M_x = \int_{\Omega}{\left|\derivative{\rho u_x}{t}\right| \dd \Omega}
+    M_y = \int_{\Omega}{\left|\partialderivative{\rho u_y}{t}\right| \dd \Omega},\ \
+    M_x = \int_{\Omega}{\left|\partialderivative{\rho u_x}{t}\right| \dd \Omega}
 \end{equation}
 Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values
 obtained in the reference solution.

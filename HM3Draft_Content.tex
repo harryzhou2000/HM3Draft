@@ -2919,8 +2919,8 @@ where $N_{t}$ is the number of time steps for $t\in(200,210]$,
 $t_i$ is the time on time steps, and $M_{y,i}$ and $M_{x,i}$ are
 the norms of time derivatives of $y$ and $x$ momentum:
 \begin{equation}
-    M_y = \int_{\Omega}{\left|\derivative{\rho u_y}{t}\right| \dd \Omega},\ \
-    M_x = \int_{\Omega}{\left|\derivative{\rho u_x}{t}\right| \dd \Omega}
+    M_y = \int_{\Omega}{\left|\partialderivative{\rho u_y}{t}\right| \dd \Omega},\ \
+    M_x = \int_{\Omega}{\left|\partialderivative{\rho u_x}{t}\right| \dd \Omega}
 \end{equation}
 Meanwhile, $M_{y,ref}(t_i)$ and $M_{x,ref}(t_i)$ are those values
 obtained in the reference solution.
