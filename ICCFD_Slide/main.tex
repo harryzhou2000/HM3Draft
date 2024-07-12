@@ -1,0 +1,1232 @@
+%%=======================================================================
+% !Mode:: "TeX:UTF-8"
+% !TEX program  = xeLatex
+%%=======================================================================
+% 模板名称：thubeamer
+% 模板版本：V1.0.0
+% 模板作者：杨敬轩（Jingxuan Yang）
+% 联系作者：yangjx20@mails.tsinghua.edu.cn & yanglatex2e@gmail.com
+% 模板适用：清华大学风格 Beamer 模板
+% 模板编译：手动编译方法参看 README.md 或 thubeamer.pdf
+%          编译 beamer 之前必须编译说明文档：make doc 或双击 makedoc.bat
+%          编译说明文档同时分离出四个样式文件 *thubeamer.sty
+%          GNU make 工具：make beamer
+%          Windows 批处理脚本：双击 makebeamer.bat 自动编译 beamer
+%          更多编译细节详见说明文档：thubeamer.pdf
+% 更新时间：2021/07/07
+% 模板帮助：请**务必务必务必**阅读 thubeamer.pdf 说明文档，文档查看方法：
+%          下载模板文件夹里就有，如果是从 CTAN 上安装更新本模板，则通过
+%          cmd 命令行：texdoc thubeamer 查看文档
+%          推荐前往模板的 GitHub 仓库获取最新文件，地址：
+%          https://github.com/YangLaTeX/thubeamer
+%%=======================================================================
+
+% 设置文档类别为 <beamer>
+\documentclass[aspectratio=169,serif]{beamer} % 设置长宽比为 16:9
+% \documentclass{beamer}
+
+% 使用 <thubeamer> 主题
+% 模板选项如下
+% (a.1) smoothbars: 页面顶端单行显示目录，默认选项
+% \usetheme{thubeamer}
+
+% (a.2) sidebar: 页面左侧分栏显示目录
+\usetheme[sidebar]{thubeamer}
+
+% (b) sectiontoc: 在每节（section）前显示目录，并高亮显示当前节，默认不显示
+
+% (c) subsectiontoc: 在每小节（subsection）前显示目录，并高亮显示当前节和当前小节，默认不显示
+
+% 图片存放路径
+\graphicspath{{figures/}{../}}
+
+
+% \include{macros}
+
+% \renewcommand\mathfamilydefault{\mathde}
+% \usefonttheme[onlymath]{serif}
+\usepackage[nodayofweek]{datetime}
+\newdateformat{mydate}{\twodigit{\THEDAY}{ }\shortmonthname[\THEMONTH], \THEYEAR}
+
+% \usefonttheme{professionalfonts} % using non standard fonts for beamer
+% \usefonttheme{serif} % default family is serif
+\usepackage{fontspec}
+% \setsansfont{Times New Roman} % this works
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{physics}
+% \usepackage{cmbright}
+% \fontencoding{OT1}\fontfamily{cmbr}\selectfont %to load ot1cmbr.fd
+% \DeclareFontShape{OT1}{cmbr}{bx}{n}{% change bx definition
+% <->cmbrbx10%
+% }{}
+% \normalfont % back to normalfont
+\usepackage{caption}
+\usepackage{subcaption}
+\renewcommand{\tablename}{Table}
+\renewcommand{\figurename}{Figure}
+
+% 封面信息，方括号内容是显示在左侧边栏的内容（当选择 sidebar 主题时有效）
+\title[DITR]{High-order Accurate Implicit Scheme Based on 
+Temporal Reconstruction for Solving Compressible 
+Navier-Stokes Equations}
+\author[Hanyu Zhou, Yu-Xin Ren]{Hanyu Zhou, Yu-Xin Ren}
+\institute[Tsinghua University]{\small  Tsinghhua University}
+\date{\small \vskip -10pt \today}
+
+
+
+% 开始写文章
+\begin{document}
+
+
+\input{../HM3Draft_Defs.tex}
+
+% 标题页
+\begin{frame}
+  \maketitle
+\end{frame}
+
+% 目录页
+\section*{Contents}
+\frame{
+  \frametitle{\secname}
+  \tableofcontents[hideallsubsections]
+}
+
+\section{Introduction}
+
+% \subsection{课题主要研究内容}
+
+\begin{frame}{\secname: Implicit Time Marching}
+  \begin{itemize}
+    \item  A widely applied practice in CFD:
+          spacial discretization + ODE integrator
+          (Time Marching Scheme/Method)
+    \item Variants of RK3, RK4 are popular
+          explicit schemes.
+    \item Implicit time marching can deal with stiffness and
+          use desirable time step size:
+          \begin{itemize}
+            \item Wall-bounded viscous flow, especially when applying a RANS model in BL
+            \item Low Ma or incompressible flow, propagation of sound wave ignored
+            \item Mesh overly fine in some regions / directions
+            \item Additional stiffness caused by source term
+                  (chemical, physical...)
+          \end{itemize}
+    \item Implicit time marching can be easily applied with additional algebraic
+          equations (see section \ref{sec:CFV}).
+  \end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}{\secname: Stability}
+  \begin{itemize}
+    \item Not any implicit scheme is stable,
+          even in a linear context
+          \begin{block}{}
+            When solving the linear ODE with $\inc t$
+            $$
+              \dv{y}{t} = \lambda y = (\frac{z}{\inc t})y
+            $$
+            and $y^{n+1}=R(z) y^{n}$, then $|R(z)|\leq1, \forall \real(z)\leq 0$ is
+            called $A$-stability, added with $|R(\infty)|=0$ is called $L$-stability
+            \cite{wanner1996solving}.
+          \end{block}
+          \begin{block}{Dahlquist's second barrier
+              \cite{dahlquist1963special}}
+            A linear multistep method that has $A$-stability
+            can only be {\bf 2nd order accurate at most}.
+            Specially, BDF2 and Trapezoid Rule (Crank-Nicolson)
+            are $A$-stable, and BDF2 is $L$-stable.
+          \end{block}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: High-order Implicit Time Marching}
+  \begin{itemize}
+    \item High order CFD method is an active field of research
+          \cite{cheng2009highHOReview}.
+    \item A lot of high order spacial discretization
+          methods in literature can be combined
+          with {\bf arbitrary} time marching, but higher-order
+          time marching schemes greatly reduces the need of time refinement.
+    \item Schemes being both implicit and high-order (>2): mostly implicit RK schemes
+          \begin{itemize}
+            \item Fully implicit RK (IRK): hard to implement,
+                  needs careful treatment \cite{pazner2017stage,jameson2017evaluation}.
+            \item Diagonally implicit RK
+                  (including SDIRK, ESDIRK) can be solved stage-by-stage.
+                  The popular 4th order ESDIRK \cite{kennedy2003additiveARK,kvaerno2004singly}
+                  has {\bf 5 implicit stages}, and is $L$-stable.
+            \item Other variations of implicit RKs, like MIRK and NIRK
+                  \cite{cash1975classMIRKOrig,kulikov2006familyNIRKOrig}
+                  are seldom tested in CFD.
+          \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: Our Work}
+  \begin{itemize}
+    \item Our recent exploration indicates a novel
+          way of obtaining stable, high-order accurate and
+          efficient implicit time marching schemes:
+          \begin{block}{DITR Time Marching Scheme}
+            \begin{itemize}
+              \item {\bf Direct Integration}
+                    integrate the ODE using a quadrature rule
+              \item {\bf Temporal Reconstruction}
+                    approximate the nodal values using a polynomial
+                    interpolation
+            \end{itemize}
+          \end{block}
+    \item Selecting different DI and TR affects
+          the accuracy and stability of DITR methods.
+    \item Applied to high-order Compact Finite Volume
+          (Variational Reconstruction), tested in compressible
+          flow problems.
+  \end{itemize}
+\end{frame}
+
+\section{Compact Finite Volume}
+\label{sec:CFV}
+
+\begin{frame}{\secname: Finite Volume}
+  \begin{itemize}
+    \item High-order spacial discretization are able to demonstrate
+          high spacial resolution and low spacial discretization error.
+    \item
+          Briefly introduce the N-S equations' spacial discretization
+          \begin{block}{Compressible Navier-Stokes Equation}
+            \begin{equation}
+              \label{eq:NS}
+              \frac{\partial \U}{\partial t} +
+              \mathbf\nabla \cdot (\F - \F_v)  = 0
+            \end{equation}
+          \end{block}
+    \item Using Finite Volume (FV) discretization, each
+          cell records its mean value as physical DOF:
+          \begin{block}{}
+            \begin{equation}
+              \label{eq:FVMean}
+              \UM_i = \frac{1}{\overline{\Omega}_i}\int_{\OO_i}\U(\x)\dd \Omega
+            \end{equation}
+          \end{block}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: Finite Volume Method}
+  \begin{itemize}
+    \item Next, one can use polynomial reconstruction per cell:
+          \begin{block}{}
+            \begin{equation}
+              \label{eq:FVRec}
+              \U_i(\x) = \UM_i + \sum_{l=1}^{\mathrm{NDOF}(k)}{\U_i^l\varphi_{i,l}(\x) }
+            \end{equation}
+          \end{block}
+    \item All the flux terms are discretized on the surface due to Gauss-Green formula
+          \begin{block}{}
+            \begin{equation}
+              \label{eq:FVInt}
+              \frac{\dd\UM_i}{\dd t}
+              +\sum_{j\in S_i, j\neq i}{\left(
+                \int_{f_{i,j}}{
+                  [\Fn(\U_i,\U_j) - \Fn_v(\U_i,\U_j, \nabla \U_i, \nabla \U_j)] \cdot \n  \dd A
+                }\right)
+              }
+              = 0
+            \end{equation}
+          \end{block}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: Reconstruction}
+  \begin{itemize}
+    \item Reconstruct polynomial coefficients using compact
+            {\bf variational reconstruction}\cite{wang2017compact_VR},
+          by minimizing a global
+          functional:
+          \begin{block}{}
+            \begin{equation}
+              I = \sum{I_f},
+            \end{equation}
+            \begin{equation}
+              I_f = \omega_f^G\int_{\OO_i \cap \OO_j}{
+                \sum_{p+q=0}^{p + q\leq k}\left[
+                  \omega_f^D(p,q)
+                  d_{ij}^{p+q}
+                  \left(
+                  \partialderivative{^{p+q}u_i(x,y)}{x^p\partial y^q}
+                  -
+                  \partialderivative{^{p+q}u_j(x,y)}{x^p\partial y^q}
+                  \right)
+                  \right]^2
+                \dd f
+              }
+            \end{equation}
+          \end{block}
+    \item The functional measures interface jump of polynomials
+  \end{itemize}
+\end{frame}
+
+\section{DITR Methods}
+\subsection{Construction}
+
+
+\begin{frame}[allowframebreaks]{\secname: \subsecname}
+  The spacial discretization yields an ODE $\dv{\U}{t}=\R(t,\U)$.
+  DI and TR are:
+  \begin{block}{Direct Integration}
+    \begin{itemize}
+      \item We only use a 3-point quadrature
+            rule on $[t^n,t^{n+1}]$:
+            \begin{equation}
+              \label{eq:Quad3}
+              \begin{aligned}
+                \frac{\uu^{n+1} - \uu^{n}}{\inc t^n} = & \frac{1}{\inc t^n}
+                \int_{t^n}^{t^{n+1}}{
+                \R(t, \uu) \dd t
+                }                                                           \\ \approx &
+                b_1\R(t^n, \uu^n)
+                +
+                b_2\R(t^{n+c_2}, \uu^{n+c_2})
+                +
+                b_3\R(t^{n+1}, \uu^{n+1})
+              \end{aligned}
+            \end{equation}
+      \item The ${n+c_2}$ value is an intermediate stage value, and $t^{n+1}$ is the desired new step value.
+            $\uu^{n+c_2},\uu^{n+1}$ are unknown values.
+            $c_2\in (0,1)$
+    \end{itemize}
+  \end{block}
+
+
+  \begin{block}{Temporal Reconstruction}
+    \begin{itemize}
+      \item Currently we use only step values for TR (no stage values):
+            \begin{equation}
+              \begin{aligned}
+                \label{eq:TR}
+                \uu(t) & \approx
+                A^n_0(t)\uu^{n - 1} +
+                A^n_1(t)\uu^{n} +
+                A^n_2(t)\uu^{n + 1}
+                \\ & +
+                \inc t^n D^n_0(t)\R^{n - 1} +
+                \inc t^n D^n_1(t)\R^{n} +
+                \inc t^n D^n_2(t)\R^{n + 1}
+              \end{aligned}
+            \end{equation}
+      \item $A^n_i(t), D^n_i(t), i=0,1,2$
+            are polynomial base functions, similar to Hermite
+            interpolation bases, as $\R=\dv{\uu}{t}$ time derivative values are
+            used as interpolation conditions.
+    \end{itemize}
+  \end{block}
+
+
+  \begin{itemize}
+    \item DI \eeqref{eq:Quad3} and TR \eeqref{eq:TR} combined can form
+          a closed system.
+    \item TR can be used to evaluate the $n+c_2$
+          stage value, and produces an additional equation.
+    \item More stage values need more TR equations.
+  \end{itemize}
+\end{frame}
+
+\subsection{Order of Accuracy}
+
+\begin{frame}[allowframebreaks]{\secname: \subsecname}
+  \begin{itemize}
+    \item DI \eeqref{eq:Quad3} can be precise at 2nd or 3rd ($c_2=0.5$) degree.
+    \item TR can reach 3rd degree accurate using 4 of the interpolation conditions.
+    \item Suppose DI has precision degree of $m$ the truncation error is:
+          \begin{equation}
+            \label{eq:Quad3Err}
+            \begin{aligned}
+              \uu^{n+1} - \uu^{n} = & \int_{t^n}^{t^{n+1}}{
+              \R(t, \uu)\dd t}                              \\  = &
+              {\inc t}^{n}
+              \left[
+                b_1\R(t^n, \uu^n)
+                +
+                b_2\R(t^{n+c_2}, \uu^{n+c_2})
+                +
+                b_3\R(t^{n+1}, \uu^{n+1})
+                \right]
+              \\ + &
+              O((\inc t^{n})^{m+2} )
+            \end{aligned}
+          \end{equation}
+    \item and TR has precision degree of $l$
+          \begin{equation}
+            \begin{aligned}
+              \label{eq:TRErr}
+              \uu(t^{n+c_2}) & =
+              A^n_0(t^{n+c_2})\uu^{n - 1} +
+              A^n_1(t^{n+c_2})\uu^{n} +
+              A^n_2(t^{n+c_2})\uu^{n + 1}
+              \\ & +
+              \inc t^n D^n_0(t^{n+c_2})\R^{n - 1} +
+              \inc t^n D^n_1(t^{n+c_2})\R^{n} +
+              \inc t^n D^n_2(t^{n+c_2})\R^{n + 1}
+              \\ & +
+              O((\inc t^{n})^{l+1} )
+            \end{aligned}
+          \end{equation}
+    \item Substitute \eeqref{eq:TRErr} into \eeqref{eq:Quad3Err} (assuming $\R$ is non-singular):
+          \begin{equation}
+            \begin{aligned}
+              \uu^{n+1}
+              = &
+              \uu^{n} + {\inc t}^{n}
+              \left[
+                b_1\R(t^n, \uu^n)
+                +
+                b_2\R(t^{n+c_2}, \uu^{n+c_2})
+                +
+                b_3\R(t^{n+1}, \uu^{n+1})
+                \right]
+              \\ + &
+              O((\inc t^{n})^{m+2}  + O((\inc t^{n})^{l+2} ))
+            \end{aligned}
+            \label{eq:fullLTE}
+          \end{equation}
+    \item The theoretical order of accuracy: $\min(m,l) + 1$
+  \end{itemize}
+\end{frame}
+
+
+\subsection{Variants}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item TR \eeqref{eq:TR} could use any subset of those interpolation conditions,
+          resulting in different DITR methods
+    \item To exploit all information in a single step:
+          \begin{block}{DITR U2R2 Method}
+            \begin{itemize}
+              \item Using $\uu^{n},\uu^{n+1},\R^{n},\R^{n+1}$ for TR
+              \item 4th order accurate if $c_2=0.5$, 3rd order otherwise
+              \item $A$-stable if $c_2 \geq 0.5$, and more stable as $c_2$ increases
+            \end{itemize}
+          \end{block}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \small
+    \item Using 2nd degree interpolation
+          \begin{block}{DITR U2R1 Method}
+            \begin{itemize}
+              \item Using $\uu^{n},\uu^{n+1},\R^{n+1}$ for TR
+              \item 3rd order accurate
+              \item Proved to be $L$-stable
+            \end{itemize}
+          \end{block}
+    \item Using multistep information (not linear multistep)
+          \begin{block}{DITR U3R1 Method}
+            \begin{itemize}
+              \item Using $\uu^{n-1},\uu^{n},\uu^{n+1},\R^{n+1}$ for TR
+              \item 4th order accurate if $c_2=0.5$
+              \item Proved to be $L$-stable
+            \end{itemize}
+          \end{block}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item The variants have unified form:
+          \begin{block}{DITR Schemes}
+            \begin{equation}
+              \uu^{n+1} = \uu^{n} + \inc t^n\left(
+              b_1 \R^n +
+              b_2 \R^{n+c_2} +
+              b_3 \R^{n+1}
+              \right)
+              \label{eq:DISum}
+            \end{equation}
+            \begin{equation}
+              \label{eq:TRSum}
+              \uu^{n+c_2}  =
+              a^n_0\uu^{n - 1} +
+              a^n_1\uu^{n} +
+              a^n_2\uu^{n + 1}
+              +
+              \inc t^n
+              \left(
+              d^n_1\R^{n} +
+              d^n_2\R^{n + 1}
+              \right)
+            \end{equation}
+          \end{block}
+    \item The quadrature coefficients are the same:
+          \begin{table}[htbp]
+            \centering
+            \begin{tabular}{|c|c|c|}
+              \hline
+              $b_1$                            & $b_2$ & $b_3$ \\
+              \hline
+              $\frac{1}{2} - \frac{1}{6{c_2}}$ &
+              $\frac{1}{6{c_2}(1-{c_2})}$      &
+              $\frac{1}{2} - \frac{1}{6(1-{c_2})} $            \\
+              \hline
+            \end{tabular}
+            % \caption{Butcher tableau of DITR U2R2}
+            \label{tab:integ0Tab}
+          \end{table}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item The TR coefficients are different for each variant:
+          \begin{table}[htbp]
+            \centering
+            \footnotesize
+            \begin{tabular}{|c|c|c|c|}
+              \hline
+              Variant & U2R2                          & U2R1                 & U3R1                                                                                                                                   \\
+              \hline
+              $a^n_0$ & 0                             & 0                    & $-\frac{c_{2}\,{\left(c_{2}-1\right)}^2}{\Theta\,{\left(\Theta+1\right)}^2}$                                                           \\
+              \hline
+              $a^n_1$ & $1-(3{c_2}^2 - 2 {c_2}^3)$    & $1-(2c_2 - {c_2}^2)$ & $\frac{\left(\Theta+c_{2}\right)\,{\left(c_{2}-1\right)}^2}{\Theta}$                                                                   \\
+              \hline
+              $a^n_2$ & $3{c_2}^2 - 2 {c_2}^3$        & $2c_2 - {c_2}^2$     & $\frac{c_{2}\,\left(-\Theta^2\,c_{2}+2\,\Theta^2-\Theta\,{c_{2}}^2+3\,\Theta-2\,{c_{2}}^2+3\,c_{2}\right)}{{\left(\Theta+1\right)}^2}$ \\
+              \hline
+              $d^n_1$ & ${c_2} - 2 {c_2}^2 + {c_2}^3$ & 0                    & 0                                                                                                                                      \\
+              \hline
+              $d^n_2$ & $- {c_2}^2 + {c_2}^3$         & ${c_2}^2 - {c_2}$    & $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                              \\
+              \hline
+            \end{tabular}
+            % \caption{Interpolation coefficients for different DITR methods}
+            \label{tab:inter0Tab}
+          \end{table}
+    \item $\Theta=\frac{\inc t^{n-1}}{\inc t^n}$ is the
+          time step ratio for U3R1
+  \end{itemize}
+\end{frame}
+
+\section{Iteration Methods}
+
+\subsection{Nested Iteration}
+
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item Substituting TR into DI, the intermediate stage $n+c_2$ can be eliminated!
+          \begin{equation}
+            \begin{aligned}
+              \uu^{n+1} & =                       \\
+                        & \uu^{n} + \inc t\biggl[
+              b_1 \R^n                            \\
+                        & +
+                b_2 \R(t^{n+c_2},a^n_0\uu^{n - 1} +
+                a^n_1\uu^{n} +
+                a^n_2\uu^{n + 1}
+                +
+                \inc t^n
+                \left(
+                d^n_1\R^{n} +
+                d^n_2\R^{n + 1}
+              \right))                            \\
+                        & +
+                b_3 \R(t^{n+1},\uu^{n+1})
+                \biggr]
+              \label{eq:nestedDITR}
+            \end{aligned}
+          \end{equation}
+    \item Only one unknown; $\R$ is nested in $\R$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item The implicit equation is formed as $\FF^N=0$, where residual $\FF^N$ is
+          \small
+          \begin{equation}
+            \begin{aligned}
+              \FF^N(\uu^{n+1}) & = -\frac{\uu^{n+1} - \uu^{n}}{\inc t^n} \\
+                               & +
+              b_1 \R^n                                                   \\
+                               & +
+              b_2 \R\left(t^{n+c_2},a^n_0\uu^{n - 1} +
+              a^n_1\uu^{n} +
+              a^n_2\uu^{n + 1}
+              +
+              \inc t^n
+              \left(
+              d^n_1\R^{n} +
+              d^n_2\R^{n + 1}
+              \right)\right)                                             \\
+                               & +
+              b_3 \R(t^{n+1},\uu^{n+1}) = 0.
+              \label{eq:nestedDITR_F}
+            \end{aligned}
+          \end{equation}
+          \normalsize
+    \item We use a dual time stepping technique \cite{jameson1991time} along
+          with linearized backward Euler in pseudo time marching:
+          \small
+          \begin{equation}
+            \left(\frac{\eye}{\inc\tau} -
+            \pdv{\FF^N}{\uu^{n+1}}  \right)
+            \inc\uu^{n+1,m} = \FF^N(\uu^{n+1,m})
+            \label{eq:abstractNewtonNested}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item The Nested Iteration seems good:
+          \begin{itemize}
+            \item Only one unknown stage ($n+1$ step)
+            \item Solve one linear problem each updating
+          \end{itemize}
+    \item But there are problems:
+          \begin{itemize}
+            \item Jacobian term $\pdv{\FF^N}{\uu^{n+1}}$
+                  is a 2nd degree polynomial of $\pdv{\R}{\uu}$ terms
+            \item Matrix-free solvers cannot be applied directly
+            \item {\bf Pseudo time evolution is unstable}
+          \end{itemize}
+    \item Fourier analysis on pseudo time (1-D linear advection):
+          \begin{equation}
+            \begin{aligned}
+              \kappa^* =
+              -i\CFLt b_2 d_2^n {\kappa'}^2
+              + (b_2a_2^n + b_3) \kappa' - \frac{i}{\CFLt}
+            \end{aligned}
+            \label{eq:imagKsTauDITR_General}
+          \end{equation}
+          $\kappa^*$ is modified wave number in pseudo time, $\kappa'=\kappa'(\kappa)$
+          is the modified wave number of spacial discretization.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item As $b_2d_2^n < 0$, when $CFL_t$ is large enough,
+          $\kappa*$ is expected to have positive imaginary part (unstable).
+    \item Example: using first order upwind difference scheme:
+          \begin{figure}[htbp]
+            \centering
+            \includegraphics[width=0.5\textwidth]{../pics/HM3_U2R2050_KappaS.pdf}
+            \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using
+              nested solving}
+            \label{fig:HM3_U2R2050_KappaS}
+          \end{figure}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item Nested Iteration indeed diverges for large $\CFLt$, in linear advection experiments
+    \item Nested Iteration is indeed able to converge at low $\CFLt$
+    \item We aim to solve at larger $\CFLt$, so Nested Iteration is unacceptable
+  \end{itemize}
+\end{frame}
+
+\subsection{Stage-decoupled Iteration}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item Similar to full-implicit RK, we consider both $\uu^{n+c_2}$ and
+          $\uu^{n+1}$ as unknown values.
+    \item The implicit system $\FF^*=0$ is enlarged, with residual function $\FF^*$ defined as
+          \begin{equation}
+            \begin{aligned}
+              \FF^* & =\begin{bmatrix}
+                \FF^{n+c_2} \\
+                \FF^{n+1}
+              \end{bmatrix} = \Pm\begin{bmatrix}
+                \GG^{n+c_2} \\
+                \GG^{n+1}
+              \end{bmatrix} \\ & = \Pm\begin{bmatrix}
+                \frac{a^n_0\uu^{n - 1} +
+                  a^n_1\uu^{n} +
+                  a^n_2\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+                +
+                d^n_1\R^{n} +
+                d^n_2\R^{n + 1}
+                \\
+                \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+                b_1 \R^n +
+                b_2 \R^{n+c_2} +
+                b_3 \R^{n+1}
+              \end{bmatrix}
+              \label{eq:DITRFFDef}
+            \end{aligned}
+          \end{equation}
+    \item $\Pm$ is a preconditioning matrix ($2\time 2$ scalar parameters)
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item The current paper only uses $\Pm$ in a special form:
+          \begin{equation}
+            \Pm = \begin{bmatrix}
+              \eye & \beta\eye \\
+              0    & \eye
+            \end{bmatrix}
+            \label{eq:specialP}
+          \end{equation}
+    \item Then the residual functions for each stage is
+          \begin{equation}
+            \begin{aligned}
+              \FF^{n+c_2} & =
+              \frac{a^n_0\uu^{n - 1} +
+                (a^n_1+\beta)\uu^{n} +
+                (a^n_2-\beta)\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
+              \\ & +
+              (d^n_1 + \beta b_1)\R^{n} +
+              \beta b_2 \R^{n+c_2} +
+              (d^n_2 + \beta b_3)\R^{n + 1},                             \\
+              \FF^{n+1}   & =    \frac{\uu^{n} - \uu^{n+1}}{\inc t^n}  +
+              b_1 \R^n +
+              b_2 \R^{n+c_2} +
+              b_3 \R^{n+1}.
+            \end{aligned}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item Instead of updating $\uu^{n+c_2}, \uu^{n+1}$ simultaneously,
+          which requires the solution of an {\bf enlarged linear system}
+    \item we decouple the stage values and update them separately with dual time stepping
+          \begin{equation}
+            \begin{aligned}
+              \left(\frac{\eye}{\inc\tau} -
+              \partialderivative{\FF^{n+c_2}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+c_2}}  \right)
+              \inc\uu^{n+c_2,m} & = \FF^{n+c_2}(\uu^{n+c_2,m}, \uu^{n+1,m}) \\
+              \left(\frac{\eye}{\inc\tau} -
+              \partialderivative{\FF^{n+1}(\uu^{n+c_2}, \uu^{n+1})}{\uu^{n+1}}  \right)
+              \inc\uu^{n+1,m}   & = \FF^{n+1}(\uu^{n+c_2,m+1}, \uu^{n+1,m}) \\
+            \end{aligned}
+            \label{eq:DITRSDS}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item Stage-decoupled iteration uses almost the same programs used in
+          ESDIRK and BDF solving (easy implementation)
+    \item Compatible with old matrix-free solvers (LU-SGS...)
+    \item Convergence is affected by preconditioning parameter $\beta$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \small
+  \begin{itemize}
+    \item To choose parameter $\beta$, results of two analyses are combined:
+          \begin{itemize}
+            \item Fourier analysis in pseudo time ($\inc\tau \rightarrow 0$)
+          \end{itemize}
+          \begin{itemize}
+            \item Gauss-Seidel stability ($\inc\tau \rightarrow \infty$, induced
+                  when decoupling the stages)
+          \end{itemize}
+    \item Fourier analysis yields a linear ODE system of wave amplitudes:
+          \footnotesize
+          \begin{equation}
+            \derivative{ }{\tau}
+            \begin{bmatrix}
+              A^{n+c_2}(\tau) \\
+              A^{n+1}(\tau)
+            \end{bmatrix}
+            =
+            -\imagUnit \frac{a}{\inc x}
+            \left(\frac{\imagUnit}{\CFLt}\begin{bmatrix}
+              A_{11} & A_{12} \\
+              A_{21} & A_{22} \\
+            \end{bmatrix}
+            +\kappa'
+            \begin{bmatrix}
+              B_{11} & B_{12} \\
+              B_{21} & B_{22} \\
+            \end{bmatrix}
+            \right)
+            \begin{bmatrix}
+              A^{n+c_2}(\tau) \\
+              A^{n+1}(\tau)
+            \end{bmatrix}
+            +
+            \begin{bmatrix}
+              C_1 \\C_2
+            \end{bmatrix}
+          \end{equation}
+          \normalsize
+    \item Then stability relies on the modified pseudo time wave number, or equivalently
+          the eigenvalues of Jacobian
+          $\mu^*_i = \frac{\CFLt\kappa^*_i}{\imagUnit},\ i=1,2$ to have negative
+          real parts (exponentially decaying).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \item There are two eigenvalues in Fourier analysis,
+          we plot the maximum of their real part $\max(\real(\mu^*_1),\real(\mu^*_2))$
+          as a function of $\mu'$, eigenvalue of the spacial discretization.
+  \end{itemize}
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0_TauMu.pdf}
+      \caption[]{$\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0.5_TauMu.pdf}
+      \caption[]{$\beta = 0.5$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta1_TauMu.pdf}
+      \caption[]{$\beta = 1$}
+    \end{subfigure}
+    \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0}
+    \label{fig:MuU2R2}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \begin{itemize}
+    \small
+    \item Gauss-Seidel stability analysis takes decoupling into account
+    \item Solving linear ODE $y'=\frac{z}{\inc t}y$, when $\inc \tau\rightarrow\infty$, the updating becomes
+          Gauss-Seidel iteration of a $2\times 2$ linear system.
+    \item Magnifying factor between steps $G_{GS}$
+  \end{itemize}
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0_GGS.pdf}
+      \caption[]{$\beta = 0$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0.5_GGS.pdf}
+      \caption[]{$\beta = 0.5$}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.33\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta1_GGS.pdf}
+      \caption[]{$\beta = 1$}
+    \end{subfigure}
+    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1}
+    \label{fig:GGSU2R2}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \footnotesize
+  \begin{itemize}
+    \item Stability requires, $\mu^*_{M}(\beta) \leq 0,G_{GS,M}(\beta) \leq 1$.
+  \end{itemize}
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Methods_SearchMu.pdf}
+      % \caption[]{$\beta = 0$}
+    \end{subfigure}
+    \begin{subfigure}{0.45\textwidth}
+      \includegraphics[width=\textwidth]{../pics/HM3_Methods_SearchGGS.pdf}
+      % \caption[]{$\beta = 0.5$}
+    \end{subfigure}
+    \caption{Numerical scanning results of $\beta$}
+    \label{fig:MuGGSSearch}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: \subsecname}
+  \small
+  \begin{itemize}
+    \item Stability restrictions $\mu^*_{M}(\beta) \leq 0,G_{GS,M}(\beta) \leq 1$ are listed
+  \end{itemize}
+  \footnotesize
+  \begin{table}[htbp]
+    \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      Method             & Restriction from $\mu^*_{M}$ & Restriction from $G_{GS,M}$ \\
+      \hline
+      U2R2 $c_2=0.5$     & $\beta > 0.63$               & $\beta > 0.38$              \\
+      \hline
+      U2R2 $c_2=0.55$    & $\beta > 0.72$               & $\beta > 0.53$              \\
+      \hline
+      U2R1 $c_2=0.25$    & $\beta > 0.63$               & $\beta > 0.34$              \\
+      \hline
+      U2R1 $c_2=0.5$     & $\beta > 1$                  & $\beta > 0.75$              \\
+      \hline
+      U3R1 $\Theta=0.25$ & $\beta > 0.71$               & $\beta > 0.45$              \\
+      \hline
+      U3R1 $\Theta=1$    & $\beta > 0.83$               & $\beta > 0.57$              \\
+      \hline
+      U3R1 $\Theta=4$    & $\beta > 0.94$               & $\beta > 0.68$              \\
+      \hline
+    \end{tabular}
+    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
+    \label{tab:resrictionBetaSearch}
+  \end{table}
+\end{frame}
+
+
+
+\begin{frame}{\secname: \subsecname}
+  \small
+  \begin{itemize}
+    \item From Figure \ref{fig:MuGGSSearch}, it seems minimizing
+          the searched maximums could help improve convergence.
+    \item Empirical tests show that $\beta$ being slightly larger
+          could reduce the region of instability, thus enhancing
+          convergence in nonlinear systems.
+    \item Our recommended empirical choice:
+          \begin{itemize}
+            \item For U2R2 $c=0.5$, $\beta = 1$.
+            \item For U2R2 $c=0.55$, $\beta = 1.333$.
+            \item For U2R1 $c=0.25$, $\beta = 1$.
+            \item For U3R1 with any $\Theta$, $\beta = 1.333$
+          \end{itemize}
+    \item The choices meet the stability restrictions,
+          and have reasonable converge in various test problems.
+  \end{itemize}
+\end{frame}
+
+\section{Numerical Tests}
+
+\begin{frame}{\secname}
+  \begin{itemize}
+    \item We have tested 4 DITR variants:
+          \begin{itemize}
+            \item U2R2 $c_2=0.5$, 4th order, $A$-stable.
+            \item U2R2 $c_2=0.55$, 3rd order, $A$-stable.
+            \item U2R1 $c_2=0.25$, 3rd order, $L$-stable.
+            \item U3R1 $c_2=0.5$, 4th order, $L$-stable, multistep.
+          \end{itemize}
+    \item Transient numerical cases with compressible N-S equations:
+          \begin{itemize}
+            \item Isentropic vortex
+            \item Vortex shedding of a circular cylinder
+            \item Double Mach reflection
+          \end{itemize}
+    \item 4th order variational reconstruction CFV discretization is used.
+    \item Details of the test cases are referred to the proceedings article.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname: Isentropic Vortex}
+  % \begin{itemize}
+  %   \item The 
+  % \end{itemize}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.pdf}
+        \caption[]{Density error vs. time step size }
+        \label{sfig:IVTests_Conv}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
+        \caption[]{Density error vs. total CPU time}
+        \label{sfig:IVTests_Eff}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency test with isentropic vortex problem}
+    \label{fig:IVTests}
+  \end{figure}
+\end{frame}
+
+
+\begin{frame}{\secname: Vortex Shedding}
+  % \begin{itemize}
+  %   \item The 
+  % \end{itemize}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
+        \caption[]{Mesh}
+        \label{sfig:CylinderRe1200Demo_Mesh}
+    \end{subfigure}
+    \begin{subfigure}{0.4\textwidth}
+        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
+        \caption[]{Vorticity distribution}
+        \label{sfig:CylinderRe1200Demo_Vort}
+    \end{subfigure}
+    \caption[]{Mesh and a instance of z-vorticity distribution
+        in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200Demo}
+  \end{figure}
+\end{frame}
+
+
+
+\begin{frame}{\secname: Vortex Shedding}
+  % \begin{itemize}
+  %   \item The 
+  % \end{itemize}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig14.pdf}
+        \caption[]{Error vs. time step size}
+        \label{sfig:CylinderRe1200_My_C}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/Cylinder_fig4.pdf}
+        \caption[]{Error vs. CPU Time}
+        \label{sfig:CylinderRe1200_My_E}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
+    \label{fig:CylinderRe1200_My}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: DMR}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
+        \caption[]{DITR U2R2 $c_2=0.5$}
+        \label{sfig:DM480_HM3LBT}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
+        \caption[]{DITR U2R2 $c_2=0.55$}
+        \label{sfig:DM480_HM3}
+    \end{subfigure}
+    \caption{Density in double Mach reflection problem, DITR U2R2}
+    \label{fig:DM480-1}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: DMR}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U2R1.png}
+        \caption[]{DITR U2R1}
+        \label{sfig:DM480_HM3U2R1}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
+        \caption[]{DITR U3R1}
+        \label{sfig:DM480_HM3U3R1}
+    \end{subfigure}
+    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1}
+    \label{fig:DM480-2}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: DMR}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_ESDIRK4-T2.png}
+        \caption[]{ESDIRK4}
+        \label{sfig:DM480_ESDIRK4}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+        \includegraphics[width=\textwidth]{pics/DM480-1_BDF-T2.png}
+        \caption[]{BDF2}
+        \label{sfig:DM480_BDF2}
+    \end{subfigure}
+    \caption{Density in double Mach reflection problem, baseline methods}
+    \label{fig:DM480-3}
+  \end{figure}
+\end{frame}
+
+% \subsection{进度介绍}
+
+% \begin{frame}{进度介绍}
+%   \begin{figure}
+%     \includegraphics[width=0.4\linewidth]{thulogo}
+%     \caption{进度介绍}
+%   \end{figure}
+% \end{frame}
+
+% \section{研究工作及成果}
+
+% \begin{frame}{已完成的研究工作及成果}
+%   \begin{block}{已完成的研究工作简介}
+%     \begin{itemize}
+%       \setlength{\itemsep}{6pt}
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+% \subsection{研究工作一}
+
+% \begin{frame}{研究工作一}
+%   \begin{block}{无编号公式}
+%     无编号公式示例：
+%     $$
+%       k:[-\pi,\pi] \rightarrow [0,1]
+%     $$
+%   \end{block}
+% \end{frame}
+
+% \subsection{研究工作二}
+
+% \begin{frame}{研究工作二}
+%   \begin{block}{有编号公式}
+%     \begin{itemize}
+%       \item 有编号公式示例：输入为图像
+%             \begin{equation}
+%               % \vx\in\reals^{C_{\text{in}}\times H\times W}
+%               a
+%             \end{equation}
+%             其中 $C_{\text{in}}$ 表示通道, $H$ 表示图像高度, $W$ 表示图像深度.
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+% \subsection{研究工作三}
+
+% \begin{frame}{研究工作三}
+%   \begin{block}{表格}
+%     表格示例, 如表 \ref{tab:unique_values} 所示.
+
+%     \begin{table}[htbp]
+%       \small
+%       \centering
+%       \caption{train.csv 每列非重复元素个数}
+%       \label{tab:unique_values}
+%       \begin{tabular}{lc}
+%         \toprule
+%         column       & \# unique values \\
+%         \midrule
+%         posting\_id  & 34250            \\
+%         image        & 32412            \\
+%         image\_phash & 28735            \\
+%         title        & 33117            \\
+%         label\_group & 11014            \\
+%         \bottomrule
+%       \end{tabular}
+%     \end{table}
+%   \end{block}
+% \end{frame}
+
+% \subsection{研究工作四}
+
+% \begin{frame}{研究工作四}
+%   \begin{block}{并排图片}
+%     并排图片示例.
+%   \end{block}
+%   \begin{figure}[htbp]
+%     \centering
+%     \begin{minipage}[t]{0.48\textwidth}
+%       \centering
+%       \includegraphics[width=3cm]{thulogo.pdf}
+%       \caption{并排图片1}
+%       \label{fig:left_side}
+%     \end{minipage}
+%     \begin{minipage}[t]{0.48\textwidth}
+%       \centering
+%       \includegraphics[width=3cm]{thulogo.pdf}
+%       \caption{并排图片2}
+%       \label{fig:right_side}
+%     \end{minipage}
+%   \end{figure}
+% \end{frame}
+
+% \section{后期工作与安排}
+
+% \subsection{后期研究工作}
+
+% \begin{frame}{后期研究工作}
+%   \begin{block}{后期研究工作}
+%     \begin{itemize}
+%       \setlength{\itemsep}{6pt}
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%       \item XXXX
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+% \subsection{进度安排}
+
+% \begin{frame}{进度安排}
+%   \begin{block}{进度安排}
+%     \begin{itemize}
+%       \setlength{\itemsep}{6pt}
+%       \item XXXX\cite{liu2016}
+%       \item XXXX\cite{ren2010}
+%       \item XXXX\cite{Chen1992}
+%       \item XXXX\cite{Gravagne2003}
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+% \section{问题与解决方案}
+
+% \begin{frame}{问题与解决方案}
+%   \begin{block}{问题}
+%     \begin{itemize}
+%       \item XXXX
+%     \end{itemize}
+%   \end{block}
+%   \begin{block}{对应解决方案}
+%     \begin{itemize}
+%       \item XXXX
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+% \section{按时完成可能性}
+
+% \begin{frame}{按时完成可能性}
+%   \begin{block}{按时完成可能性}
+%     \begin{itemize}
+%       \setlength{\itemsep}{6pt}
+%       \item XXXX\cite{xin1994}
+%       \item XXXX\cite{zhai2015}
+%       \item XXXX\cite{jones2004}
+%       \item XXXX\cite{mcmahan2005}
+%     \end{itemize}
+%   \end{block}
+% \end{frame}
+
+
+\renewcommand\refname{References} 
+\begin{frame}[allowframebreaks]{References}
+  \bibliographystyle{unsrt}
+  \bibliography{../HM3DraftRefs}
+\end{frame}
+
+\begin{frame}
+  \begin{center}
+    {\Huge\calligra Thanks for your attention!}
+    \vspace{1cm}
+
+    {\Huge Q \& A}
+  \end{center}
+\end{frame}
+
+% 结束文档撰写
+\end{document}
