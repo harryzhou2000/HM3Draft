@@ -875,20 +875,20 @@ expressed in \eeqref{eq:TRErr}
         \inc t^n D^n_1(t^{n+c_2})\R^{n} +
         \inc t^n D^n_2(t^{n+c_2})\R^{n + 1}
         \\ & +
-        O((\inc t^{n})^{n+1} )
+        O((\inc t^{n})^{l+1} )
     \end{aligned}
 \end{equation}
 as a result of polynomial degree.
 Substituting \eeqref{eq:TRErr} into the $t^{n+c_2}$ stage
 of \eeqref{eq:Quad3Err}, the truncation error
-of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
+of the entire scheme becomes $O((\inc t)^{l+2}) + O((\inc t)^{m+2})$:
 \begin{equation}
     \begin{aligned}
         \uu^{n+1} = & \uu^{n} + {\inc t}^{n}
         \left[
             b_1\R(t^n, \uu^n)
             +
-            b_2\R(t^{n+c_2}, \uu^{n+c_2} + O((\inc t^{n})^{n+1} ))
+            b_2\R(t^{n+c_2}, \uu^{n+c_2} + O((\inc t^{n})^{l+1} ))
             +
             b_3\R(t^{n+1}, \uu^{n+1})
             \right]
@@ -904,7 +904,7 @@ of the entire scheme becomes $O((\inc t)^{n+2}) + O((\inc t)^{m+2})$:
             b_3\R(t^{n+1}, \uu^{n+1})
             \right]
         \\ + &
-        O((\inc t^{n})^{m+2}  + O((\inc t^{n})^{n+2} ))
+        O((\inc t^{n})^{m+2}  + O((\inc t^{n})^{l+2} ))
     \end{aligned}
     \label{eq:fullLTE}
 \end{equation}
@@ -916,7 +916,7 @@ $\R(t, \uu)$ to be sufficiently regular and therefore does not
 change the order of error.
 Therefore, for smooth problems the
 order of accuracy of a DITR
-method is theoretically $\min(m,n) + 1$.
+method is theoretically $\min(m,l) + 1$.
 
 The following sections will illustrate some
 practical DITR methods based on equations \eqref{eq:Quad3} and \eqref{eq:TR}.
@@ -2342,7 +2342,7 @@ and
 Therefore, to ensure the stability of continuous pseudo time
 marching of DITR's stage-decoupled iteration method, it is
 required
-\begin{equation}iteration method
+\begin{equation}
     \real(\mu^*_i) \leq 0,\  i = 1,2,\  \forall \real(\mu') \leq 0
 \end{equation}
 where
@@ -2655,9 +2655,9 @@ the stage-decoupled iteration method.
 
 
 Combining the discussions above,
-for U2R2 $c=0.5$, we empirically choose $\beta = 1$.
-For U2R2 $c=0.55$, we empirically choose $\beta = 1.333$.
-For U2R2 $c=0.25$, we empirically choose $\beta = 1$.
+for U2R2 $c_2=0.5$, we empirically choose $\beta = 1$.
+For U2R2 $c_2=0.55$, we empirically choose $\beta = 1.333$.
+For U2R1 $c_2=0.25$, we empirically choose $\beta = 1$.
 For U3R1, we empirically use $\beta = 1.333$ for all $\Theta$.
 These $\beta$ values are significantly larger than the
 stability restrictions and guarantees
@@ -2816,7 +2816,7 @@ and $\rho_a$ the analytic result.
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
         \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
-        \caption[]{Density error vs. total CPU time consumption}
+        \caption[]{Density error vs. total CPU time}
         \label{sfig:IVTests_Eff}
     \end{subfigure}
     \caption[]{Convergence and efficiency test with isentropic vortex problem}
