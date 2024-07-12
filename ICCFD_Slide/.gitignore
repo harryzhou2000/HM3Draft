@@ -19,3 +19,4 @@
 *.hd 
 *.sty 
 *.ins
+*.synctex*
