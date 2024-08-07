@@ -257,16 +257,16 @@ Finally, Section \ref{sec:Conc} gives the concluding remarks.
 \label{sec:CFV}
 
 The new time-marching method developed in
-the current paper can be applied with
-any spatial discretizations when solving
+the current paper can be applied to any general first order 
+ODE, including any spatial discretization when solving
 time-dependent PDEs such as the compressible Euler and Navier-Stokes
 equations.
-However, their actual performance will be affected by
-the spatial discretizations.
+In order to compare the performance of ode integrators in flow problems,
+a spacial discretization must be specified.
 Therefore,
-this section will provide a brief description of
-finite volume spatial  discretization,
-and additional details
+this section will provide a brief description on the
+finite volume spatial discretization of governing equations.
+Then, details
 of the high-order finite volume scheme
 used in numerical tests are specified.
 
@@ -650,26 +650,25 @@ are
     \end{aligned}
 \end{equation}
 
-The local coefficients matrices and vectors \eeqref{eq:vrCoeffs} can be
+The local coefficient matrices and vectors \eeqref{eq:vrCoeffs} can be
 calculated at the start of computation.
 The linear reconstruction system \eeqref{eq:vrBlockEq}
 is solved with block-SOR method.
 The details of linear solving of variational reconstruction and the treatments of
 boundary conditions can be found in \cite{wang2017compact_VR}.
-The fact to be emphasized here is that
+A fact to be emphasized here is that
 the reconstruction is implicit, and
 the reconstruction coefficients must be
 obtained through a series of
 iterations.
 To ensure the efficiency of the numerical method,
-the variational reconstruction is used
-together with temporally implicit discretization
-of the governing equations.
-During an implicit solving procedure,
+the variational reconstruction is best used
+together with implicit time marching schemes.
+During an implicit solving procedure of the finite volume method,
 the updating of mean values and reconstruction
 coefficients are decoupled
 and executed alternately, with the block-SOR
-iteration carried out only once for every iteration
+iteration carried out only once before every updating
 of the implicit marching scheme.
 As each block-SOR updating is compact in the sense of data dependency,
 the variational reconstruction is able to have better data locality and
