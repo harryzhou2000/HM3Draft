@@ -4,10 +4,9 @@
 \section{Introduction}
 \label{sec:intro}
 
-In computational fluid dynamics (CFD),
-high-order numerical methods have the capability of
-resolving complex flows effectively and efficiently,
-which have been attracting great attention recently.
+High-order numerical methods in computational fluid dynamics (CFD)
+have the capability of
+resolving complex flows effectively and efficiently.
 Popular high-order CFD methods, including discontinuous
 Galerkin (DG) methods
 \cite{reed1973triangularDG,
@@ -38,33 +37,49 @@ and finite volume (FV) methods
     friedrich1998weighted_WENO,
     hu1999weighted_WENO,
     dumbser2007quadrature_WENO},
-generally adopted the method of line,
+generally adopt the method of line,
 in which the governing equations 
 are spatially discretized at first
-resulting in a system of ODEs.
+producing a system of ODEs.
 The system of ODEs is then 
 solved with
 ODE integrators such as the 
 popular strong stability preserving
 Runge-Kutta (SSPRK) methods
-\cite{gottlieb2001strong_SSPRK}.
+\cite{gottlieb2001strong_SSPRK} in transient flow problems.
 
-Although explicit ODE integrators
+Explicit ODE integrators
 are simple and efficient for a wide range of
-CFD problems,
-the Courant-Friedrichs-Lewy (CFL) condition
+CFD problems, but the Courant-Friedrichs-Lewy (CFL) condition
 that limits physical time step in explicit
-methods could make them inefficient in
-notably inhomogeneous or anisotropic
-transient flows,
-such as wall-bounded turbulence.
+methods could make them inefficient in various 
+scenarios.
+For example, 
+when compressible Navier-Stokes equations are solved with a low Mach number configuration,
+the propagation of acoustic wave is often neglected in the simulation, 
+but with explicit time integrator, 
+the speed of sound which is $\text{Ma}^{-1}$ times the 
+speed of convection
+severely limits the time step size.
+Moreover, in engineering applications, 
+wall-bounded flow simulations could face 
+very fine and anisotropic boundary layer meshes,
+whose small length scales limit the time step size 
+to a scale much smaller than necessary.
 Such inefficiency could be overcome by
 applying implicit ODE solvers which
-usually have better stability attributes.
+usually have better stability attributes and the CFL condition is not required.
+For linear systems, $A$-stability and $L$-stability conditions \cite{wanner1996solving}
+are often used to characterize the stability of an ODE integrator.
+$A$-stability \cite{dahlquist1963special} implies 
+when the ODE integrator is applied to linear advection, 
+the CFL can be arbitrarily large without blowing up the solution.
+In addition to $A$-stability, $L$-stability ensures that the high-frequency 
+modes in linear advection diminishes rapidly.
 Due to Dahlquist's second barrier
 \cite{dahlquist1963special},
 only second and first order linear multistep ODE methods
-could achieve $A$-stability.
+could achieve $A$-stability. 
 Therefore,
 the $L$-stable
 second-order backward differentiation formula (BDF2)
@@ -74,52 +89,54 @@ the single-step implicit Runge-Kutta (IRK) methods
 with multiple internal stages
 can achieve higher order of accuracy while
 preserving stability \cite{butcher2016ODEBook}.
-Among the IRK methods, fully coupled IRK methods
-could achieve optimal order
-for given number of stages,
+Fully coupled IRK methods like the Gauss type IRKs
+could achieve optimal order of accuracy, 
+with less stages
 but they require the solution of a nonlinear
 system with its dimension several times larger
 than that of the ODE.
-The enlarged algebraic system
-could be especially troublesome for its implementation in
+Solving the enlarged algebraic system of IRKs
+could be especially troublesome for their implementation in
 CFD solvers.
 Pazner and Persson
 \cite{pazner2017stage}
 made effort in efficiently solving
 fully IRK methods with DG, and
 Jameson \cite{jameson2017evaluation}
-discussed how to adopt dual time stepping
+discussed on how to adopt dual time stepping
 into fully IRKs.
 Due to the difficulties in solving
 fully IRK methods,
-singly diagonally implicit Runge-Kutta (SDIRK)
+diagonally implicit Runge-Kutta (DIRK)
 methods are more commonly used in CFD, for example in
 \cite{wang2017compact_VR}.
-SDIRK methods have lower-triangular butcher tableau,
+DIRK methods have lower-triangular butcher tableau,
 enabling the stage values to be solved in a sequence.
-As a special case of SDIRK,
-ESDIRK methods are SDIRK with an explicit first stage,
+As a special case of DIRK,
+ESDIRK methods are DIRK with the same non-zero diagonal value 
+and an explicit first stage,
 which are constructed to have
 second stage order while being $L$-stable
 \cite{kennedy2003additiveARK,kvaerno2004singly}.
 High-order ESDIRK schemes and
 BDF2 have been tested in
-\cite{
-    bijl2002implicitBDFvESDIRK,
-    wang2007implicitDGTests}
+\cite{bijl2002implicitBDFvESDIRK,wang2007implicitDGTests}
 to solve flow problems,
 whose results illustrate
 better accuracy and higher efficiency
 of high-order ESDIRK methods
-compared to second order BDF2.
+compared to the second order BDF2.
+Previous numerical experiments also confirmed
+the ESDIRKs can endure large time step size like the BDF2 method, 
+having good stability.
 
-Apart from fully IRK and SDIRK methods,
+
+In addition to fully IRK and SDIRK methods,
 another class of implicit RK methods,
 mono implicit RK methods (MIRK)
 \cite{cash1975classMIRKOrig}
 with explicit internal stages and
-an implicit final
-stage,
+an implicit final stage,
 allow the implicit system to
 have the same number of dimensions
 as the original ODE.
@@ -141,7 +158,7 @@ polynomials of the Jacobian of the ODE's right-hand-side.
 Cash and Singhal proposed to find MIRK methods whose
 Jacobian could be approximately factorized,
 so that the Newton iteration
-could be realized approximately by solving a series of successive linear
+could be approximated by solving a successive series of linear
 problems \cite{cash1982monoMIRK2}.
 Kulikov and Shindin found certain factorization
 approximation could sabotage the stability of
@@ -151,21 +168,16 @@ and analyzed how to choose the approximation of
 Jacobian in
 \cite{kulikov2007asymptotic}.
 MIRK and NIRK methods are more attractive than SDIRK methods
-for they require fewer inner stages.
+due to their fewer inner stages.
 Typical fourth order
 stiffly accurate ESDIRK requires 5 implicit internal stages to be
 solved,
-while MIRK and NIRK could
-solve only one implicit stage.
-
-
-MIRK and NIRK methods have less
-implicit stages than SDIRK methods,
-which gives them potential to gain better efficiency in
+while MIRK and NIRK only have one implicit stage.
+This property gives MIRK and NIRK methods potential to gain better efficiency in
 large scale problems.
 However, current literature has seldom explored
 the application of MIRK or NIRK methods in
-solving PDEs.
+solving PDEs including those from flow problems.
 The fully IRK methods, on the other hand,
 have been practiced in
 finite volume \cite{jameson2017evaluation} and
@@ -173,19 +185,18 @@ DG \cite{pazner2017stage}
 as mentioned before,
 but their implementations
 in CFD methods are significantly more
-complex compared to DIRK methods.
+complicated compared to DIRK methods.
 
-Different from previous approaches,
-the current paper aims to construct implicit
+The current paper aims to construct implicit
 time marching schemes based on temporal
-reconstruction.
-By combining polynomial approximation and
+reconstruction, which is different from previous approaches.
+It will be shown in the paper by combining polynomial approximation and
 numerical quadrature rules in the direction of time,
 stable,
 high-order accurate and efficient implicit ODE methods
 termed as DITR could be
 obtained straightforwardly.
-The basic idea of the DITR scheme will be presented
+The basic idea of the DITR scheme will be explained in details
 in Section \ref{sec:HIRK}.
 Briefly speaking, the construction of the DITR
 schemes consists of the following two steps.
@@ -194,21 +205,15 @@ system of first-order ODEs.
 When the right-hand side is integrated using the
 three point Gauss-Lobatto rule, the resulting DITR
 schemes have two stages and are at most temporally fourth-order accurate.
-The actual order of accuracy is then determined by
-the second step which is the temporal reconstruction.
-When the temporal reconstruction uses only the information of n
-and n+1 steps, the DITR schemes are single step schemes
+In the second step, temporal reconstruction is used to determine the 
+unknown stage values based on the known step values.
+When the temporal reconstruction uses only the information of $n$
+and $n+1$ steps, the DITR schemes are single step schemes
 similar to the MIRK or NIRK schemes.
-When the temporal reconstruction uses the information of n-1, n and n+1 steps,
-the resulting DITR schemes are multistep methods that are
+When the temporal reconstruction uses the information of $n-1$, $n$ and $n+1$ steps,
+the resulting DITR schemes are multistep methods
 different from the common implicit linear multistep
-methods such as
-the Adams-Moulton and BDF schemes \cite{wanner1996solving}.
-%! actually, the method was described as a Multistep Collocation Method 
-%! actually, DITR is a collocation method
-The stability of the DITR
-schemes is mainly determined by the temporal
-reconstruction step.
+methods \cite{wanner1996solving}.
 When adopting proper quadrature rules
 and temporal reconstructions in these two steps, single-step
 and multistep methods with arbitrary orders of temporal
@@ -226,33 +231,30 @@ a new iteration scheme called the stage-decoupled iteration
 is proposed.
 Stability analysis
 confirm the advantage of the proposed procedure.
-It will be shown that the new methods can be implemented
+It will be shown that the new iteration methods can be implemented
 in a matrix-free style, guaranteeing their portability.
-The new implicit methods are further applied to
-high-order compact finite volume method to
+The new implicit methods are further applied to the
+high-order compact finite volume method \cite{wang2017compact_VR} to
 test their capabilities in flow problems. Numerical results
 illustrate that the new methods are high-order accurate
 and competitive with the 4th order ESDIRK method in efficiency.
 
-% Paper's structure:...%TODO
-
 The rest of the paper is organized as follows.
-High-order compact finite volume spatial  discretization schemes
-are introduced in Section \ref{sec:CFV}.
+High-order compact finite volume spatial discretization schemes
+are introduced in Section \ref{sec:CFV} to provide a testing platform for 
+different time marching schemes.
 The construction and analyses of DITR methods are presented
 in Section \ref{sec:HIRK}.
-Section \ref{sec:Solving} introduces the methods
+Section \ref{sec:Solving} introduces the iteration methods
 of solving DITR and discusses their stability attributes.
 Section \ref{sec:Results} illustrates some numerical results of
-DITR solving the Euler and N-S equations, combined with
-spatial  discretization from Section \ref{sec:CFV}.
-Last, Section \ref{sec:Conc} gives the concluding remarks.
+DITR solving the compressible Euler and N-S equations, combined with
+spatial discretization from Section \ref{sec:CFV}.
+Finally, Section \ref{sec:Conc} gives the concluding remarks.
 
 
 \section{High-order compact finite volume method}
 \label{sec:CFV}
-
-
 
 The new time-marching method developed in
 the current paper can be applied with

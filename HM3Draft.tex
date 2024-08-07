@@ -114,7 +114,7 @@
     \affiliation[THUDEM]
     {
         organization=
-            { Department of Engineering Mechanices, Tsinghua Universiy},%Department and Organization
+            { Department of Engineering Mechanics, Tsinghua University},%Department and Organization
         city={Beijing},
         postcode={100084},
         country={China}}
@@ -122,25 +122,29 @@
 
 
     \begin{abstract}  
-        A family of new implicit time marching schemes based on 
-        temporally Direct Integration and Temporal 
-        Reconstruction (DITR) are developed and tested in this paper.
-        These schemes can be used to solve ordinary differential equations (ODEs)
-        directly or solve ODEs arising from semi-discrete schemes
-         solving partial differential equations (PDEs).
-         he most significant advantages of these methods are that temporally third- and fourth-order
-          schemes can be constructed straightforwardly, 
-          and require fewer stages than some popular implicit Runge-Kutta schemes. 
-        As a ODE solver, the DITR method are found to be 
-        $A$-stable, with two variants of them being $L$-stable. 
-        When being extended to solve compressible Euler and Navier-Stokes equations that are spatially discretized using  high-order compact finite volumes, 
-        the challenge is the design of an efficient and stable iteration method. 
-        To this end, a stage-decoupled iteration scheme is proposed and tested. 
-        This iteration scheme is implemented together with the dual time-stepping 
-        technique and the matrix-free LU-SGS method. Numerical results show that 
-        DITR methods achieve high order of accuracy with comparatively 
-        lower computational cost. When reaching the same error, 
-        some DITR methods are able to save significant amount of time compared with the implicit ESDIRK4 method.
+        A new family of high-order implicit time marching schemes based on 
+        Direct Integration and Temporal 
+        Reconstruction (DITR) is developed and tested in this paper.
+        Besides common ordinary differential equations (ODEs), 
+        these schemes can be applied in solving ODEs
+        arising from semi-discrete schemes
+        solving partial differential equations (PDEs),
+        including the compressible Navier-Stokes equations.
+        DITR methods can be constructed with third- and fourth-order temporal accuracy 
+        in a straightforward fashion, 
+        and require fewer stages than some popular implicit Runge-Kutta schemes. 
+        Certain variants DITR ODE integrators can obtain 
+        $A$-stability or $L$-stability. 
+        A matrix-free iteration method for solving the DITR equations
+        is described for practical implementation of DITR, with its linear 
+        stability obtained by choosing an appropriate preconditioning parameter. 
+        Numerical results show that 
+        DITR methods are able to achieve high order of accuracy 
+        with comparatively low computational cost.
+        When achieving the same precision in numerical solutions, 
+        some DITR methods
+        use significantly smaller amount of time
+        compared with popular ESDIRK4 method. 
     \end{abstract}
 
     % %%Graphical abstract
