@@ -3155,11 +3155,12 @@ and U3R1 uses $79\%$.
 \section{Conclusion}
 \label{sec:Conc}
 
-The current paper has described a method of
+The method of
 developing time marching schemes using a
-direct integration and a temporal reconstruction.
-Using one form of quadrature rule and several
-forms of temporal reconstruction, a series of
+direct integration and a temporal reconstruction is 
+described in the current paper.
+Using three point quadrature rule in direct integration and different
+forms of temporal reconstruction, a family of
 specific DITR methods are discovered and analyzed.
 The DITR U2R2 method is $A$-stable, and with $c_2=0.5$, U2R2 is 4th order accurate.
 The DITR U2R1 method is $L$-stable with 3rd order accuracy, and
@@ -3170,29 +3171,30 @@ It is discovered that using the nested iteration method, pseudo time marching is
 Using the stage-decoupled iteration method with preconditioning,
 the implicit time steps of DITR can steadily converge with proper choices of
 the preconditioning parameter $\beta$.
-The stage-decoupled iteration method is easy to be implemented in a
+The stage-decoupled iteration method is easy to implement in a
 matrix-free manner.
 
-After analyzing the results of numerical tests, it is confirmed
-all the DITR methods can exhibit their theoretical order of accuracy.
-With the same time step, DITR methods are much more accurate than
-BDF2 and comparable with ESDIRK4.
+Analysis of the results of numerical tests, confirms
+all the DITR methods can reach their theoretical order of accuracy.
+DITR methods are much more accurate than
+BDF2 and comparable with ESDIRK4 when the time step size is 
+identical.
 Due to having only 2 stages, DITR methods takes less time than ESDIRK4
 each step.
-When reaching the same accuracy, some DITR methods are
-distinctively faster than ESDIRK4.
+When reaching the same accuracy, some DITR methods are faster than ESDIRK4.
 In summary, the DITR methods are steady implicit time marching methods
-that are easy to implement and more efficient.
+that are efficient and easy to implement.
 
-The iteration methods discussed in the current paper is still crude.
-For the successful stage-decoupled iteration method,
-more variants of the preconditioning matrix and details including
+The iteration methods discussed in the current paper are still crude.
+The currently successful stage-decoupled iteration method 
+requires further discussion on 
+more variants of the preconditioning matrix, 
 the choice of pseudo time step, the influence of approximate
-Jacobian and the influence of linear solvers are not discussed here.
+Jacobian and the influence of linear solvers.
 Meanwhile, more delicate analysis on the choosing of preconditioning parameter
 $\beta$ could still be conducted.
-For the unsteady nested iteration method,
-tricks to stabilize the method including modifying the matrices and
+Tricks to stabilize the unstable nested iteration method 
+including modifying the matrices and
 using methods other than dual-time stepping are not considered.
-Therefore, more delicate and efficient iteration methods of DITR could
-still be found.
+Therefore, the iteration method of DITR is possible to improve and 
+requires further investigation.
