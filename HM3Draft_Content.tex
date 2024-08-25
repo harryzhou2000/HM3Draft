@@ -90,8 +90,8 @@ with multiple internal stages
 can achieve higher order of accuracy while
 preserving stability \cite{butcher2016ODEBook}.
 Fully coupled IRK methods like the Gauss type IRKs
-could achieve optimal order of accuracy, 
-with less stages
+could achieve optimal order of accuracy
+with fewer stages, 
 but they require the solution of a nonlinear
 system with its dimension several times larger
 than that of the ODE.
@@ -207,14 +207,14 @@ three point Gauss-Lobatto rule, the resulting DITR
 schemes have two stages and are at most temporally fourth-order accurate.
 In the second step, temporal reconstruction is used to determine the 
 unknown stage values based on the known step values.
-When the temporal reconstruction uses only the information of $n$
+If the temporal reconstruction uses only the information of $n$
 and $n+1$ steps, the DITR schemes are single step schemes
 similar to the MIRK or NIRK schemes.
 When the temporal reconstruction uses the information of $n-1$, $n$ and $n+1$ steps,
 the resulting DITR schemes are multistep methods
 different from the common implicit linear multistep
 methods \cite{wanner1996solving}.
-When adopting proper quadrature rules
+Adopting proper quadrature rules
 and temporal reconstructions in these two steps, single-step
 and multistep methods with arbitrary orders of temporal
 accuracy can be constructed. Therefore, the DITR approaches
@@ -223,7 +223,7 @@ schemes that are different from the IRK and multistep
 methods.
 
 When applying DITR schemes to solving compressible Euler and
-Navier-Stokes equations, the approximate factorization
+Navier-Stokes equations, the approximate factorization of Jacobian matrix
 proposed by Kulikov and Shindin \cite{kulikov2007asymptotic}
 does not work well.
 In the present paper,
@@ -519,7 +519,7 @@ which is calculated with:
 \end{equation}
 
 The length scales are chosen to be the largest distance of nodes from the
-barycenter, which has the from
+barycenter, which has the form
 \begin{equation}
     \inc x_j = \inc y_j = \max_k(\|\x_{j,k} - \x_{c,j}\|_2)
 \end{equation}
@@ -1855,7 +1855,7 @@ $\uu^{n+c_2}$ only exists on the left side, namely the
 right side of \eeqref{eq:TRSum} has only $\uu^{n+1}$ as
 unknown. Consequently, by substitution, equivalent
 to the previous derivations leading to \eeqref{eq:fullLTE},
-$\uu^{n+c_2}$ can be eliminated nonlinearly:
+$\uu^{n+c_2}$ can be eliminated:
 \begin{equation}
     \begin{aligned}
         \uu^{n+1} & =                       \\
@@ -1918,7 +1918,7 @@ local explicitness of DITR's formulation.
 The nested iteration method is similar, and sometimes equivalent with
 the iteration methods used in MIRK \cite{cash1975classMIRKOrig,cash1977clasMIRK1,cash1982monoMIRK2}
 and NIRK \cite{kulikov2006familyNIRKOrig,kulikov2009adaptive,kulikov2007asymptotic}.
-In these literature, the residual function $\FF^N$ is directly
+In literature, the residual function $\FF^N$ is directly
 solved using a Newton method:
 \begin{equation}
     -\partialderivative{\FF^N}{\uu^{n+1}}
@@ -1959,7 +1959,7 @@ nested iteration method.
 \subsubsection{Fourier analysis in pseudo time: the nested iteration method}
 
 To explain the failure of the nested iteration method
-in solving PDEs uisng the dual time stepping technique, Fourier
+in solving PDEs using the dual time stepping technique, Fourier
 analysis based on pseudo time introduced in \ref{sssec:fourier} is considered.
 
 When DITR is solved using the nested iteration method,
@@ -2184,7 +2184,7 @@ $\GG$ terms in \eeqref{eq:DITRFFDef} are already
 well-formed, the current research limits the form
 of $\Pm$ to be:
 
-The current paper chooses preconditioning to be 
+The current paper selects preconditioning to be 
 \begin{equation}
     \Pm = \begin{bmatrix}
         \eye & \beta\eye \\
@@ -2396,7 +2396,7 @@ the iterating process of \eeqref{eq:DITRSDS} is
 actually a 2-by-2 block Gauss-Seidel iteration that obtains
 the linear increment if convergent.
 Therefore, the current section is about to discuss the
-near Guass-Seidel behavior of the stage-decoupled iteration method.
+near Gauss-Seidel behavior of the stage-decoupled iteration method.
 
 Assuming $\R$ to be linear and diagonalizable,
 a linear scalar ODE
@@ -2502,11 +2502,12 @@ DITR methods, which will be discussed in the next section.
 \label{sssec:numScan}
 
 The preconditioning parameter, $\beta$, as discussed in \ref{sssec:SDSFourier}
-and \ref{sssec:GSStability}, affects convergence properties of the
+and \ref{sssec:GSStability}, influences convergence properties of the
 stage-decoupled solving strategy.
-When $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier},
+With $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier},
 $\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth
-rate of the $\tau$ evolution. When the DITR method parameters are settled,
+rate of the $\tau$ evolution. 
+When the DITR method parameters are settled,
 $\mu^*_1=\mu^*_1(\beta, \mu')$, $\mu^*_2=\mu^*_2(\beta, \mu')$ and $G_{GS}=G_{GS}(\beta, z)$.
 When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability}
 represents the magnifying factor in the Gauss-Seidel updating.
@@ -2726,7 +2727,7 @@ and a perturbation at initial time:
         \delta S             & = 0                                                                          \\
     \end{array}
     \right.
-\end{equation}
+\end{equation} 
 with ideal gas setting of $T = p/\rho, S= p/\rho^\gamma, \gamma =1.4$.
 Initial vortex center is chosen $(x_c,y_c)=(5,5)$,
 and vortex strength is $\epsilon = 5$.
@@ -2885,7 +2886,7 @@ of the speed of sound, thus being potentially more favorable.
         \caption[]{Vorticity distribution}
         \label{sfig:CylinderRe1200Demo_Vort}
     \end{subfigure}
-    \caption[]{Mesh and a instance of z-vorticity distribution
+    \caption[]{Mesh and an instance of z-vorticity distribution
         in $Re=1200$ vortex shedding problem}
     \label{fig:CylinderRe1200Demo}
 \end{figure}
@@ -3137,7 +3138,7 @@ Meanwhile, the second order BDF2
 completely smears the K-H instability
 in the shear layer, despite that the spatial
 discretization is 4th order accurate.
-All high-order time march methods methods can successfully
+All high-order time march methods can successfully
 simulate K-H instability and resolve the
 small structures induced.
 The results of DITR U2R2 $c_2=0.5$, U2R2  $c_2=0.55$
@@ -3196,5 +3197,5 @@ $\beta$ could still be conducted.
 Tricks to stabilize the unstable nested iteration method 
 including modifying the matrices and
 using methods other than dual-time stepping are not considered.
-Therefore, the iteration method of DITR is possible to improve and 
-requires further investigation.
+Therefore, iteration methods of DITR are possible to improve and 
+require further investigation.

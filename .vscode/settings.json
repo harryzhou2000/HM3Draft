@@ -1,11 +1,31 @@
 {
     "cSpell.words": [
+        "barycenters",
+        "CWBAP",
         "Dahlquist's",
+        "diagonalizable",
         "DITHR",
         "DITR",
         "ESDIRK",
+        "HIRK",
+        "IIIA",
+        "Kulikov",
         "kvaerno",
+        "Lewy",
+        "linearizing",
         "multistep",
-        "Navier"
+        "Navier",
+        "NIRK",
+        "Pazner",
+        "Persson",
+        "Prandtl",
+        "preconditioner",
+        "Radau",
+        "Raphson",
+        "Seidel",
+        "Shindin",
+        "Signhal",
+        "Singhal",
+        "SSPRK"
     ]
 }
