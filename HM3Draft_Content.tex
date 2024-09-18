@@ -37,7 +37,7 @@ and finite volume (FV) methods
     friedrich1998weighted_WENO,
     hu1999weighted_WENO,
     dumbser2007quadrature_WENO},
-generally adopt the method of line,
+usually adopt the method of line,
 in which the governing equations 
 are spatially discretized at first
 producing a system of ODEs.
@@ -46,17 +46,18 @@ solved with
 ODE integrators such as the 
 popular strong stability preserving
 Runge-Kutta (SSPRK) methods
-\cite{gottlieb2001strong_SSPRK} in transient flow problems.
+\cite{gottlieb2001strong_SSPRK} in the simulation 
+of unsteady flow problems.
 
 Explicit ODE integrators
 are simple and efficient for a wide range of
 CFD problems, but the Courant-Friedrichs-Lewy (CFL) condition
-that limits physical time step in explicit
-methods could make them inefficient in various 
+that limits their physical time sizes
+could make them inefficient in various 
 scenarios.
 For example, 
-when compressible Navier-Stokes equations are solved with a low Mach number configuration,
-the propagation of acoustic wave is often neglected in the simulation, 
+when compressible Navier-Stokes equations are solved at a low Mach number condition,
+the propagation of acoustic wave has minimal effect in the numerical results, 
 but with explicit time integrator, 
 the speed of sound which is $\text{Ma}^{-1}$ times the 
 speed of convection
@@ -64,11 +65,12 @@ severely limits the time step size.
 Moreover, in engineering applications, 
 wall-bounded flow simulations could face 
 very fine and anisotropic boundary layer meshes,
-whose small length scales limit the time step size 
+whose small length scales in wall-normal direction limit the time step size 
 to a scale much smaller than necessary.
 Such inefficiency could be overcome by
 applying implicit ODE solvers which
-usually have better stability attributes and the CFL condition is not required.
+usually have better stability characteristics
+and the CFL condition is not required.
 For linear systems, $A$-stability and $L$-stability conditions \cite{wanner1996solving}
 are often used to characterize the stability of an ODE integrator.
 $A$-stability \cite{dahlquist1963special} implies 
@@ -91,9 +93,9 @@ can achieve higher order of accuracy while
 preserving stability \cite{butcher2016ODEBook}.
 Fully coupled IRK methods like the Gauss type IRKs
 could achieve optimal order of accuracy, 
-with less stages
+with fewer stages,
 but they require the solution of a nonlinear
-system with its dimension several times larger
+system with its scale several times larger
 than that of the ODE.
 Solving the enlarged algebraic system of IRKs
 could be especially troublesome for their implementation in
@@ -101,12 +103,12 @@ CFD solvers.
 Pazner and Persson
 \cite{pazner2017stage}
 made effort in efficiently solving
-fully IRK methods with DG, and
+fully coupled IRK methods with DG, and
 Jameson \cite{jameson2017evaluation}
-discussed on how to adopt dual time stepping
-into fully IRKs.
+discussed the efficient implementation of the dual time stepping
+technique in fully coupled IRKs.
 Due to the difficulties in solving
-fully IRK methods,
+fully coupled IRK methods,
 diagonally implicit Runge-Kutta (DIRK)
 methods are more commonly used in CFD, for example in
 \cite{wang2017compact_VR}.
@@ -127,11 +129,11 @@ better accuracy and higher efficiency
 of high-order ESDIRK methods
 compared to the second order BDF2.
 Previous numerical experiments also confirmed
-the ESDIRKs can endure large time step size like the BDF2 method, 
+the ESDIRKs can endure large time step size similar to the BDF2 method, 
 having good stability.
 
 
-In addition to fully IRK and SDIRK methods,
+In addition to fully coupled IRK and SDIRK methods,
 another class of implicit RK methods,
 mono implicit RK methods (MIRK)
 \cite{cash1975classMIRKOrig}
@@ -178,7 +180,7 @@ large scale problems.
 However, current literature has seldom explored
 the application of MIRK or NIRK methods in
 solving PDEs including those from flow problems.
-The fully IRK methods, on the other hand,
+The fully coupled IRK methods, on the other hand,
 have been practiced in
 finite volume \cite{jameson2017evaluation} and
 DG \cite{pazner2017stage}

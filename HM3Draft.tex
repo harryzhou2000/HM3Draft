@@ -121,30 +121,33 @@
 
 
 
-    \begin{abstract}  
-        A new family of high-order implicit time marching schemes based on 
-        Direct Integration and Temporal 
-        Reconstruction (DITR) is developed and tested in this paper.
-        Besides common ordinary differential equations (ODEs), 
-        these schemes can be applied in solving ODEs
-        arising from semi-discrete schemes
-        solving partial differential equations (PDEs),
-        including the compressible Navier-Stokes equations.
-        DITR methods can be constructed with third- and fourth-order temporal accuracy 
-        in a straightforward fashion, 
-        and require fewer stages than some popular implicit Runge-Kutta schemes. 
-        Certain variants DITR ODE integrators can obtain 
-        $A$-stability or $L$-stability. 
-        A matrix-free iteration method for solving the DITR equations
-        is described for practical implementation of DITR, with its linear 
-        stability obtained by choosing an appropriate preconditioning parameter. 
-        Numerical results show that 
-        DITR methods are able to achieve high order of accuracy 
-        with comparatively low computational cost.
-        When achieving the same precision in numerical solutions, 
-        some DITR methods
-        use significantly smaller amount of time
-        compared with popular ESDIRK4 method. 
+    \begin{abstract}
+        This paper presents a new family of high-order implicit
+        time marching schemes based on direct integration
+        and temporal reconstruction (DITR).
+        These schemes can be used to solve the system of
+        ordinary differential equations (ODEs) arising from
+        semi-discretization of partial differential equations (PDEs)
+        such as the compressible Navier-Stokes equations,
+        in addition to common ODEs.
+        DITR methods can be constructed with third- and fourth-order
+        temporal accuracy in a straightforward fashion,
+        and require fewer stages than some popular
+        implicit Runge-Kutta schemes.
+        Some DITR ODE integrators can achieve A-stability or
+        L-stability.
+        We present a matrix-free iteration method
+        for solving the DITR equations,
+        which ensures that DITR can be efficiently
+        implemented in practical applications.
+        The linear stability is realized by choosing
+        an appropriate preconditioning parameter.
+        The numerical results demonstrate that DITR methods
+        can achieve high order of accuracy with comparatively
+        low computational cost. When achieving the same level of
+        errors in numerical solutions, some DITR methods use
+        significantly smaller amounts of time compared with the
+        popular ESDIRK4 method.
     \end{abstract}
 
     % %%Graphical abstract
@@ -168,7 +171,7 @@
         %% MSC codes here, in the form: \MSC code \sep code
         %% or \MSC[2008] code \sep code (2000 is the default)
 
-    \end{keyword} 
+    \end{keyword}
 
 \end{frontmatter}
 
