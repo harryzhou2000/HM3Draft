@@ -574,7 +574,7 @@ with
 as the derivative weight.
 This form of derivative weight in \eeqref{eq:wdRotRatio} is rotational invariant and
 isotropic.
-The coefficients in \eeqref{eq:wdHQMOPT} are taken from \cite{huang2022high}, which were
+The coefficients in \eeqref{eq:wdHQMOPT} are taken from previous research \cite{huang2022high}, which were
 obtained through the
 optimization of dissipation and dispersion relations.
 
@@ -584,7 +584,7 @@ The geometric weight uses the form
 \end{equation}
 where $d$ is the number of spatial dimension and $S$ is the area of the interface.
 This form of
-geometric weight is also taken from \cite{huang2022high}.
+geometric weight is also taken from previous research \cite{huang2022high}.
 
 The minimization problem
 \begin{equation}
@@ -653,7 +653,7 @@ calculated at the start of computation.
 The linear reconstruction system \eeqref{eq:vrBlockEq}
 is solved with block-SOR method.
 The details of linear solver of variational reconstruction and the treatments of
-boundary conditions can be found in \cite{wang2017compact_VR}.
+boundary conditions can be found in the original paper \cite{wang2017compact_VR}.
 A fact to be emphasized here is that
 the reconstruction is implicit, and
 the reconstruction coefficients must be
@@ -839,7 +839,7 @@ higher degree temporal reconstruction.
 Apart from the quadrature rule used in the current research,
 Gauss-Lobatto quadrature with more points or Radau quadrature
 could be experimented in DITR, 
-which is however not the main focus of the present paper..
+which is however not the main focus of the present paper.
 
 Assuming the quadrature rule has algebraic precision
 of degree $m$, and the polynomial interpolation is of degree $l$,
@@ -920,11 +920,14 @@ Therefore, for smooth problems the
 order of accuracy of a DITR
 method is theoretically $\min(m,l) + 1$.
 
-The following sub-sections will illustrate some
+The following subsections will illustrate some
 practical variants of DITR methods based on \eeqref{eq:Quad3} and \eeqref{eq:TR}.
 
 
 \subsection{Variants of DITR methods}
+
+The following subsections will derive several special versions of DITR based on 
+previous formulations. 
 
 \subsubsection{The DITR U2R2 method}
 
@@ -989,11 +992,11 @@ with its Butcher tableau shown in Table \ref{tab:U2R2Butcher}.
         1     & $b_1$          & $b_2$    & $b_3$          \\ \hline
               & $b_1$          & $b_2$    & $b_3$
     \end{tabular}
-    \caption{Butcher tableau of DITR U2R2}
+    \caption{Butcher tableau of DITR U2R2.}
     \label{tab:U2R2Butcher}
 \end{table}
 
-According to table \ref{tab:U2R2Butcher} with the coefficients
+According to Table \ref{tab:U2R2Butcher} with the coefficients
 determined by \eeqref{eq:interpU2R2} and \eeqref{eq:integ0},
 one can find that the 4th-order accurate
 DITR U2R2 method with $c_2=1/2$
@@ -1002,7 +1005,7 @@ of order 4 \cite{wanner1996solving}.
 The classic order and stage order of DITR U2R2 could
 also be verified using Table \ref{tab:U2R2Butcher} via
 the simplifying assumptions, which is a trivial procedure
-based on the formulae provided in \cite{wanner1996solving}.
+based on the formulae provided in textbook \cite{wanner1996solving}.
 
 Following standard analysis based on Dahlquist's equation
 $\frac{dy}{dt} = \lambda y$ \cite{wanner1996solving},
@@ -1086,7 +1089,7 @@ and the choice of $c_2$ does not affect the order of accuracy.
 Similar to U2R2, DITR U2R1's order of accuracy can
 be examined using
 standard procedures for
-Runge-Kutta methods\cite{wanner1996solving}.
+Runge-Kutta methods \cite{wanner1996solving}.
 
 The linear stability function for DITR U2R1 is
 \begin{equation}
@@ -1188,7 +1191,7 @@ With 4th-order accuracy and observed $L$-stability, the
 DITR U3R1 method is clearly more favorable than
 the implicit schemes based on 
 simple backward differencing, 
-for which only the BDF2 scheme is L-stable, 
+for which only the BDF2 scheme is $L$-stable, 
 and an unconditionally stable third 
 or higher-order scheme has not been found.
 
@@ -1222,7 +1225,7 @@ are used from now on.
         $\frac{1}{2} - \frac{1}{6(1-{c_2})} $            \\
         \hline
     \end{tabular}
-    \caption{Butcher tableau of DITR U2R2}
+    \caption{Butcher tableau of DITR U2R2.}
     \label{tab:integ0Tab}
 \end{table}
 
@@ -1263,7 +1266,7 @@ $\Theta = \inc t^{n-1} / \inc t^{n}$.
         $d^n_2$     & $- {c_2}^2 + {c_2}^3$         & ${c_2}^2 - {c_2}$    & $\frac{c_{2}\,\left(\Theta+c_{2}\right)\,\left(c_{2}-1\right)}{\Theta+1}$                                                              \\
         \hline
     \end{tabular}
-    \caption{Interpolation coefficients for different DITR methods}
+    \caption{Interpolation coefficients for different DITR methods.}
     \label{tab:inter0Tab}
 \end{table}
 
@@ -1289,7 +1292,7 @@ offers optimal 4th-order of accuracy is always used.
 % certain order of accuracy is usually based on
 % a certain integration method and
 % corresponding taylor expansion analysis,
-% as described in \cite{kulikov2006familyNIRKOrig}.
+% as described in literature \cite{kulikov2006familyNIRKOrig}.
 % However, the present paper proposes a single step method
 % derived with Hermite interpolation
 % (thus called HIRK),
@@ -1461,13 +1464,13 @@ offers optimal 4th-order of accuracy is always used.
 % The classic order and stage order of HIRK could
 % also be evaluated from table \ref{tab:HM3Butcher} via
 % the simplifying assumptions, which is a trivial procedure
-% given the formulae provided in \cite{wanner1996solving}.
+% given the formulae provided in literature{wanner1996solving}.
 
 % If the quadrature rule in HIRK is
 % replaced with Gauss-Legendre rule,
 % the method immediately becomes a special case of the
 % Gauss type NIRK method of order 4
-% described in \cite{kulikov2006familyNIRKOrig}.
+% described in literature \cite{kulikov2006familyNIRKOrig}.
 % For large scale CFD application,
 % using 2 point Gauss-Legendre rule
 % would mean deriving the right hand side at
@@ -2101,7 +2104,7 @@ and pseudo time step is small.
     \centering
     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R2050_KappaS.pdf}
     \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using
-        nested solving}
+        nested solving.}
     \label{fig:HM3_U2R2050_KappaS}
 \end{figure}
 
@@ -2332,7 +2335,7 @@ $\imag(\kappa')\leq0$
 can be satisfied under proper spatial discretization. 
 Therefore, 
 to ensure the stability of \eeqref{eq:ode-stage-decouple-fourier},
-is is sufficient to require 
+is sufficient to require 
 $\imag(\kappa^*_i(\kappa'))\leq0, \forall i,\kappa'\text{ where } i \in \{1,2\} \imag(\kappa')\leq0$, 
 which is equivalent to  
 \begin{equation}
@@ -2386,7 +2389,7 @@ at which it is observed $\max(\real(\mu^*_1),\real(\mu^*_2)) < 0$ for the whole 
         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_TauMu.pdf}
         \caption[]{$\beta = 1$}
     \end{subfigure}
-    \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0}
+    \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0.}
     \label{fig:MuU2R2}
 \end{figure}
 
@@ -2415,11 +2418,11 @@ near Gauss-Seidel behavior of the stage-decoupled iteration method.
 
 Assuming $\R$ to be linear and diagonalizable,
 \eeqref{eq:FVODE} can be reformed into a system of decoupled linear scalar ODEs 
-with it components in the from of
+with it components in the form of
 \begin{equation}
     \label{eq:odeScalarTest}
     \derivative{y}{t} = \lambda y
-\end{equation}.
+\end{equation}
 \eeqref{eq:odeScalarTest} with $\real(\lambda)\leq 0$
 is used as the model equation 
 of the stage-decoupled iteration method
@@ -2508,7 +2511,7 @@ the left half plane.
         \includegraphics[width=\textwidth]{pics/HM3_Method1_C0.5_Theta1_Beta1_GGS.pdf}
         \caption[]{$\beta = 1$}
     \end{subfigure}
-    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1}
+    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1.}
     \label{fig:GGSU2R2}
 \end{figure}
 
@@ -2589,7 +2592,7 @@ $A(\tau,\infty)-$stability are both achieved.
         \includegraphics[width=\textwidth]{pics/HM3_Methods_SearchGGS.pdf}
         % \caption[]{$\beta = 0.5$}
     \end{subfigure}
-    \caption{Numerical scanning results of $\beta$}
+    \caption{Numerical scanning results of $\beta$.}
     \label{fig:MuGGSSearch}
 \end{figure}
 \figref{fig:MuGGSSearch} illustrates the numerical scanning
@@ -2622,7 +2625,7 @@ The approximate results are listed in Table \ref{tab:resrictionBetaSearch}.
         U3R1 $\Theta=4$    & $\beta > 0.94$               & $\beta > 0.68$              \\
         \hline
     \end{tabular}
-    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
+    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning.}
     \label{tab:resrictionBetaSearch}
 \end{table}
 
@@ -2644,7 +2647,7 @@ converge more reliably.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R205_GGSRegions.pdf}
-    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R2 $c_2=0.5$ with different $\beta$}
+    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R2 $c_2=0.5$ with different $\beta$.}
     \label{fig:HM3_U2R205_GGSRegions}
 \end{figure}
 
@@ -2656,7 +2659,7 @@ $\beta$ causes slow convergence.
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.6\textwidth]{pics/HM3_U2R1_GGSRegions.pdf}
-    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R1 with different $\beta$ and $c_2$}
+    \caption[]{Boundaries of $|G_{GS}|\leq1$ stability regions of U2R1 with different $\beta$ and $c_2$.}
     \label{fig:HM3_U2R1_GGSRegions}
 \end{figure}
 Another issue that should be addressed here is the
@@ -2735,7 +2738,7 @@ which will be explained in Section \ref{ssec:resultIV}.
 
 The isentropic vortex problem is a classic
 accuracy testing problem for Euler equations.
-The settings can be found in \cite{hu1999weighted_WENO}.
+The settings can be found in literature \cite{hu1999weighted_WENO}.
 The free-stream flow is $(\rho,u,v,p)=(1,1,1,1)$,
 and a perturbation at initial time:
 \begin{equation}
@@ -2795,7 +2798,7 @@ simulate.
         \caption[]{BDF2}
         \label{sfig:IV10Step_BDF2}
     \end{subfigure}
-    \caption{Density of isentropic vortex problem, with aggressively large time step $\inc t = 1$ at $t=10$}
+    \caption{Density of isentropic vortex problem, with aggressively large time step $\inc t = 1$ at $t=10$.}
     \label{fig:IV10Step}
 \end{figure}
 
@@ -2844,7 +2847,7 @@ and $\overline{\Omega}$ the volume of entire domain.
         \caption[]{Density error vs. total CPU time}
         \label{sfig:IVTests_Eff}
     \end{subfigure}
-    \caption[]{Convergence and efficiency test with isentropic vortex problem}
+    \caption[]{Convergence and efficiency test with isentropic vortex problem.}
     \label{fig:IVTests}
 \end{figure}
 
@@ -2910,7 +2913,7 @@ of the speed of sound, thus being potentially more favorable.
         \label{sfig:CylinderRe1200Demo_Vort}
     \end{subfigure}
     \caption[]{Mesh and an instance of z-vorticity distribution
-        in $Re=1200$ vortex shedding problem}
+        in $Re=1200$ vortex shedding problem.}
     \label{fig:CylinderRe1200Demo}
 \end{figure}
 
@@ -3007,7 +3010,7 @@ starting value.
         \caption[]{Error vs. CPU Time}
         \label{sfig:CylinderRe1200_My_E}
     \end{subfigure}
-    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem.}
     \label{fig:CylinderRe1200_My}
 \end{figure}
 
@@ -3023,7 +3026,7 @@ starting value.
         \caption[]{Error vs. CPU Time}
         \label{sfig:CylinderRe1200_Mx_E}
     \end{subfigure}
-    \caption[]{Convergence and efficiency analysis with $\epsilon_{Mx}$ in $Re=1200$ vortex shedding problem}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{Mx}$ in $Re=1200$ vortex shedding problem.}
     \label{fig:CylinderRe1200_Mx}
 \end{figure}
 
@@ -3088,7 +3091,7 @@ at $x = 1/6 + \cot(60^\circ) y$.
 The boundary of $y=0, x\in[1/6,4]$ is
 inviscid wall, and all other boundaries
 conforms with the Ma 10 moving shock.
-Details about the initial and boundary settings may be found in \cite{woodward1984dmr}.
+Details about the initial and boundary settings may be found in literature \cite{woodward1984dmr}.
 The compact FV scheme is additionally equipped with
 an accuracy preserving CWBAP limiter \cite{wu2023cwbap},
 which grants the ability to capture spatial  discontinuities.
@@ -3111,7 +3114,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U2R2 $c_2=0.55$}
         \label{sfig:DM480_HM3}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, DITR U2R2}
+    \caption{Density in double Mach reflection problem, DITR U2R2.}
     \label{fig:DM480-1}
 \end{figure}
 
@@ -3127,7 +3130,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{DITR U3R1}
         \label{sfig:DM480_HM3U3R1}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1}
+    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1.}
     \label{fig:DM480-2}
 \end{figure}
 
@@ -3143,7 +3146,7 @@ and the solutions at $t=0.25$ are compared.
         \caption[]{BDF2}
         \label{sfig:DM480_BDF2}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, baseline methods}
+    \caption{Density in double Mach reflection problem, baseline methods.}
     \label{fig:DM480-3}
 \end{figure}
 

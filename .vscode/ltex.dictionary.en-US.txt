@@ -50,3 +50,9 @@ Padé
 Lobatto
 Crank-Nicolson
 Newton-Raphson
+FVInt
+TRErr
+DISum
+TRSum
+fd
+abstractImplicit

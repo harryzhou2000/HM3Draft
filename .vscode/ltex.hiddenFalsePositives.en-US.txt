@@ -61,3 +61,5 @@
 {"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QIn other words, the reference solution is a good enough approximation of the exact solution of the semi-discretized FV equations eq:FVODE.\\E$"}
 {"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QFor U3R1, we empirically use \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q for all \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
 {"rule":"UPPERCASE_SENTENCE_START","sentence":"^\\Qfig:HM3_U2R2050_KappaS indicates for DITR U2R2 \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q, when using nested iteration method, it is unable to linearly converge with small \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q and approximately \\E(?:Dummy|Ina|Jimmy-)[0-9]+\\Q.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QWhen \\E(?:Dummy|Ina|Jimmy-|Dummy-|Maniquí-|Maniquíes-)[0-9]+\\Q, Equation eq:abstractNewton tends to reflect the exact evolution of dual time stepping eq:exactDualTime.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\Qeq:abstractNewton becomes the standard Newton-Raphson method when \\E(?:Dummy|Ina|Jimmy-|Dummy-|Maniquí-|Maniquíes-)[0-9]+\\Q.\\E$"}
