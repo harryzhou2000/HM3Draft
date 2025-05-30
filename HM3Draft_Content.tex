@@ -52,7 +52,7 @@ of unsteady flow problems.
 Explicit ODE integrators
 are simple and efficient for a wide range of
 CFD problems, but the Courant-Friedrichs-Lewy (CFL) condition
-that limits their physical time sizes
+that limits their physical time step sizes
 could make them inefficient in various
 scenarios.
 For example,
@@ -104,7 +104,7 @@ Pazner and Persson
 made effort in efficiently solving
 fully coupled IRK methods for DG, and
 Jameson \cite{jameson2017evaluation}
-discussed the efficient implementation of the dual time stepping
+discussed efficient implementation of the dual time stepping
 technique in fully coupled IRKs.
 Due to the difficulties in solving
 fully coupled IRK methods,
@@ -1274,7 +1274,8 @@ U2R2 $c_2=0.55$ is 3rd-order accurate but breaks symmetry and is more stable.
 For U2R1, $c_2$ does not affect order of accuracy and stability.
 We empirically choose $c_2=0.25$ for U2R1, the reason roots in
 the convergence of solving PDEs using
-dual time stepping technique, which will be explained in \ref{sssec:numScan}.
+dual time stepping technique, which will be explained in 
+Section \ref{sssec:numScan}.
 
 For U3R1, since any $c_2$ gives $L$-stability, so $c_2=0.5$ which
 offers optimal 4th-order of accuracy is always used.
@@ -1566,7 +1567,7 @@ implicit time stepping equations
 in flow problems.
 The nonlinear equations are written in the form of
 \begin{equation}
-    \FF^s(\uu^s) = 0,\ \ s=0,1,\dots
+    \FF^s(\uu^s) = 0,\ \ s=1,2,\dots
     \label{eq:abstractImplicit}
 \end{equation}
 where $\uu^s$ represents the unknown $s$-th stage values
@@ -1583,12 +1584,12 @@ For example, for trapezoid rule (Crank-Nicolson method),
     -\frac{\uu^{n+1}-\uu^{n}}{\inc t^n} + \frac{\R^{n} + \R^{n+1}}{2}
     =0
 \end{equation}
-Generally, $\FF^*$ should be arranged so that
-$\R(\uu^*)$ in $\FF^*$ has coefficient being $O(1)$ and positive,
-while $\uu^*$ has its coefficient being $O(\inc t^{-1})$ and negative.
+Generally, $\FF^s$ should be arranged so that
+$\R(\uu^s)$ in $\FF^s$ has coefficient being $O(1)$ and positive,
+while $\uu^s$ has its coefficient being $O(\inc t^{-1})$ and negative.
 With the idea of dual time stepping, namely
 \begin{equation}
-    \frac{\dd\uu^{*}}{\dd \tau} = \FF^*(\uu^{*})
+    \frac{\dd\uu^{s}}{\dd \tau} = \FF^s(\uu^{s})
     \label{eq:exactDualTime}
 \end{equation}
 combined with a backward Euler method on the
@@ -1614,7 +1615,7 @@ the solution of a sparse linear problem.
 When $\inc\tau\rightarrow0$, Equation \eeqref{eq:abstractNewton}
 tends to reflect the exact evolution of dual time stepping
 \eeqref{eq:exactDualTime}.
-eeqref{eq:abstractNewton} becomes the
+\eeqref{eq:abstractNewton} becomes the
 standard Newton-Raphson method when $\inc\tau\rightarrow\infty$.
 
 In this paper, the dual time stepping technique is considered to be crucial
@@ -1630,7 +1631,7 @@ pseudo-time-dependent ODE system, and linear stability features with
 respect to $\tau$ can be performed \cite{jameson1991time}.
 The current paper considers using Fourier analysis
 to gain insights of the stability features in pseudo time
-when the form of $\FF^*$ varies.
+when the form of $\FF^s$ varies.
 As an illustration, the
 Fourier analysis in pseudo time using standard BDF and DIRK
 methods as an example will be studied firstly.
@@ -1963,7 +1964,8 @@ nested iteration method.
 
 To explain the failure of the nested iteration method
 in solving PDEs using the dual time stepping technique, Fourier
-analysis based on pseudo time introduced in \ref{sssec:fourier} is conducted.
+analysis based on pseudo time introduced in 
+Section \ref{sssec:fourier} is conducted.
 
 When DITR is solved using the nested iteration method,
 residual $\FF^N$ in \eeqref{eq:nestedDITR_F}
@@ -2150,8 +2152,8 @@ To circumvent this complexity,
 the present paper
 proposes a simple stage-decoupled iteration method 
 to avoid solving \eeqref{eq:DITRNaiveDualTime} directly.
-To this end, \eeqref{eq:DITRNaiveDualTime} is rewritten as
-\eeqref{eq:DITRNaiveDualTime}:
+To this end, \eeqref{eq:DITRNaiveDualTime} can be solved 
+by an iteration process
 \begin{equation}
     \begin{aligned}
         \left(\frac{\eye}{\inc\tau} -
@@ -2516,15 +2518,17 @@ the choice of $\beta$ can be again narrowed down.
 \subsubsection{Numerical Scanning for the Preconditioning Parameter}
 \label{sssec:numScan}
 
-The preconditioning parameter, $\beta$, as discussed in \ref{sssec:SDSFourier}
-and \ref{sssec:GSStability}, influences convergence properties of the
+The preconditioning parameter, $\beta$, as discussed in 
+Section \ref{sssec:SDSFourier}
+and Section \ref{sssec:GSStability}, 
+influences convergence properties of the
 stage-decoupled solving strategy.
-With $\inc \tau\rightarrow0$, as discussed in \ref{sssec:SDSFourier},
+With $\inc \tau\rightarrow0$, as discussed in Section \ref{sssec:SDSFourier},
 $\max(\real(\mu^*_1),\real(\mu^*_2))$ represents the linear growth
 rate of the $\tau$ evolution.
 When the DITR method parameters are chosen, we have
 $\mu^*_1=\mu^*_1(\beta, \mu')$, $\mu^*_2=\mu^*_2(\beta, \mu')$ and $G_{GS}=G_{GS}(\beta, z)$.
-When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from \ref{sssec:GSStability}
+When $\inc \tau\rightarrow+\infty$, $|G_{GS}|$ from Section \ref{sssec:GSStability}
 represents the magnifying factor in the Gauss-Seidel updating.
 Similar to $A$-stability of ODE integrators,
 the relations:
@@ -2704,7 +2708,7 @@ U2R2 $c_2 = 0.5$, U2R2 $c_2 = 0.55$, U2R1 and U3R1 are tested.
 The isentropic vortex, 2-D vortex shedding
 and  double Mach reflection problems use
 $P^3$ variational reconstruction finite volume method described in
-section \ref{sec:CFV} as spatial  discretization.
+Section \ref{sec:CFV} as spatial  discretization.
 Iterative solution of the implicit reconstruction
 is conducted before each right-hand-side evaluation,
 which consists of 1 block-Jacobi iteration by default.
@@ -2722,7 +2726,7 @@ This linear solution method simplifies the control flow of
 the program,
 while providing a simple yet reliable way of
 comparing total calculation consumption between ODE solvers,
-which will be explained in section \ref{ssec:resultIV}.
+which will be explained in Section \ref{ssec:resultIV}.
 
 
 
