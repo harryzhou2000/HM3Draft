@@ -6,8 +6,10 @@ flags=-synctex=1 -interaction=nonstopmode -file-line-error -recorder
 
 all: $(addsuffix .pdf, $(targets))
 
+elsarticle.cls: elsarticle.ins
+	latex elsarticle.ins
 
-%.pdf: %.tex
+%.pdf:  %.tex elsarticle.cls
 	pdflatex $< -draftmode $(flags)
 	bibtex $*
 	pdflatex $< -draftmode $(flags)
@@ -16,6 +18,8 @@ all: $(addsuffix .pdf, $(targets))
 .PHONY:clean
 
 clean:
+	rm -f elsarticle.cls
+	rm -f elsarticle.log
 	rm -f $(addsuffix .pdf, $(targets))
 	rm -f $(addsuffix .aux, $(targets))
 	rm -f $(addsuffix .blg, $(targets))
