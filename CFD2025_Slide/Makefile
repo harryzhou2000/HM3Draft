@@ -1,8 +1,8 @@
 beamer:
-	xelatex -synctex=1 -interaction=nonstopmode main
+	xelatex --shell-escape -synctex=1 -interaction=nonstopmode main
 	bibtex main
-	xelatex -synctex=1 -interaction=nonstopmode main
-	xelatex -synctex=1 -interaction=nonstopmode main
+	xelatex --shell-escape -synctex=1 -interaction=nonstopmode main
+	xelatex --shell-escape -synctex=1 -interaction=nonstopmode main
 
 doc:
 	xelatex thubeamer.dtx

@@ -68,11 +68,9 @@
 \renewcommand{\figurename}{Figure}
 
 % 封面信息，方括号内容是显示在左侧边栏的内容（当选择 sidebar 主题时有效）
-\title[DITR]{High-order Accurate Implicit Scheme Based on 
-Temporal Reconstruction for Solving Compressible 
-Navier-Stokes Equations}
-\author[Hanyu Zhou, Yu-Xin Ren]{Hanyu Zhou, Yu-Xin Ren}
-\institute[Tsinghua University]{\small  Tsinghhua University}
+\title[DITR]{基于直接积分时间重构的高效高阶有限体积方法隐式时间推进格式}
+\author[周涵宇, 任玉新]{周涵宇, 任玉新}
+\institute[清华大学]{\small  清华大学}
 \date{\small \vskip -10pt \today}
 
 
@@ -89,44 +87,41 @@ Navier-Stokes Equations}
 \end{frame}
 
 % 目录页
-\section*{Contents}
+\section*{目录}
 \frame{
   \frametitle{\secname}
   \tableofcontents[hideallsubsections]
 }
 
-\section{Introduction}
+\section{引述}
 
 % \subsection{课题主要研究内容}
 
-\begin{frame}{\secname: Implicit Time Marching}
+\begin{frame}{\secname: 隐式时间推进}
   \begin{itemize}
-    \item  A widely applied practice in CFD:
-          spacial discretization + ODE integrator
-          (Time Marching Scheme/Method)
-    \item Variants of RK3, RK4 are popular
-          explicit schemes.
-    \item Implicit time marching can deal with stiffness and
-          use desirable time step size:
+    \item  CFD的常见做法:
+          空间离散 + ODE 积分器
+          (时间推进/时间积分)。
+    \item {\bf 显式时间推进}：RK3、RK4等，包括SSPRK3
+    \item {\bf 隐式时间推进}：可处理刚性问题，
+          使用更大的时间步长，在以下问题中有巨大效率优势：
           \begin{itemize}
-            \item Wall-bounded viscous flow, especially when applying a RANS model in BL
-            \item Low Ma or incompressible flow, propagation of sound wave ignored
-            \item Mesh overly fine in some regions / directions
-            \item Additional stiffness caused by source term
-                  (chemical, physical...)
+            \item 壁面流动，尤其是使用RANS建模的边界层流动；
+            \item 可压缩模型计算低马赫数流动，而声波速度远大于特征速度时；
+            \item 某些方向/区域过密网格；
+            \item 额外源项刚性（化学、物理效应等）。
           \end{itemize}
-    \item Implicit time marching can be easily applied with additional algebraic
-          equations (see section \ref{sec:CFV}).
+    \item 此外，隐式时间推进方便与代数约束耦合，如 \ref{sec:CFV} 中介绍的隐式重构，
+          或者不可压流体的离散连续方程。
   \end{itemize}
 \end{frame}
 
 
 
 
-\begin{frame}{\secname: Stability}
+\begin{frame}{\secname: 稳定性}
   \begin{itemize}
-    \item Not any implicit scheme is stable,
-          even in a linear context
+    \item 即使是线性问题中，隐式时间推进也并不一定稳定。
           \begin{block}{}
             When solving the linear ODE with $\inc t$
             $$
@@ -146,61 +141,52 @@ Navier-Stokes Equations}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{\secname: High-order Implicit Time Marching}
+\begin{frame}{\secname: 高阶隐式时间推进}
   \begin{itemize}
-    \item High order CFD method is an active field of research
-          \cite{cheng2009highHOReview}.
-    \item A lot of high order spacial discretization
-          methods in literature can be combined
-          with {\bf arbitrary} time marching, but higher-order
-          time marching schemes greatly reduces the need of time refinement.
-    \item Schemes being both implicit and high-order (>2): mostly implicit RK schemes
+    \item 高阶方法是CFD发展方向之一\cite{cheng2009highHOReview}。
+    \item 文献中众多高阶空间半离散格式可以与{\bf 任意}的时间推进格式结合
+          但高阶时间推进可大幅减小时间步加密的需求，改进计算效率。
+    \item 高阶且隐式的格式 (>2): 大多数为RK时间推进格式——
           \begin{itemize}
-            \item Fully implicit RK (IRK): hard to implement,
-                  needs careful treatment \cite{pazner2017stage,jameson2017evaluation}.
-            \item Diagonally implicit RK
-                  (including SDIRK, ESDIRK) can be solved stage-by-stage.
-                  The popular 4th order ESDIRK \cite{kennedy2003additiveARK,kvaerno2004singly}
-                  has {\bf 5 implicit stages}, and is $L$-stable.
-            \item Other variations of implicit RKs, like MIRK and NIRK
+            \item 全隐式RK，难以编写，需要细心处理
+                  \cite{pazner2017stage,jameson2017evaluation}；
+            \item 对角隐式RK，Diagonally implicit RK
+                  (including SDIRK, ESDIRK) 可以逐级求解。
+                  其中ESDIRK \cite{kennedy2003additiveARK,kvaerno2004singly}最为流行，
+                  有 {\bf 5个隐式Stage}, 具有$L$-稳定性；
+            \item 其他隐式RK，如 MIRK、 NIRK，
                   \cite{cash1975classMIRKOrig,kulikov2006familyNIRKOrig}
-                  are seldom tested in CFD.
+                  尚未在CFD等大规模PDE问题测试。
           \end{itemize}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{\secname: Our Work}
+\begin{frame}{\secname: 本研究的工作}
   \begin{itemize}
-    \item Our recent exploration indicates a novel
-          way of obtaining stable, high-order accurate and
-          efficient implicit time marching schemes:
-          \begin{block}{DITR Time Marching Scheme}
+    \item 本研究发现，可以用一种新颖的方式构造稳定、高阶并且高效的隐式时间积分格式：
+          \begin{block}{DITR 直接积分时间重构方法}
             \begin{itemize}
-              \item {\bf Direct Integration}
-                    integrate the ODE using a quadrature rule
-              \item {\bf Temporal Reconstruction}
-                    approximate the nodal values using a polynomial
-                    interpolation
+              \item {\bf Direct Integration (DI) 直接积分：}
+                    使用时间方向数值积分方法对ODE直接积分；
+              \item {\bf Temporal Reconstruction (TR) 时间重构：}
+                    通过时间方向重构进行估测节点值
             \end{itemize}
           \end{block}
-    \item Selecting different DI and TR affects
-          the accuracy and stability of DITR methods.
-    \item Applied to high-order Compact Finite Volume
-          (Variational Reconstruction), tested in compressible
-          flow problems.
+    \item DI与TR的方法影响DITR的精度与稳定性。
+    \item 应用于高阶变分重构有限体积格式, 在可压缩流动中测试其效率、精度与稳定性。
   \end{itemize}
 \end{frame}
 
-\section{Compact Finite Volume}
+\section{变分有限体积}
 \label{sec:CFV}
 
-\begin{frame}{\secname: Finite Volume}
+\begin{frame}{\secname: 有限体积}
   \begin{itemize}
     \item High-order spacial discretization are able to demonstrate
           high spacial resolution and low spacial discretization error.
     \item
           Briefly introduce the N-S equations' spacial discretization
-          \begin{block}{Compressible Navier-Stokes Equation}
+          \begin{block}{Compressible Navier-Stokes equation}
             \begin{equation}
               \label{eq:NS}
               \frac{\partial \U}{\partial t} +
@@ -218,7 +204,7 @@ Navier-Stokes Equations}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{\secname: Finite Volume Method}
+\begin{frame}{\secname: 有限体积}
   \begin{itemize}
     \item Next, one can use polynomial reconstruction per cell:
           \begin{block}{}
@@ -243,7 +229,7 @@ Navier-Stokes Equations}
   \end{itemize}
 \end{frame}
 
-\begin{frame}{\secname: Reconstruction}
+\begin{frame}{\secname: 重构}
   \begin{itemize}
     \item Reconstruct polynomial coefficients using compact
             {\bf variational reconstruction}\cite{wang2017compact_VR},
@@ -272,8 +258,8 @@ Navier-Stokes Equations}
   \end{itemize}
 \end{frame}
 
-\section{DITR Methods}
-\subsection{Construction}
+\section{DITR 方法}
+\subsection{构造}
 
 
 \begin{frame}[allowframebreaks]{\secname: \subsecname}
@@ -326,18 +312,16 @@ Navier-Stokes Equations}
             used as interpolation conditions.
     \end{itemize}
   \end{block}
-
+  \pagebreak
 
   \begin{itemize}
-    \item DI \eeqref{eq:Quad3} and TR \eeqref{eq:TR} combined can form
-          a closed system.
-    \item TR can be used to evaluate the $n+c_2$
-          stage value, and produces an additional equation.
-    \item More stage values need more TR equations.
+    \item DI \eeqref{eq:Quad3} 与 TR \eeqref{eq:TR} 共同构成封闭的系统；
+    \item DI中$n+c_2$级为未知量，而TR可用于$n+c_2$值的约束；
+    \item 若构造更多中间级，则自然引入更多TR方程。
   \end{itemize}
 \end{frame}
 
-\subsection{Order of Accuracy}
+\subsection{精度阶数}
 
 \begin{frame}[allowframebreaks]{\secname: \subsecname}
   \begin{itemize}
@@ -400,14 +384,13 @@ Navier-Stokes Equations}
 \end{frame}
 
 
-\subsection{Variants}
+\subsection{方法变种}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item TR \eeqref{eq:TR} could use any subset of those interpolation conditions,
-          resulting in different DITR methods
-    \item To exploit all information in a single step:
-          \begin{block}{DITR U2R2 Method}
+    \item TR 可以使用 \eeqref{eq:TR} 中插值条件的子集，则给出不同的DITR格式（目前固定DI）。
+    \item 单步方法中全部信息：
+          \begin{block}{DITR U2R2 method}
             \begin{itemize}
               \item Using $\uu^{n},\uu^{n+1},\R^{n},\R^{n+1}$ for TR
               \item 4th order accurate if $c_2=0.5$, 3rd order otherwise
@@ -420,16 +403,16 @@ Navier-Stokes Equations}
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
     \small
-    \item Using 2nd degree interpolation
-          \begin{block}{DITR U2R1 Method}
+    \item 采用2次插值：
+          \begin{block}{DITR U2R1 method}
             \begin{itemize}
               \item Using $\uu^{n},\uu^{n+1},\R^{n+1}$ for TR
               \item 3rd order accurate
               \item Proved to be $L$-stable
             \end{itemize}
           \end{block}
-    \item Using multistep information (not linear multistep)
-          \begin{block}{DITR U3R1 Method}
+    \item 采用多步信息 （与线性多步法不同）
+          \begin{block}{DITR U3R1 method}
             \begin{itemize}
               \item Using $\uu^{n-1},\uu^{n},\uu^{n+1},\R^{n+1}$ for TR
               \item 4th order accurate if $c_2=0.5$
@@ -441,8 +424,8 @@ Navier-Stokes Equations}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item The variants have unified form:
-          \begin{block}{DITR Schemes}
+    \item 不同变种的统一形式：
+          \begin{block}{DITR schemes}
             \begin{equation}
               \uu^{n+1} = \uu^{n} + \inc t^n\left(
               b_1 \R^n +
@@ -465,7 +448,7 @@ Navier-Stokes Equations}
               \right)
             \end{equation}
           \end{block}
-    \item The quadrature coefficients are the same:
+    \item 其中直接积分权重统一：
           \begin{table}[htbp]
             \centering
             \begin{tabular}{|c|c|c|}
@@ -485,7 +468,7 @@ Navier-Stokes Equations}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item The TR coefficients are different for each variant:
+    \item 时间重构系数与变种有关：
           \begin{table}[htbp]
             \centering
             \footnotesize
@@ -507,14 +490,13 @@ Navier-Stokes Equations}
             % \caption{Interpolation coefficients for different DITR methods}
             \label{tab:inter0Tab}
           \end{table}
-    \item $\Theta=\frac{\inc t^{n-1}}{\inc t^n}$ is the
-          time step ratio for U3R1
+    \item $\Theta=\frac{\inc t^{n-1}}{\inc t^n}$ 为U3R1中的时间步比率。
   \end{itemize}
 \end{frame}
 
-\section{Iteration Methods}
+\section{迭代方法}
 
-\subsection{Nested Iteration}
+\subsection{嵌套迭代}
 
 
 \begin{frame}{\secname: \subsecname}
@@ -620,7 +602,7 @@ Navier-Stokes Equations}
             \centering
             \includegraphics[width=0.5\textwidth]{../pics/HM3_U2R2050_KappaS.pdf}
             \caption[]{DITR U2R2 $c_2=1/2$ imaginary part of $\kappa^*$ using
-              nested solving}
+              nested solving.}
             \label{fig:HM3_U2R2050_KappaS}
           \end{figure}
   \end{itemize}
@@ -628,13 +610,13 @@ Navier-Stokes Equations}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item Nested Iteration indeed diverges for large $\CFLt$, in linear advection experiments
-    \item Nested Iteration is indeed able to converge at low $\CFLt$
-    \item We aim to solve at larger $\CFLt$, so Nested Iteration is unacceptable
+    \item 采用较大$\CFLt$时，线性对流方程的测试中，嵌套迭代一定发散。
+    \item 较小 $\CFLt$ 时，嵌套迭代的确可以收敛。
+    \item 实际计算中，为发挥隐式格式优势，$\CFLt$会在局部远大于1，嵌套迭代是不符合要求的。
   \end{itemize}
 \end{frame}
 
-\subsection{Stage-decoupled Iteration}
+\subsection{级解耦迭代}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
@@ -644,12 +626,12 @@ Navier-Stokes Equations}
           \begin{equation}
             \begin{aligned}
               \FF^* & =\begin{bmatrix}
-                \FF^{n+c_2} \\
-                \FF^{n+1}
-              \end{bmatrix} = \Pm\begin{bmatrix}
-                \GG^{n+c_2} \\
-                \GG^{n+1}
-              \end{bmatrix} \\ & = \Pm\begin{bmatrix}
+                         \FF^{n+c_2} \\
+                         \FF^{n+1}
+                       \end{bmatrix} = \Pm\begin{bmatrix}
+                                            \GG^{n+c_2} \\
+                                            \GG^{n+1}
+                                          \end{bmatrix} \\ & = \Pm\begin{bmatrix}
                 \frac{a^n_0\uu^{n - 1} +
                   a^n_1\uu^{n} +
                   a^n_2\uu^{n + 1} - \uu^{n+c_2}}{\inc t^n}
@@ -702,9 +684,9 @@ Navier-Stokes Equations}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item Instead of updating $\uu^{n+c_2}, \uu^{n+1}$ simultaneously,
-          which requires the solution of an {\bf enlarged linear system}
-    \item we decouple the stage values and update them separately with dual time stepping
+    \item 并非同时求解 $\uu^{n+c_2}, \uu^{n+1}$,
+          其需要求解{\bf 扩充的线性方程组}。
+    \item 通过冻结某一级，解耦两级之间的更新，分别、依次对其双时间步更新。
           \begin{equation}
             \begin{aligned}
               \left(\frac{\eye}{\inc\tau} -
@@ -722,23 +704,21 @@ Navier-Stokes Equations}
 
 \begin{frame}{\secname: \subsecname}
   \begin{itemize}
-    \item Stage-decoupled iteration uses almost the same programs used in
-          ESDIRK and BDF solving (easy implementation)
-    \item Compatible with old matrix-free solvers (LU-SGS...)
-    \item Convergence is affected by preconditioning parameter $\beta$
+    \item 级解耦迭代使用的程序与ESDIRK、BDF等隐式方法几乎一致（编写容易）；
+    \item 与现存线性求解器，如无矩阵LU-SGS直接配合；
+    \item 收敛性与预处理系数 $\beta$相关。
   \end{itemize}
 \end{frame}
 
 \begin{frame}{\secname: \subsecname}
   \small
   \begin{itemize}
-    \item To choose parameter $\beta$, results of two analyses are combined:
+    \item 为选择预处理参数 $\beta$, 我们结合了两个分析的结果：
           \begin{itemize}
-            \item Fourier analysis in pseudo time ($\inc\tau \rightarrow 0$)
+            \item 虚拟时间方向傅里叶分析 ($\inc\tau \rightarrow 0$)
           \end{itemize}
           \begin{itemize}
-            \item Gauss-Seidel stability ($\inc\tau \rightarrow \infty$, induced
-                  when decoupling the stages)
+            \item Gauss-Seidel 稳定性分析 ($\inc\tau \rightarrow \infty$, 级间解耦造成的)
           \end{itemize}
     \item Fourier analysis yields a linear ODE system of wave amplitudes:
           \footnotesize
@@ -781,23 +761,24 @@ Navier-Stokes Equations}
   \begin{itemize}
     \item There are two eigenvalues in Fourier analysis,
           we plot the maximum of their real part $\max(\real(\mu^*_1),\real(\mu^*_2))$
-          as a function of $\mu'$, eigenvalue of the spacial discretization.
+          as a function of $\mu'$, eigenvalue of the spatial discretization.
   \end{itemize}
   \begin{figure}[htbp]
     \centering
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0_TauMu.pdf}
       \caption[]{$\beta = 0$}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0.5_TauMu.pdf}
       \caption[]{$\beta = 0.5$}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta1_TauMu.pdf}
       \caption[]{$\beta = 1$}
     \end{subfigure}
-    \caption{DITR U2R2 $c_2=1/2$, $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0}
+    \caption{DITR U2R2 $c_2=1/2$, 
+    $\max(\real(\mu^*_1),\real(\mu^*_2))$ distribution, black line is 0.}
     \label{fig:MuU2R2}
   \end{figure}
 \end{frame}
@@ -812,19 +793,19 @@ Navier-Stokes Equations}
   \end{itemize}
   \begin{figure}[htbp]
     \centering
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0_GGS.pdf}
       \caption[]{$\beta = 0$}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta0.5_GGS.pdf}
       \caption[]{$\beta = 0.5$}
     \end{subfigure}\hfill
-    \begin{subfigure}{0.33\textwidth}
+    \begin{subfigure}{0.28\textwidth}
       \includegraphics[width=\textwidth]{../pics/HM3_Method1_C0.5_Theta1_Beta1_GGS.pdf}
       \caption[]{$\beta = 1$}
     \end{subfigure}
-    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1}
+    \caption{DITR U2R2 $c_2=1/2$, $|G_{GS}|$ distribution, black line is 1.}
     \label{fig:GGSU2R2}
   \end{figure}
 \end{frame}
@@ -844,7 +825,7 @@ Navier-Stokes Equations}
       \includegraphics[width=\textwidth]{../pics/HM3_Methods_SearchGGS.pdf}
       % \caption[]{$\beta = 0.5$}
     \end{subfigure}
-    \caption{Numerical scanning results of $\beta$}
+    \caption{Numerical scanning results of $\beta$.}
     \label{fig:MuGGSSearch}
   \end{figure}
 \end{frame}
@@ -876,7 +857,7 @@ Navier-Stokes Equations}
       U3R1 $\Theta=4$    & $\beta > 0.94$               & $\beta > 0.68$              \\
       \hline
     \end{tabular}
-    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning}
+    \caption{Approximate stability restrictions on $\beta$ obtained in numerical scanning.}
     \label{tab:resrictionBetaSearch}
   \end{table}
 \end{frame}
@@ -886,47 +867,43 @@ Navier-Stokes Equations}
 \begin{frame}{\secname: \subsecname}
   \small
   \begin{itemize}
-    \item From Figure \ref{fig:MuGGSSearch}, it seems minimizing
-          the searched maximums could help improve convergence.
-    \item Empirical tests show that $\beta$ being slightly larger
-          could reduce the region of instability, thus enhancing
-          convergence in nonlinear systems.
-    \item Our recommended empirical choice:
+    \item 直觉上，最小化图\ref{fig:MuGGSSearch}中的特征值/放大因子上限可以增强收敛速度；
+    \item 实际测试表明， $\beta$ 稍大可减小不稳定区域，并增强非线性问题中的收敛性；
+    \item 本文给出的经验性预处理参数：
           \begin{itemize}
-            \item For U2R2 $c=0.5$, $\beta = 1$.
-            \item For U2R2 $c=0.55$, $\beta = 1.333$.
-            \item For U2R1 $c=0.25$, $\beta = 1$.
-            \item For U3R1 with any $\Theta$, $\beta = 1.333$
+            \item U2R2 $c=0.5$, $\beta = 1$.
+            \item U2R2 $c=0.55$, $\beta = 1.333$.
+            \item U2R1 $c=0.25$, $\beta = 1$.
+            \item U3R1 任意 $\Theta$, $\beta = 1.333$
           \end{itemize}
-    \item The choices meet the stability restrictions,
-          and have reasonable converge in various test problems.
+    \item 这些参数选取都满足迭代稳定性要求，并在多种测试中保持较好的收敛速度。
   \end{itemize}
 \end{frame}
 
-\section{Numerical Tests}
+\section{数值测试}
 
 \begin{frame}{\secname}
   \begin{itemize}
-    \item We have tested 4 DITR variants:
+    \item 我们测试了4种不同DITR变种:
           \begin{itemize}
             \item U2R2 $c_2=0.5$, 4th order, $A$-stable.
             \item U2R2 $c_2=0.55$, 3rd order, $A$-stable.
             \item U2R1 $c_2=0.25$, 3rd order, $L$-stable.
             \item U3R1 $c_2=0.5$, 4th order, $L$-stable, multistep.
           \end{itemize}
-    \item Transient numerical cases with compressible N-S equations:
+    \item 可压缩N-S方程瞬态问题：
           \begin{itemize}
-            \item Isentropic vortex
-            \item Vortex shedding of a circular cylinder
-            \item Double Mach reflection
+            \item 等熵涡
+            \item 圆柱涡脱落
+            \item 双马赫反射
           \end{itemize}
-    \item 4th order variational reconstruction CFV discretization is used.
-    \item Details of the test cases are referred to the proceedings article.
+    \item 使用四阶变分重构作为统一空间离散。
+    \item 详细设置可见此前发表文章\cite{zhou2025high}。
   \end{itemize}
 \end{frame}
 
 
-\begin{frame}{\secname: Isentropic Vortex}
+\begin{frame}{\secname: 等熵涡}
   % \begin{itemize}
   %   \item The 
   % \end{itemize}
@@ -934,22 +911,22 @@ Navier-Stokes Equations}
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.pdf}
-        \caption[]{Density error vs. time step size }
-        \label{sfig:IVTests_Conv}
+      \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_1.pdf}
+      \caption[]{Density error vs. time step size }
+      \label{sfig:IVTests_Conv}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
-        \caption[]{Density error vs. total CPU time}
-        \label{sfig:IVTests_Eff}
+      \includegraphics[width=\textwidth]{pics/HM3_IV160_fig_2.pdf}
+      \caption[]{Density error vs. total CPU time}
+      \label{sfig:IVTests_Eff}
     \end{subfigure}
-    \caption[]{Convergence and efficiency test with isentropic vortex problem}
+    \caption[]{Convergence and efficiency test with isentropic vortex problem.}
     \label{fig:IVTests}
   \end{figure}
 \end{frame}
 
 
-\begin{frame}{\secname: Vortex Shedding}
+\begin{frame}{\secname: 涡脱落}
   % \begin{itemize}
   %   \item The 
   % \end{itemize}
@@ -957,24 +934,24 @@ Navier-Stokes Equations}
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.4\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
-        \caption[]{Mesh}
-        \label{sfig:CylinderRe1200Demo_Mesh}
+      \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200_Mesh.png}
+      \caption[]{Mesh}
+      \label{sfig:CylinderRe1200Demo_Mesh}
     \end{subfigure}
     \begin{subfigure}{0.4\textwidth}
-        \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
-        \caption[]{Vorticity distribution}
-        \label{sfig:CylinderRe1200Demo_Vort}
+      \includegraphics[width=\textwidth]{pics/CylinderB1_Re1200.png}
+      \caption[]{Vorticity distribution}
+      \label{sfig:CylinderRe1200Demo_Vort}
     \end{subfigure}
     \caption[]{Mesh and a instance of z-vorticity distribution
-        in $Re=1200$ vortex shedding problem}
+      in $Re=1200$ vortex shedding problem.}
     \label{fig:CylinderRe1200Demo}
   \end{figure}
 \end{frame}
 
 
 
-\begin{frame}{\secname: Vortex Shedding}
+\begin{frame}{\secname: 涡脱落}
   % \begin{itemize}
   %   \item The 
   % \end{itemize}
@@ -982,73 +959,74 @@ Navier-Stokes Equations}
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/Cylinder_fig14.pdf}
-        \caption[]{Error vs. time step size}
-        \label{sfig:CylinderRe1200_My_C}
+      \includegraphics[width=\textwidth]{pics/Cylinder_fig14.pdf}
+      \caption[]{Error vs. time step size}
+      \label{sfig:CylinderRe1200_My_C}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/Cylinder_fig4.pdf}
-        \caption[]{Error vs. CPU Time}
-        \label{sfig:CylinderRe1200_My_E}
+      \includegraphics[width=\textwidth]{pics/Cylinder_fig4.pdf}
+      \caption[]{Error vs. CPU Time}
+      \label{sfig:CylinderRe1200_My_E}
     \end{subfigure}
-    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ vortex shedding problem}
+    \caption[]{Convergence and efficiency analysis with $\epsilon_{My}$ in $Re=1200$ 
+    vortex shedding problem.}
     \label{fig:CylinderRe1200_My}
   \end{figure}
 \end{frame}
 
-\begin{frame}{\secname: DMR}
+\begin{frame}{\secname: 双马赫反射}
   \scriptsize
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
-        \caption[]{DITR U2R2 $c_2=0.5$}
-        \label{sfig:DM480_HM3LBT}
+      \includegraphics[width=\textwidth]{pics/DM480_HM3LBT.png}
+      \caption[]{DITR U2R2 $c_2=0.5$}
+      \label{sfig:DM480_HM3LBT}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
-        \caption[]{DITR U2R2 $c_2=0.55$}
-        \label{sfig:DM480_HM3}
+      \includegraphics[width=\textwidth]{pics/DM480_HM3.png}
+      \caption[]{DITR U2R2 $c_2=0.55$}
+      \label{sfig:DM480_HM3}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, DITR U2R2}
+    \caption{Density in double Mach reflection problem, DITR U2R2.}
     \label{fig:DM480-1}
   \end{figure}
 \end{frame}
 
-\begin{frame}{\secname: DMR}
+\begin{frame}{\secname: 双马赫反射}
   \scriptsize
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U2R1.png}
-        \caption[]{DITR U2R1}
-        \label{sfig:DM480_HM3U2R1}
+      \includegraphics[width=\textwidth]{pics/DM480-1_HM3U2R1.png}
+      \caption[]{DITR U2R1}
+      \label{sfig:DM480_HM3U2R1}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
-        \caption[]{DITR U3R1}
-        \label{sfig:DM480_HM3U3R1}
+      \includegraphics[width=\textwidth]{pics/DM480-1_HM3U3R1.png}
+      \caption[]{DITR U3R1}
+      \label{sfig:DM480_HM3U3R1}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1}
+    \caption{Density in double Mach reflection problem, DITR U2R1 and U3R1.}
     \label{fig:DM480-2}
   \end{figure}
 \end{frame}
 
-\begin{frame}{\secname: DMR}
+\begin{frame}{\secname: 双马赫反射}
   \scriptsize
   \begin{figure}[htbp]
     \centering
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480-1_ESDIRK4-T2.png}
-        \caption[]{ESDIRK4}
-        \label{sfig:DM480_ESDIRK4}
+      \includegraphics[width=\textwidth]{pics/DM480-1_ESDIRK4-T2.png}
+      \caption[]{ESDIRK4}
+      \label{sfig:DM480_ESDIRK4}
     \end{subfigure}\hfill
     \begin{subfigure}{0.5\textwidth}
-        \includegraphics[width=\textwidth]{pics/DM480-1_BDF-T2.png}
-        \caption[]{BDF2}
-        \label{sfig:DM480_BDF2}
+      \includegraphics[width=\textwidth]{pics/DM480-1_BDF-T2.png}
+      \caption[]{BDF2}
+      \label{sfig:DM480_BDF2}
     \end{subfigure}
-    \caption{Density in double Mach reflection problem, baseline methods}
+    \caption{Density in double Mach reflection problem, baseline methods.}
     \label{fig:DM480-3}
   \end{figure}
 \end{frame}
@@ -1213,8 +1191,117 @@ Navier-Stokes Equations}
 % \end{frame}
 
 
-\renewcommand\refname{References} 
-\begin{frame}[allowframebreaks]{References}
+\section{预处理与效率改进}
+
+\begin{frame}{\secname}
+  \begin{itemize}
+    \item 预处理矩阵可进行扩展使其完备：
+          \begin{equation}
+            \Pm = \begin{bmatrix}
+              \eye                & \beta_1 \eye \\
+              \beta_3\beta_2 \eye & \beta_3 \eye \\
+            \end{bmatrix}
+          \end{equation}
+    \item 其中$\beta_1$为原有的预处理系数$\beta$，将DI残差按比例加入TR（求解$n+c_2$级）；
+    \item $\beta_2$为仿照$\beta_1$，
+          将TR方程按比例加入DI残差（求解$n+1$级）；
+    \item $\beta_3$调整两行之间的比例。
+    \item 以上参数化已经考虑任意独立的$2\times 2$预处理矩阵。
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\secname}
+  \begin{itemize}
+    \item 由于采用级分解求解，$\beta_3$调控的是两级更新速率。
+    \item 此处采用时间项归一化措施，要求：
+          \begin{equation}
+            \beta_3 = \frac{1}{1-a_2\beta_2}
+          \end{equation}
+          使得$\uu^{n+1}$的残差具有$\frac{1}{\inc t}{\uu^{n+1}}$对角项，与$\uu^{n+c_2}$残差一致。
+    \item 此时预处理 $\Pm=\Pm(\beta_1,\beta_2)$，具有两个可调参数。
+    \item 极限情况：$\beta_2\rightarrow-\infty, \beta_3\rightarrow 0^+$，此时
+          \begin{equation}
+            \Pm(\beta_1,-\infty) = \begin{bmatrix}
+              \eye                 & \beta_1 \eye \\
+              - \frac{1}{a_2} \eye & 0            \\
+            \end{bmatrix}
+          \end{equation}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname}
+  \begin{itemize}
+    \item 应用此前的数值扫描技术，可得$\mu^*_M$以及$G_{GS,M}$稳定性约束指标，
+          对于U2R2 $c_2=0.5$可得：
+          \begin{table}[htbp]
+            \scriptsize
+            \centering
+            \caption{不同预处理参数的稳定性指标}
+            \label{tab:u2r2_beta1beta2samples}
+            \begin{tabular}{lcc}
+              \toprule
+              预处理系数            & $\mu^*_M$ & $G_{GS,M}$ \\
+              \midrule
+              $(1, 1)$         & 0.0000    & 1.0000     \\
+              $(1, 0)$ （旧方案）   & -0.4453   & 0.4137     \\
+              $(1, -2)$        & -0.7575   & 0.5000     \\
+              $(1, -4)$        & -0.8853   & 0.6667     \\
+              $(1, -\infty)$   & -0.8000   & 1.0000     \\
+              $(3/4, 4/3)$     & 0.0000    & 1.0000     \\
+              $(3/4, 0)$       & -0.5000   & 0.2500     \\
+              $(3/4, -2)$      & -0.7143   & 0.2500     \\
+              $(3/4, -4)$      & -0.8000   & 0.3333     \\
+              $(3/4, -\infty)$ & -1.0000   & 0.5000     \\
+              \bottomrule
+            \end{tabular}
+          \end{table}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{\secname: 等熵涡测试}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{pics/HM3_IV_B0_JC2_RB_tr_err.pdf}
+      \caption[]{Error vs. time step size}
+      \label{sfig:IV_u2r2Pretest_err}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{pics/HM3_IV_B0_JC2_RB_tr_eff.pdf}
+      \caption[]{Error vs. CPU Time}
+      \label{sfig:IV_u2r2Pretest_eff}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with isentropic vortex problem.}
+    \label{fig:IV_u2r2Pretest}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{\secname: 涡脱落测试}
+  \scriptsize
+  \begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{pics/HM3_vorstreet_T7_prtr_err.pdf}
+      \caption[]{Error vs. time step size}
+      \label{sfig:Cylinder_u2r2Pretest_err}
+    \end{subfigure}\hfill
+    \begin{subfigure}{0.5\textwidth}
+      \includegraphics[width=\textwidth]{pics/HM3_vorstreet_T7_prtr_eff.pdf}
+      \caption[]{Error vs. wall time}
+      \label{sfig:Cylinder_u2r2Pretest_eff}
+    \end{subfigure}
+    \caption[]{Convergence and efficiency analysis with $Re=1200$ vortex shedding problem.}
+    \label{fig:Cylinder_u2r2Pretest}
+  \end{figure}
+\end{frame}
+
+
+
+\renewcommand\refname{参考文献}
+\begin{frame}[allowframebreaks]{参考文献}
   \bibliographystyle{unsrt}
   \bibliography{../HM3DraftRefs}
 \end{frame}
